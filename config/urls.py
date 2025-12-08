@@ -16,7 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from academico import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    # ruta raiz (localhost:8000/)
+    path('', views.dashboard_view, name='dashboard'),
+    path('alumnos/consultar/', views.consultar_alumno_view, name='consultar_alumno'),
+    path('alumnos/visualizar/', views.visualizar_alumno_view, name='visualizar_alumno'),
+    path('alumnos/anadir/', views.anadir_alumno_view, name='anadir_alumno'),
+    path('alumnos/baja/', views.baja_alumno_view, name='baja_alumno'),
+    path('alumnos/cambio-carrera/', views.cambio_carrera_view, name='cambio_carrera'),
+    path('docentes/consultar/', views.consultar_docente_view, name='consultar_docente'),
+    path('docentes/visualizar/', views.visualizar_docente_view, name='visualizar_docente'),
+    path('docentes/asignar/', views.asignar_materia_view, name='asignar_materia'),
+    path('docentes/anadir/', views.anadir_docente_view, name='anadir_docente'),
+    path('tutores/consultar/', views.consultar_tutor_view, name='consultar_tutor'),
+    path('tutores/visualizar/', views.visualizar_tutor_view, name='visualizar_tutor'),
+    path('tutores/anadir/', views.anadir_tutor_view, name='anadir_tutor'),
 ]

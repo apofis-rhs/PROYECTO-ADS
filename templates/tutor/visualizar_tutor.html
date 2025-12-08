@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle del Tutor{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+  <div class="caja caja-titulo mb-4">
+    <h1>Visualizar Datos del Tutor</h1>
+  </div>
+
+  <div class="caja caja-central d-flex gap-4 mb-4">
+    
+    <div class="col-4 d-flex flex-column align-items-center p-3 border rounded">
+      
+      <div class="foto-placeholder mb-3"
+           style="width: 200px; height: 200px; border: 2px dashed #999; border-radius: 8px; background-image: url('{% static 'img/tutor_placeholder.png' %}'); background-size: cover;">
+      </div>
+
+      <button class="btn btnVisualizar mb-2" style="width: 50%; align-self: center; padding: 6px 0">
+        Subir Foto
+      </button>
+
+      <button class="btn btnDescargar" style="width: 50%; align-self: center; padding: 6px 0">
+        Imprimir Información
+      </button>
+    </div>
+
+    <div class="col-8 p-3 border rounded">
+      
+      <div class="mb-3 d-flex justify-content-end">
+        <div>
+          <label class="form-label fw-bold">Seleccionar hijo:</label>
+          <select id="selectHijo" class="form-select" style="width: 250px">
+            <option value="1">2022012345 - Juan Pérez</option>
+            <option value="2">2022078910 - María Pérez</option>
+          </select>
+        </div>
+      </div>
+
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Datos del Tutor</th>
+            <th>Datos del Hijo</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Nombre: <strong>Rosa</strong></td>
+            <td>Nombre del hijo: <strong>Juan</strong></td>
+          </tr>
+
+          <tr>
+            <td>Apellido paterno: <strong>Simón</strong></td>
+            <td>Apellido paterno del hijo: <strong>Pérez</strong></td>
+          </tr>
+
+          <tr>
+            <td>Apellido materno: <strong>Gutiérrez</strong></td>
+            <td>Apellido materno del hijo: <strong>López</strong></td>
+          </tr>
+
+          <tr>
+            <td>CURP: <strong>ROSA000000XXXXXX</strong></td>
+            <td>Grado educativo: <strong>Primaria 5°</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="mt-4 d-flex justify-content-center">
+  <a href="{% url 'consultar_tutor' %}" class="btn btn-secondary px-3 py-1 text-white text-decoration-none" style="font-size: 18px">
+    Regresar
+  </a>
+</div>
+
+{% endblock %}

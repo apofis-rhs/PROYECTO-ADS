@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle del Alumno{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="caja caja-titulo mb-4">
+        <h1>Visualizar Datos del Alumno</h1>
+    </div>
+
+    <div class="caja caja-central d-flex gap-4 mb-4">
+
+        <div class="col-4 d-flex flex-column align-items-center p-3 border rounded">
+
+            <div class="foto-placeholder mb-3"
+                style="width:200px; height:200px; border:2px dashed #999; border-radius:8px; background-image: url('{% static 'img/alumno_placeholder.png' %}'); background-size: cover;">
+            </div>
+
+            <button class="btn btnVisualizar mb-2" style="width: 50%; align-self: center; padding: 6px 0;">
+                Subir Foto
+            </button>
+
+            <button class="btn btnDescargar" style="width: 50%; align-self: center; padding: 6px 0;">
+                Imprimir Información
+            </button>
+
+        </div>
+
+        <div class="col-8 p-3 border rounded">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Datos Personales</th>
+                        <th>Datos Académicos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nombre: <strong>Juan</strong></td>
+                        <td>Carrera: <strong>Ing. Sistemas</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Apellido paterno: <strong>Pérez</strong></td>
+                        <td>Semestre: <strong>5</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Apellido materno: <strong>López</strong></td>
+                        <td>Grupo: <strong>5CV1</strong></td>
+                    </tr>
+                    <tr>
+                        <td>CURP: <strong>AAAA000000XXXXXX</strong></td>
+                        <td>Situación: <strong>Regular</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="caja caja-inferior d-flex gap-4">
+
+        <div class="col-4 p-3 border rounded d-flex flex-column">
+            <label class="form-label mb-2" style="font-size: 18px; font-weight: bold;">
+                Expedir Documento
+            </label>
+
+            <select class="form-select mb-3">
+                <option selected>Seleccione una opción</option>
+                <option>Horario</option>
+                <option>Lista de Incidencias</option>
+                <option>Historial académico</option>
+            </select>
+
+            <button class="btn btnVisualizar mb-2" style="width: 70%; align-self: center; padding: 6px 0;">
+                Visualizar
+            </button>
+
+            <button class="btn btnDescargar" style="width: 70%; align-self: center; padding: 6px 0;">
+                Descargar
+            </button>
+        </div>
+
+        <div class="col-8 p-3 border rounded d-flex justify-content-center">
+            <div class="d-flex flex-column align-items-center w-100">
+
+                <a href="{% url 'baja_alumno' %}" class="btn btnBaja w-50 py-3 mb-3 text-white text-decoration-none" style="font-size: 20px;">
+                    Dar de baja
+                </a>
+
+            <a href="{% url 'cambio_carrera' %}" class="btn btnCmabioCarrera w-50 py-3 text-white text-decoration-none" style="font-size: 20px;">
+            Cambio de carrera
+            </a>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="mt-4 d-flex justify-content-center">
+    <a href="{% url 'consultar_alumno' %}" class="btn btn-secondary px-3 py-1 text-white text-decoration-none" style="font-size: 20px;">
+        Regresar
+    </a>
+</div>
+
+<br><br> {% endblock %}

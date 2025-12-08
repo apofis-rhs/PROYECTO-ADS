@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cambio de Carrera{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+  <h1>Cambio de Carrera</h1>
+
+  <div class="caja border rounded p-4">
+    
+    <div class="caja border rounded p-3 mb-4">
+      <h3>Datos del Alumno</h3>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Nombre completo</label>
+          <input type="text" class="form-control" value="Juan Pérez López" readonly />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">CURP</label>
+          <input type="text" class="form-control" value="AAAA000000XXXXXX" readonly />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Fecha de nacimiento</label>
+          <input type="date" class="form-control" value="2005-01-01" readonly />
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Nivel educativo</label>
+          <input type="text" class="form-control" value="Universidad" readonly />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Grado / Semestre</label>
+          <input type="text" class="form-control" value="3" readonly />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Boleta / Matrícula</label>
+          <input type="text" class="form-control" value="2022001234" readonly />
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-6">
+          <label class="form-label">Tutor (si aplica)</label>
+          <input type="text" class="form-control" value="N/A" readonly />
+        </div>
+
+        <div class="col-6">
+          <label class="form-label">Teléfono del tutor</label>
+          <input type="text" class="form-control" value="N/A" readonly />
+        </div>
+      </div>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="caja border rounded p-3 mb-4">
+          <h3>Seleccionar Nueva Carrera</h3>
+
+          <div class="row mt-3">
+            <div class="col-6">
+              <label class="form-label">Nueva carrera</label>
+              <select class="form-select" name="nueva_carrera">
+                <option value="">Seleccionar…</option>
+                <option>Ingeniería en Sistemas Computacionales</option>
+                <option>Ingeniería Mecatrónica</option>
+                <option>Ingeniería Industrial</option>
+                <option>Licenciatura en Administración</option>
+                <option>Licenciatura en Informática</option>
+                <option>Ingeniería en Alimentos</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btnConfirmarCambio mt-4 px-4">
+            Confirmar Cambio
+          </button>
+        </div>
+    </form>
+
+    <div class="mt-4 d-flex justify-content-center">
+      <a href="{% url 'visualizar_alumno' %}" class="btn btnRegresar px-3 py-1 text-white text-decoration-none">
+        Regresar
+      </a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
