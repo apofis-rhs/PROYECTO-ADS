@@ -1,0 +1,106 @@
+<div class="container-fluid mt-4">
+  <div class="caja border rounded p-3 mb-4">
+    <h1>Añadir (Alta) Tutor</h1>
+  </div>
+
+  <div class="caja border rounded p-4">
+    <div class="caja border rounded p-3 mb-4">
+      <h3>Datos Personales del Tutor</h3>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Nombre(s)</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Apellido Paterno</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Apellido Materno</label>
+          <input type="text" class="form-control" />
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">CURP</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Parentesco</label>
+          <select class="form-select">
+            <option value="">Seleccionar…</option>
+            <option>Madre</option>
+            <option>Padre</option>
+            <option>Tutor legal</option>
+            <option>Abuelo(a)</option>
+            <option>Hermano(a)</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" class="form-control" />
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Teléfono principal</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Teléfono secundario (opcional)</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Dirección completa</label>
+          <input type="text" class="form-control" />
+        </div>
+      </div>
+    </div>
+
+    <div class="caja border rounded p-3 mb-4">
+      <h3>Datos del Alumno</h3>
+
+      <p class="text-muted">
+        Estos datos se autocompletarán según el alumno que estás registrando.
+      </p>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Nombre del alumno</label>
+          <input type="text" class="form-control" disabled />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">CURP del alumno</label>
+          <input type="text" class="form-control" disabled />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Nivel educativo</label>
+          <input type="text" class="form-control" disabled />
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+      <button
+        class="btn btnAltaRegresar px-4"
+        onclick="cargarVista('alumno/añadirAlumno.html')"
+      >
+        Regresar
+      </button>
+
+      <button class="btn btnAltaTutor px-4 ml-4">Dar de alta Tutor</button>
+    </div>
+  </div>
+</div>

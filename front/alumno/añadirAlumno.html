@@ -1,0 +1,153 @@
+<div class="container-fluid mt-4">
+  <h1>Añadir (Alta) Alumno</h1>
+
+  <div class="caja border rounded p-4">
+    <div class="caja border rounded p-3 mb-4">
+      <h3>Datos Personales</h3>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Nombre(s)</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Apellido Paterno</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Apellido Materno</label>
+          <input type="text" class="form-control" />
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">CURP</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Fecha de nacimiento</label>
+          <input type="date" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Sexo</label>
+          <select class="form-select">
+            <option value="">Seleccionar…</option>
+            <option>Femenino</option>
+            <option>Masculino</option>
+            <option>Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Nacionalidad</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Lugar de nacimiento</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Foto del alumno</label>
+          <input type="file" class="form-control" />
+        </div>
+      </div>
+    </div>
+
+    <div class="caja border rounded p-3 mb-4">
+      <h3>Contactos de Emergencia</h3>
+      <p class="text-muted">Puedes agregar uno o varios contactos.</p>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Nombre completo</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Parentesco</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Teléfono principal</label>
+          <input type="text" class="form-control" />
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-4">
+          <label class="form-label">Teléfono secundario (opcional)</label>
+          <input type="text" class="form-control" />
+        </div>
+
+        <div class="col-8">
+          <label class="form-label">Dirección</label>
+          <input type="text" class="form-control" />
+        </div>
+      </div>
+
+      <button class="btn btnContactoEmergencia mt-3 px-3">
+        Añadir otro contacto
+      </button>
+    </div>
+
+    <div class="caja border rounded p-3 mb-4">
+      <h3>Nivel Educativo</h3>
+
+      <div class="row mt-3">
+        <div class="col-6">
+          <label class="form-label">Nivel</label>
+          <select class="form-select">
+            <option value="">Seleccionar…</option>
+            <option>Kinder</option>
+            <option>Primaria</option>
+            <option>Secundaria</option>
+            <option>Preparatoria</option>
+            <option>Universidad</option>
+          </select>
+        </div>
+
+        <div class="col-6">
+          <label class="form-label">Grado / Semestre</label>
+          <input type="text" class="form-control" />
+        </div>
+      </div>
+
+      <p class="text-muted mt-3">
+        El tutor es <strong>obligatorio</strong>: Kinder, Primaria,
+        Secundaria<br />
+        El tutor es <strong>opcional</strong>: Preparatoria, Universidad
+      </p>
+
+      <button
+        class="btn btnTutor px-4"
+        onclick="cargarVista('tutor/añadirTutor.html')"
+      >
+        Añadir Tutor
+      </button>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+      <button class="btn btnCancelar px-4">Cancelar</button>
+      <button class="btn btnGuardarAlumno px-4 ml-4">Guardar Alumno</button>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex justify-content-center">
+    <button
+      class="btn btnRegresar px-3 py-1"
+      onclick="cargarVista('alumno/visualizarInfoAlumno.html')"
+    >
+      Regresar
+    </button>
+  </div>
+</div>
