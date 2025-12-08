@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Añadir Docente{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+  <h1>Añadir (Alta) Docente</h1>
+
+  <form method="POST">
+      {% csrf_token %}
+      
+      <div class="caja border rounded p-4">
+        
+        <div class="caja border rounded p-3 mb-4">
+          <h3>Datos Personales</h3>
+
+          <div class="row mt-3">
+            <div class="col-4">
+              <label class="form-label">Nombre(s)</label>
+              <input type="text" class="form-control" name="nombre" />
+            </div>
+
+            <div class="col-4">
+              <label class="form-label">Apellido Paterno</label>
+              <input type="text" class="form-control" name="ape_paterno" />
+            </div>
+
+            <div class="col-4">
+              <label class="form-label">Apellido Materno</label>
+              <input type="text" class="form-control" name="ape_materno" />
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-4">
+              <label class="form-label">CURP</label>
+              <input type="text" class="form-control" name="curp" />
+            </div>
+
+            <div class="col-4">
+              <label class="form-label">RFC</label>
+              <input type="text" class="form-control" name="rfc" />
+            </div>
+
+            <div class="col-4">
+              <label class="form-label">Fecha de Nacimiento</label>
+              <input type="date" class="form-control" name="fecha_nacimiento" />
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-4">
+              <label class="form-label">Sexo</label>
+              <select class="form-select" name="sexo">
+                <option value="">Seleccionar…</option>
+                <option>Femenino</option>
+                <option>Masculino</option>
+                <option>Otro</option>
+              </select>
+            </div>
+
+            <div class="col-4">
+              <label class="form-label">Nacionalidad</label>
+              <input type="text" class="form-control" name="nacionalidad" />
+            </div>
+
+            <div class="col-4">
+              <label class="form-label">Fotografía del Docente</label>
+              <input type="file" class="form-control" name="foto" />
+            </div>
+          </div>
+        </div>
+
+        <div class="caja border rounded p-3 mb-4">
+          <h3>Contactos de Emergencia</h3>
+          <p class="text-muted">Puedes agregar uno o varios contactos.</p>
+
+          <div class="row mt-3">
+            <div class="col-4">
+              <label class="form-label">Nombre completo</label>
+              <input type="text" class="form-control" name="contacto_nombre" />
+            </div>
+
+            <div class="col-4">
+              <label class="form-label">Parentesco</label>
+              <input type="text" class="form-control" name="contacto_parentesco" />
+            </div>
+
+            <div class="col-4">
+              <label class="form-label">Teléfono principal</label>
+              <input type="text" class="form-control" name="contacto_telefono" />
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-4">
+              <label class="form-label">Teléfono secundario (opcional)</label>
+              <input type="text" class="form-control" name="contacto_telefono2" />
+            </div>
+
+            <div class="col-8">
+              <label class="form-label">Dirección</label>
+              <input type="text" class="form-control" name="direccion" />
+            </div>
+          </div>
+
+          <button type="button" class="btn btnContactoEmergencia mt-3 px-3">
+            Añadir otro contacto
+          </button>
+        </div>
+
+        <div class="caja border rounded p-3 mb-4">
+          <h3>Datos Profesionales</h3>
+
+          <div class="row mt-3">
+            <div class="col-6">
+              <label class="form-label">Último grado académico</label>
+              <select class="form-select" name="grado_academico">
+                <option value="">Seleccionar…</option>
+                <option>Licenciatura</option>
+                <option>Maestría</option>
+                <option>Doctorado</option>
+                <option>Otro</option>
+              </select>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Institución de procedencia</label>
+              <input type="text" class="form-control" name="institucion_procedencia" />
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-4">
+              <label class="form-label">Años de experiencia</label>
+              <input type="number" class="form-control" name="anios_experiencia" />
+            </div>
+
+            <div class="col-8">
+              <label class="form-label">Áreas de especialidad</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Ej: Matemáticas, Programación, Biología..."
+                name="areas_especialidad"
+              />
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-12">
+              <label class="form-label">Experiencia laboral</label>
+              <textarea class="form-control" rows="3" name="experiencia_laboral"></textarea>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-12">
+              <label class="form-label">Certificaciones relevantes</label>
+              <textarea class="form-control" rows="2" name="certificaciones"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+          <a href="{% url 'consultar_docente' %}" class="btn btnCancelar px-4 text-white text-decoration-none">
+            Cancelar
+          </a>
+          <button type="submit" class="btn btnGuardarAlumno px-4 ml-4">
+            Guardar Docente
+          </button>
+        </div>
+      </div>
+  </form>
+
+  <div class="mt-4 d-flex justify-content-center">
+    <a href="{% url 'consultar_docente' %}" class="btn btnRegresar px-3 py-1 text-white text-decoration-none">
+      Regresar
+    </a>
+  </div>
+</div>
+
+{% endblock %}
