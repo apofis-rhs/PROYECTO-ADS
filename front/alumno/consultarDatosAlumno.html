@@ -1,0 +1,64 @@
+<!-- Vista alumno  -->
+<div id="view-alumno">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Consultar Datos del alumno</h1>
+
+    <div class="d-flex flex-column align-items-center">
+      <h4>Añadir Alumno</h4>
+
+
+      <button id="btn btnAñadirAlumno" class=" btn btnAñadirAlumno mt-2"
+        onclick="cargarVista('alumno/añadirAlumno.html')">
+        Añadir Alumno
+      </button>
+
+
+    </div>
+  </div>
+
+  <div class="d-flex mb-4">
+    <input type="text" class="form-control w-25 mr-2" placeholder="Número de boleta" />
+    <button class="btn btnBuscar">Buscar</button>
+  </div>
+
+
+  <h2 class="mb-3 mt-5">Resultados</h2>
+
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Boleta</th>
+        <th>Nombre</th>
+        <th>Apellido paterno</th>
+        <th>Apellido materno</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>2022001234</td>
+        <td>Rebeca</td>
+        <td>Hernández</td>
+        <td>Simón</td>
+        <td class="text-center">
+          <button class="btn btnVisualizar" onclick="cargarVista('alumno/visualizarInfoAlumno.html')">
+            Visualizar Información
+          </button>
+        </td>
+      </tr>
+      <!-- 
+            <tbody>
+              <tr>
+                <td colspan="6" class="text-center">
+                  No hay datos disponibles
+                </td>
+              </tr>
+            </tbody>
+            -->
+    </tbody>
+  </table>
+</div>
+</div>

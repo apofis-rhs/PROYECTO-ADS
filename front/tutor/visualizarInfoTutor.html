@@ -1,0 +1,91 @@
+<div class="container-fluid mt-4">
+  <div class="caja caja-titulo mb-4">
+    <h1>Visualizar Datos del Tutor</h1>
+  </div>
+
+  <div class="caja caja-central d-flex gap-4 mb-4">
+    <!--  Columna izquierda: Foto -->
+    <div class="col-4 d-flex flex-column align-items-center p-3 border rounded">
+      <div
+        class="foto-placeholder mb-3"
+        style="
+          width: 200px;
+          height: 200px;
+          border: 2px dashed #999;
+          border-radius: 8px;
+        "
+      ></div>
+
+      <button
+        class="btn btnVisualizar mb-2"
+        style="width: 50%; align-self: center; padding: 6px 0"
+      >
+        Subir Foto
+      </button>
+
+      <button
+        class="btn btnDescargar"
+        style="width: 50%; align-self: center; padding: 6px 0"
+      >
+        Imprimir Información
+      </button>
+    </div>
+
+    <!--  Columna derecha: Tabla -->
+    <div class="col-8 p-3 border rounded">
+      <!-- Selector de hijo -->
+      <div class="mb-3 d-flex justify-content-end">
+        <div>
+          <label class="form-label fw-bold">Seleccionar hijo:</label>
+          <select id="selectHijo" class="form-select" style="width: 250px">
+            <option value="1">2022012345</option>
+            <option value="2">2022078910</option>
+            <option value="3">2022055511</option>
+          </select>
+        </div>
+      </div>
+
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Datos del Tutor</th>
+            <th>Datos del Hijo</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Nombre:</td>
+            <td>Nombre del hijo:</td>
+          </tr>
+
+          <tr>
+            <td>Apellido paterno:</td>
+            <td>Apellido paterno del hijo:</td>
+          </tr>
+
+          <tr>
+            <td>Apellido materno:</td>
+            <td>Apellido materno del hijo:</td>
+          </tr>
+
+          <tr>
+            <td>CURP:</td>
+            <td>Grado educativo:</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Botón de regresar -->
+<div class="mt-4 d-flex justify-content-center">
+  <button
+    class="btn btn-secondary px-3 py-1"
+    style="font-size: 18px"
+    onclick="cargarVista('tutor/consultarDatosTutor.html')"
+  >
+    Regresar
+  </button>
+</div>
