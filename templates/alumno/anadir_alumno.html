@@ -8,7 +8,9 @@
 <div class="container-fluid mt-4">
   <h1>Añadir (Alta) Alumno</h1>
 
-  <form>
+  <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
       <div class="caja border rounded p-4">
         
         <div class="caja border rounded p-3 mb-4">
@@ -16,13 +18,13 @@
 
           <div class="row mt-3">
             <div class="col-4">
-              <label class="form-label">Nombre(s)</label>
-              <input type="text" class="form-control" name="nombre" />
+              <label class="form-label">Nombre(s) *</label>
+              <input type="text" class="form-control" name="nombre" required />
             </div>
 
             <div class="col-4">
-              <label class="form-label">Apellido Paterno</label>
-              <input type="text" class="form-control" name="ape_paterno" />
+              <label class="form-label">Apellido Paterno *</label>
+              <input type="text" class="form-control" name="ape_paterno" required />
             </div>
 
             <div class="col-4">
@@ -33,6 +35,11 @@
 
           <div class="row mt-3">
             <div class="col-4">
+                <label class="form-label">Boleta / Matrícula *</label>
+                <input type="text" class="form-control" name="boleta" required />
+            </div>
+
+            <div class="col-4">
               <label class="form-label">CURP</label>
               <input type="text" class="form-control" name="curp" />
             </div>
@@ -41,19 +48,19 @@
               <label class="form-label">Fecha de nacimiento</label>
               <input type="date" class="form-control" name="fecha_nacimiento" />
             </div>
+          </div>
 
+          <div class="row mt-3">
             <div class="col-4">
               <label class="form-label">Sexo</label>
               <select class="form-select" name="sexo">
                 <option value="">Seleccionar…</option>
-                <option>Femenino</option>
-                <option>Masculino</option>
-                <option>Otro</option>
+                <option value="F">Femenino</option>
+                <option value="M">Masculino</option>
+                <option value="O">Otro</option>
               </select>
             </div>
-          </div>
 
-          <div class="row mt-3">
             <div class="col-4">
               <label class="form-label">Nacionalidad</label>
               <input type="text" class="form-control" name="nacionalidad" />
@@ -63,12 +70,15 @@
               <label class="form-label">Lugar de nacimiento</label>
               <input type="text" class="form-control" name="lugar_nacimiento" />
             </div>
-
+          </div>
+          
+          <div class="row mt-3">
             <div class="col-4">
               <label class="form-label">Foto del alumno</label>
               <input type="file" class="form-control" name="foto" />
             </div>
           </div>
+
         </div>
 
         <div class="caja border rounded p-3 mb-4">
@@ -103,25 +113,19 @@
               <input type="text" class="form-control" name="direccion" />
             </div>
           </div>
-
-          <button type="button" class="btn btnContactoEmergencia mt-3 px-3">
-            Añadir otro contacto
-          </button>
         </div>
 
         <div class="caja border rounded p-3 mb-4">
-          <h3>Nivel Educativo</h3>
+          <h3>Nivel Educativo y Tutor</h3>
 
           <div class="row mt-3">
             <div class="col-6">
-              <label class="form-label">Nivel</label>
-              <select class="form-select" name="nivel">
+              <label class="form-label">Nivel *</label>
+              <select class="form-select" name="nivel" required>
                 <option value="">Seleccionar…</option>
-                <option>Kinder</option>
-                <option>Primaria</option>
-                <option>Secundaria</option>
-                <option>Preparatoria</option>
-                <option>Universidad</option>
+                {% for nivel in niveles %}
+                    <option value="{{ nivel.id_nivel }}">{{ nivel.nombre }}</option>
+                {% endfor %}
               </select>
             </div>
 
@@ -131,15 +135,30 @@
             </div>
           </div>
 
+          <div class="row mt-3">
+             <div class="col-8">
+                 <label class="form-label">Tutor Asignado *</label>
+                 <select class="form-select" name="tutor" required>
+                    <option value="">Seleccione un Tutor existente...</option>
+                    {% for tutor in tutores %}
+                        <option value="{{ tutor.id_tutor }}">
+                            {{ tutor.nombre }} {{ tutor.ape_paterno }} ({{ tutor.curp }})
+                        </option>
+                    {% endfor %}
+                 </select>
+             </div>
+             
+             <div class="col-4 d-flex align-items-end">
+                 <a href="{% url 'anadir_tutor' %}" class="btn btnTutor w-100 text-white text-decoration-none">
+                    + Nuevo Tutor
+                  </a>
+             </div>
+          </div>
+
           <p class="text-muted mt-3">
-            El tutor es <strong>obligatorio</strong>: Kinder, Primaria,
-            Secundaria<br />
-            El tutor es <strong>opcional</strong>: Preparatoria, Universidad
+            El tutor es <strong>obligatorio</strong> para guardar el registro.
           </p>
 
-          <a href="#" class="btn btnTutor px-4 text-white text-decoration-none">
-            Añadir Tutor
-          </a>
         </div>
 
         <div class="d-flex justify-content-end mt-4">
@@ -157,5 +176,7 @@
   
   <br><br>
 </div>
+
+<script src="{% static 'js/scripts_alumno.js' %}"></script>
 
 {% endblock %}

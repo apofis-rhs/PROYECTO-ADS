@@ -8,7 +8,7 @@
 <div class="container-fluid mt-4">
 
     <div class="caja caja-titulo mb-4">
-        <h1>Visualizar Datos del Alumno</h1>
+        <h1>Visualizar Datos: {{ alumno.nombre }} {{ alumno.ape_paterno }}</h1>
     </div>
 
     <div class="caja caja-central d-flex gap-4 mb-4">
@@ -16,7 +16,9 @@
         <div class="col-4 d-flex flex-column align-items-center p-3 border rounded">
 
             <div class="foto-placeholder mb-3"
-                style="width:200px; height:200px; border:2px dashed #999; border-radius:8px; background-image: url('{% static 'img/alumno_placeholder.png' %}'); background-size: cover;">
+                style="width:200px; height:200px; border:2px dashed #999; border-radius:8px; 
+                       background-image: url('{% if alumno.foto %}{{ alumno.foto.url }}{% else %}{% static 'img/alumno_placeholder.png' %}{% endif %}'); 
+                       background-size: cover; background-position: center;">
             </div>
 
             <button class="btn btnVisualizar mb-2" style="width: 50%; align-self: center; padding: 6px 0;">
@@ -33,26 +35,39 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Datos Personales</th>
-                        <th>Datos Académicos</th>
+                        <th class="table-dark text-white">Datos Personales</th>
+                        <th class="table-dark text-white">Datos Académicos</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Nombre: <strong>Juan</strong></td>
-                        <td>Carrera: <strong>Ing. Sistemas</strong></td>
+                        <td>Nombre: <strong>{{ alumno.nombre }}</strong></td>
+                        <td>Nivel: <strong>{{ alumno.nivel.nombre }}</strong></td>
                     </tr>
                     <tr>
-                        <td>Apellido paterno: <strong>Pérez</strong></td>
-                        <td>Semestre: <strong>5</strong></td>
+                        <td>Apellido paterno: <strong>{{ alumno.ape_paterno }}</strong></td>
+                        <td>Grado/Semestre: <strong>{{ alumno.grado|default:"No especificado" }}</strong></td>
                     </tr>
                     <tr>
-                        <td>Apellido materno: <strong>López</strong></td>
-                        <td>Grupo: <strong>5CV1</strong></td>
+                        <td>Apellido materno: <strong>{{ alumno.ape_materno|default:"" }}</strong></td>
+                        <td>Boleta: <strong>{{ alumno.boleta }}</strong></td>
                     </tr>
                     <tr>
-                        <td>CURP: <strong>AAAA000000XXXXXX</strong></td>
-                        <td>Situación: <strong>Regular</strong></td>
+                        <td>CURP: <strong>{{ alumno.curp|default:"--" }}</strong></td>
+                        <td>
+                            Tutor: 
+                            <strong>
+                                {% if alumno.tutor %}
+                                    {{ alumno.tutor.nombre }} {{ alumno.tutor.ape_paterno }}
+                                {% else %}
+                                    Sin asignar
+                                {% endif %}
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Fecha Nacimiento: <strong>{{ alumno.fecha_nacimiento|date:"d/m/Y" }}</strong></td>
+                        <td>Tel. Emergencia: <strong>{{ alumno.contacto_emergencia_telefono|default:"--" }}</strong></td>
                     </tr>
                 </tbody>
             </table>
@@ -86,13 +101,13 @@
         <div class="col-8 p-3 border rounded d-flex justify-content-center">
             <div class="d-flex flex-column align-items-center w-100">
 
-                <a href="{% url 'baja_alumno' %}" class="btn btnBaja w-50 py-3 mb-3 text-white text-decoration-none" style="font-size: 20px;">
+                <a href="{% url 'baja_alumno' alumno.id_alumno %}" class="btn btnBaja w-50 py-3 mb-3 text-white text-decoration-none" style="font-size: 20px;">
                     Dar de baja
                 </a>
 
-            <a href="{% url 'cambio_carrera' %}" class="btn btnCmabioCarrera w-50 py-3 text-white text-decoration-none" style="font-size: 20px;">
-            Cambio de carrera
-            </a>
+                <a href="{% url 'cambio_carrera' alumno.id_alumno %}" class="btn btnCmabioCarrera w-50 py-3 text-white text-decoration-none" style="font-size: 20px;">
+                Cambio de carrera
+                </a>
 
             </div>
         </div>
@@ -107,4 +122,5 @@
     </a>
 </div>
 
-<br><br> {% endblock %}
+<br><br> 
+{% endblock %}

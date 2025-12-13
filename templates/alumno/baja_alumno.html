@@ -8,57 +8,58 @@
 <div class="container-fluid mt-4">
   <h1>Dar de Baja al Alumno</h1>
 
-  <form method="POST">
+  <form method="POST" id="formBaja">
       {% csrf_token %}
       
       <div class="caja border rounded p-4 mt-4">
         
         <div class="caja border rounded p-3 mb-4">
           <h3>Datos del Alumno</h3>
+          <p class="text-muted">Verifique que sea el alumno correcto antes de continuar.</p>
 
           <div class="row mt-3">
             <div class="col-4">
               <label class="form-label">Nombre completo</label>
-              <input type="text" class="form-control" value="Juan Pérez López" readonly />
+              <input type="text" class="form-control" value="{{ alumno.nombre }} {{ alumno.ape_paterno }} {{ alumno.ape_materno }}" readonly />
             </div>
 
             <div class="col-4">
               <label class="form-label">CURP</label>
-              <input type="text" class="form-control" value="AAAA000000XXXXXX" readonly />
+              <input type="text" class="form-control" value="{{ alumno.curp }}" readonly />
             </div>
 
             <div class="col-4">
               <label class="form-label">Fecha de nacimiento</label>
-              <input type="date" class="form-control" value="2005-01-01" readonly />
+              <input type="text" class="form-control" value="{{ alumno.fecha_nacimiento|date:'Y-m-d' }}" readonly />
             </div>
           </div>
 
           <div class="row mt-3">
             <div class="col-4">
               <label class="form-label">Nivel educativo</label>
-              <input type="text" class="form-control" value="Preparatoria" readonly />
+              <input type="text" class="form-control" value="{{ alumno.nivel.nombre }}" readonly />
             </div>
 
             <div class="col-4">
               <label class="form-label">Grado / Semestre</label>
-              <input type="text" class="form-control" value="5" readonly />
+              <input type="text" class="form-control" value="{{ alumno.grado }}" readonly />
             </div>
 
             <div class="col-4">
               <label class="form-label">Boleta / Matrícula</label>
-              <input type="text" class="form-control" value="2022001234" readonly />
+              <input type="text" class="form-control" value="{{ alumno.boleta }}" readonly />
             </div>
           </div>
 
           <div class="row mt-3">
             <div class="col-6">
               <label class="form-label">Tutor (si aplica)</label>
-              <input type="text" class="form-control" value="María López" readonly />
+              <input type="text" class="form-control" value="{% if alumno.tutor %}{{ alumno.tutor.nombre }} {{ alumno.tutor.ape_paterno }}{% else %}N/A{% endif %}" readonly />
             </div>
 
             <div class="col-6">
               <label class="form-label">Teléfono del tutor</label>
-              <input type="text" class="form-control" value="5512345678" readonly />
+              <input type="text" class="form-control" value="{{ alumno.tutor.telefono|default:'N/A' }}" readonly />
             </div>
           </div>
         </div>
@@ -73,7 +74,7 @@
                 <input type="radio" name="tipoBaja" value="temporal" class="form-check-input me-2" checked />
                 <strong>Baja Temporal</strong>
                 <p class="text-muted mt-2 mb-0" style="font-size: 14px">
-                  El alumno puede reincorporarse posteriormente.
+                  El alumno pasará a estado inactivo, pero sus datos permanecerán en el sistema.
                 </p>
               </label>
             </div>
@@ -82,15 +83,15 @@
               <label class="d-block border rounded p-3 opcionBaja" style="cursor: pointer">
                 <input type="radio" name="tipoBaja" value="definitiva" class="form-check-input me-2" />
                 <strong>Baja Definitiva</strong>
-                <p class="text-muted mt-2 mb-0" style="font-size: 14px">
-                  El alumno se eliminará del sistema de forma permanente.
+                <p class="text-danger mt-2 mb-0" style="font-size: 14px">
+                  <strong>¡Atención!</strong> El alumno se eliminará de la base de datos permanentemente. Esta acción no se puede deshacer.
                 </p>
               </label>
             </div>
           </div>
 
           <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btnBaja px-4">Confirmar Baja</button>
+            <button type="submit" class="btn btnBaja px-4 text-white">Confirmar Baja</button>
           </div>
         </div>
 
@@ -98,12 +99,14 @@
   </form>
 
   <div class="mt-4 d-flex justify-content-center">
-    <a href="{% url 'visualizar_alumno' %}" class="btn btnRegresar px-3 py-1 text-white text-decoration-none">
+    <a href="{% url 'visualizar_alumno' alumno.id_alumno %}" class="btn btnRegresar px-3 py-1 text-white text-decoration-none">
       Regresar
     </a>
   </div>
   
   <br><br>
 </div>
+
+<script src="{% static 'js/scripts_alumno.js' %}"></script>
 
 {% endblock %}
