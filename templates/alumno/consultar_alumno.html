@@ -18,10 +18,22 @@
     </div>
   </div>
 
-  <div class="d-flex mb-4">
-    <input type="text" class="form-control w-25 mr-2" placeholder="Número de boleta" />
-    <button class="btn btnBuscar">Buscar</button>
-  </div>
+  <form method="GET" action="{% url 'consultar_alumno' %}">
+        <div class="d-flex mb-4">
+          <input 
+              type="text" 
+              name="busqueda" 
+              class="form-control w-25 mr-2" 
+              placeholder="Número de boleta" 
+              value="{{ request.GET.busqueda }}" 
+          />
+          <button type="submit" class="btn btnBuscar">Buscar</button>
+          
+          {% if request.GET.busqueda %}
+              <a href="{% url 'consultar_alumno' %}" class="btn btn-secondary ms-2">Limpiar</a>
+          {% endif %}
+        </div>
+    </form>
 
 
   <h2 class="mb-3 mt-5">Resultados</h2>
@@ -39,18 +51,31 @@
     </thead>
 
     <tbody>
+      {% for alumno in alumnos %}
       <tr>
-        <td>1</td>
-        <td>2022001234</td>
-        <td>Rebeca</td>
-        <td>Hernández</td>
-        <td>Simón</td>
+        <td>{{ alumno.id_alumno }}</td>
+        <td>{{ alumno.boleta }}</td>
+        <td>{{ alumno.nombre }}</td>
+        <td>{{ alumno.ape_paterno }}</td>
+        <td>{{ alumno.ape_materno }}</td>
+        
         <td class="text-center">
-          <a href="{% url 'visualizar_alumno' %}" class="btn btnVisualizar text-white text-decoration-none">
-              Visualizar Información
+          <a href="{% url 'visualizar_alumno' alumno.id_alumno %}" class="btn btnVisualizar text-white text-decoration-none">
+            Visualizar Información
           </a>
         </td>
       </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">
+          {% if request.GET.busqueda %}
+            No se encontraron alumnos con esa boleta.
+          {% else %}
+            Ingrese un número de boleta para buscar.
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
     </tbody>
   </table>
 </div>

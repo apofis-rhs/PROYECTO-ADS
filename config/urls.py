@@ -24,10 +24,10 @@ urlpatterns = [
     # ruta raiz (localhost:8000/)
     path('', views.dashboard_view, name='dashboard'),
     path('alumnos/consultar/', views.consultar_alumno_view, name='consultar_alumno'),
-    path('alumnos/visualizar/', views.visualizar_alumno_view, name='visualizar_alumno'),
+    path('alumnos/visualizar/<int:id_alumno>/', views.visualizar_alumno_view, name='visualizar_alumno'),
     path('alumnos/anadir/', views.anadir_alumno_view, name='anadir_alumno'),
-    path('alumnos/baja/', views.baja_alumno_view, name='baja_alumno'),
-    path('alumnos/cambio-carrera/', views.cambio_carrera_view, name='cambio_carrera'),
+    path('alumnos/baja/<int:id_alumno>/', views.baja_alumno_view, name='baja_alumno'),
+    path('alumno/cambio-carrera/<int:id_alumno>/', views.cambio_carrera_view, name='cambio_carrera'),
     path('docentes/consultar/', views.consultar_docente_view, name='consultar_docente'),
     path('docentes/visualizar/', views.visualizar_docente_view, name='visualizar_docente'),
     path('docentes/asignar/', views.asignar_materia_view, name='asignar_materia'),
