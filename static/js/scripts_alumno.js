@@ -70,3 +70,59 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 });
+
+// ==========================================
+// 3. REGISTRAR NUEVO TUTOR DESDE MODAL
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const formTutor = document.getElementById('formNuevoTutor');
+
+    if (formTutor) {
+        formTutor.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+
+            // 1. Obtenemos la URL desde el atributo data-api-url que pusimos en el HTML
+            const apiUrl = this.getAttribute('data-api-url');
+            
+            // 2. Obtenemos el token CSRF buscando el input oculto dentro del form
+            const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            let formData = new FormData(this);
+            
+            fetch(apiUrl, { 
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Cerrar el modal (usando Bootstrap 5)
+                    var modalElem = document.getElementById('modalNuevoTutor');
+                    var modalInstance = bootstrap.Modal.getInstance(modalElem);
+                    modalInstance.hide();
+                    
+                    // Limpiar formulario
+                    formTutor.reset();
+
+                    // Agregar y seleccionar el nuevo tutor en el select principal
+                    let selectTutor = document.getElementById('selectTutor');
+                    let option = new Option(data.tutor_nombre, data.tutor_id);
+                    selectTutor.add(option);
+                    selectTutor.value = data.tutor_id;
+
+                    alert('Tutor registrado correctamente. Continúe con el registro del alumno.');
+                } else {
+                    let errorDiv = document.getElementById('msgErrorTutor');
+                    errorDiv.innerText = "Error: " + data.error;
+                    errorDiv.style.display = 'block';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+});
