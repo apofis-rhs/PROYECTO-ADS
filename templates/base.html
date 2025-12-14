@@ -7,7 +7,6 @@
     <title>Gestión Escolar - {% block title %}Inicio{% endblock %}</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
@@ -17,24 +16,12 @@
     </header>
 
     <div class="row no-gutters">
-        
         <div class="col-2 no-gutters">
             <div class="izquierda d-flex flex-column align-items-center">
-                <a href="{% url 'consultar_alumno' %}" class="btn mt-5 w-75 text-white">
-                    Consultar Información del Alumno
-                </a>
-
-                <a href="{% url 'consultar_docente' %}" class="btn mt-5 w-75 btn-secondary text-white">
-                    Consultar Información del Docente
-                </a>
-
-                <a href="{% url 'consultar_tutor' %}" class="btn mt-5 w-75 btn-secondary text-white">
-                    Consultar Información del Tutor
-                </a>
-
-                <button class="btn mt-5 w-75">
-                    Consultar Información Académica
-                </button>
+                <a href="{% url 'consultar_alumno' %}" class="btn mt-5 w-75 text-white">Consultar Información del Alumno</a>
+                <a href="{% url 'consultar_docente' %}" class="btn mt-5 w-75 btn-secondary text-white">Consultar Información del Docente</a>
+                <a href="{% url 'consultar_tutor' %}" class="btn mt-5 w-75 btn-secondary text-white">Consultar Información del Tutor</a>
+                <button class="btn mt-5 w-75">Consultar Información Académica</button>
             </div>
         </div>
 
@@ -42,12 +29,15 @@
             {% block content %}
             {% endblock %}
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script src="{% static 'js/script.js' %}"></script>
+
+    {% block extra_js %}
+    {% endblock %}
+
 </body>
 </html>
