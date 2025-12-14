@@ -307,7 +307,7 @@ class Grupo(models.Model):
     turno = models.ForeignKey(CatTurno, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_turno')
     nivel = models.ForeignKey(NivelEducativo, on_delete=models.CASCADE, db_column='id_nivel')
     materia = models.ForeignKey(Materia, on_delete=models.CASCADE, db_column='id_materia')
-    docente = models.ForeignKey(Docente, on_delete=models.CASCADE, db_column='id_docente')
+    docente = models.ForeignKey(Docente, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_docente')
 
     alumnos = models.ManyToManyField(Alumno, through='AlumnoGrupo')
 

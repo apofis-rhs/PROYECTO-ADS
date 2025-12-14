@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 from academico import views
 
@@ -29,10 +31,13 @@ urlpatterns = [
     path('alumnos/baja/<int:id_alumno>/', views.baja_alumno_view, name='baja_alumno'),
     path('alumno/cambio-carrera/<int:id_alumno>/', views.cambio_carrera_view, name='cambio_carrera'),
     path('docentes/consultar/', views.consultar_docente_view, name='consultar_docente'),
-    path('docentes/visualizar/', views.visualizar_docente_view, name='visualizar_docente'),
-    path('docentes/asignar/', views.asignar_materia_view, name='asignar_materia'),
+    path('docente/visualizar/<int:id_docente>/', views.visualizar_docente_view, name='visualizar_docente'),
+    path('docente/asignar-materia/<int:id_docente>/', views.asignar_materia_view, name='asignar_materia'),
     path('docentes/anadir/', views.anadir_docente_view, name='anadir_docente'),
     path('tutores/consultar/', views.consultar_tutor_view, name='consultar_tutor'),
     path('tutores/visualizar/', views.visualizar_tutor_view, name='visualizar_tutor'),
     path('tutores/anadir/', views.anadir_tutor_view, name='anadir_tutor'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

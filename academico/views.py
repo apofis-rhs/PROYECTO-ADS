@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Alumno, Carrera, NivelEducativo, PadreTutor
+from django.db import transaction
+from django.utils import timezone
+from .models import Alumno, PadreTutor, Carrera, NivelEducativo, Docente, Grupo, AreaInteres
 
 def dashboard_view(request):
     return render(request, 'dashboard.html')
 
+# -----------------------------------------------------------------------------
+# VISTA PARA CONSULTAR ALUMNO
+# -----------------------------------------------------------------------------
 
 def consultar_alumno_view(request):
     query = request.GET.get('busqueda')
@@ -15,6 +20,9 @@ def consultar_alumno_view(request):
     
     return render(request, 'alumno/consultar_alumno.html', {'alumnos': lista_alumnos})
 
+# -----------------------------------------------------------------------------
+# VISTA PARA VISUALIZAR ALUMNO
+# -----------------------------------------------------------------------------
 
 def visualizar_alumno_view(request, id_alumno):
     # 1. Buscamos al alumno por ID. Si no existe, lanzamos 404.
@@ -35,6 +43,9 @@ def visualizar_alumno_view(request, id_alumno):
         'tutores': tutores
     })
 
+#------------------------------------------------------------------------------
+# VISTA PARA ALTA DE ALUMNO
+#------------------------------------------------------------------------------
 
 def anadir_alumno_view(request):
     # Obtenemos los catálogos para llenar los <select>
@@ -134,6 +145,9 @@ def anadir_alumno_view(request):
         'tutores': tutores
     })
 
+#------------------------------------------------------------------------------
+# VISTA PARA BAJA DE ALUMNO
+#------------------------------------------------------------------------------
 
 def baja_alumno_view(request, id_alumno):
     # Buscamos al alumno
@@ -158,7 +172,9 @@ def baja_alumno_view(request, id_alumno):
 
     return render(request, 'alumno/baja_alumno.html', {'alumno': alumno})
 
-
+# ------------------------------------------------------------------------------
+# VISTA PARA CAMBIO DE CARRERA
+# ------------------------------------------------------------------------------
 
 def cambio_carrera_view(request, id_alumno):
     # 1. Obtenemos el alumno
@@ -199,25 +215,178 @@ def cambio_carrera_view(request, id_alumno):
         'carreras_disponibles': carreras_disponibles
     })
 
+# ------------------------------------------------------------------------------
+# VISTA PARA DOCENTE
+# ------------------------------------------------------------------------------
 
 def consultar_docente_view(request):
-    return render(request, 'docente/consultar_docente.html')
+    query = request.GET.get('busqueda')
+    
+    if query:
+        docentes = Docente.objects.filter(num_empleado__icontains=query).order_by('id_docente')
+    else:
+        docentes = Docente.objects.none() 
 
-def visualizar_docente_view(request):
-    return render(request, 'docente/visualizar_docente.html')
+    return render(request, 'docente/consultar_docente.html', {'docentes': docentes})
 
-def asignar_materia_view(request):
-    # NOTA: en el futuro cargaremos las materias disponibles y el horario del profe (nomas que quede integrado todo)
-    return render(request, 'docente/asignar_materia.html')
+# ------------------------------------------------------------------------------
+# VISTA PARA VISUALIZAR DOCENTE
+# ------------------------------------------------------------------------------
+
+def visualizar_docente_view(request, id_docente):
+    docente = get_object_or_404(Docente, pk=id_docente)
+    
+    return render(request, 'docente/visualizar_docente.html', {
+        'docente': docente
+    })
+
+# ------------------------------------------------------------------------------
+# VISTA PARA ASIGNAR MATERIA A DOCENTE
+# ------------------------------------------------------------------------------
+
+def asignar_materia_view(request, id_docente):
+    docente = get_object_or_404(Docente, pk=id_docente)
+
+    if request.method == 'POST':
+        grupo_id = request.POST.get('grupo_id')
+        accion = request.POST.get('accion')
+
+        if grupo_id:
+            grupo = get_object_or_404(Grupo, pk=grupo_id)
+            
+            if accion == 'asignar':
+                # VALIDACIÓN EXTRA DE SEGURIDAD:
+                # Verificar que siga vacante antes de asignar (por si otro admin ganó el click)
+                if grupo.docente is None:
+                    grupo.docente = docente
+                    grupo.save()
+                    messages.success(request, f'Materia {grupo.materia.nombre} asignada correctamente.')
+                else:
+                    messages.error(request, f'Error: El grupo {grupo.clave_grupo} ya tiene un docente asignado.')
+            
+            elif accion == 'desasignar':
+                grupo.docente = None
+                grupo.save()
+                messages.warning(request, f'Materia {grupo.materia.nombre} desasignada. Ahora está vacante.')
+
+            return redirect('asignar_materia', id_docente=id_docente)
+
+    # --- FILTROS ---
+    
+    # 1. Asignadas: Las que tiene ESTE docente
+    materias_asignadas = Grupo.objects.filter(docente=docente).order_by('id_grupo')
+    
+    # 2. Disponibles: SOLO LAS VACANTES (Donde docente es NULL)
+    #    Usamos __isnull=True para buscar campos vacíos
+    materias_disponibles = Grupo.objects.filter(docente__isnull=True).order_by('id_grupo')
+
+    return render(request, 'docente/asignar_materia.html', {
+        'docente': docente,
+        'materias_asignadas': materias_asignadas,
+        'materias_disponibles': materias_disponibles
+    })
+    
+# ------------------------------------------------------------------------------
+# VISTA PARA ALTA DE DOCENTE
+# ------------------------------------------------------------------------------
 
 def anadir_docente_view(request):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # 1. Recuperar datos básicos
+                num_empleado = request.POST.get('num_empleado')
+                nombre = request.POST.get('nombre')
+                ape_paterno = request.POST.get('ape_paterno')
+                ape_materno = request.POST.get('ape_materno')
+                curp = request.POST.get('curp')
+                rfc = request.POST.get('rfc')
+                fecha_nacimiento = request.POST.get('fecha_nacimiento') or None
+                sexo = request.POST.get('sexo')
+                
+                # Mapeo de sexo (HTML -> BD)
+                sexo_bd = 'M' if sexo == 'Masculino' else 'F' if sexo == 'Femenino' else 'O'
+                
+                nacionalidad = request.POST.get('nacionalidad')
+                foto = request.FILES.get('foto')
+
+                # 2. Datos de contacto y emergencia
+                direccion = request.POST.get('direccion')
+                contacto_nombre = request.POST.get('contacto_nombre')
+                contacto_parentesco = request.POST.get('contacto_parentesco')
+                contacto_telefono = request.POST.get('contacto_telefono')
+
+                # 3. Datos Profesionales
+                grado_academico = request.POST.get('grado_academico')
+                institucion = request.POST.get('institucion_procedencia')
+                anios_exp = request.POST.get('anios_experiencia') or 0
+                especialidad_texto = request.POST.get('areas_especialidad')
+                experiencia_laboral = request.POST.get('experiencia_laboral')
+                certificaciones = request.POST.get('certificaciones')
+
+                # 4. Crear el Docente
+                nuevo_docente = Docente.objects.create(
+                    num_empleado=num_empleado,
+                    nombre=nombre,
+                    ape_paterno=ape_paterno,
+                    ape_materno=ape_materno,
+                    curp=curp,
+                    rfc=rfc,
+                    fecha_nacimiento=fecha_nacimiento,
+                    sexo=sexo_bd,
+                    nacionalidad=nacionalidad,
+                    foto=foto,
+                    direccion=direccion,
+                    
+                    contacto_emergencia_nombre=contacto_nombre,
+                    contacto_emergencia_parentesco=contacto_parentesco,
+                    contacto_emergencia_telefono=contacto_telefono,
+                    
+                    grado_academico=grado_academico,
+                    institucion_procedencia=institucion,
+                    anios_experiencia=anios_exp,
+                    especialidad=especialidad_texto,
+                    experiencia_laboral=experiencia_laboral,
+                    certificaciones=certificaciones,
+                    
+                    fecha_ingreso=timezone.now().date(),
+                    activo=True
+                )
+
+                # 5. Manejo de Áreas de Interés
+                if especialidad_texto:
+                    areas_lista = [x.strip() for x in especialidad_texto.split(',')]
+                    for nombre_area in areas_lista:
+                        area_obj, created = AreaInteres.objects.get_or_create(nombre=nombre_area)
+                        nuevo_docente.areas_interes.add(area_obj)
+
+                messages.success(request, f'Docente {nombre} {ape_paterno} registrado exitosamente.')
+                return redirect('consultar_docente')
+
+        except Exception as e:
+            messages.error(request, f'Error al guardar: {str(e)}')
+            return render(request, 'docente/anadir_docente.html')
+
+    # GET: Mostrar formulario vacío
     return render(request, 'docente/anadir_docente.html')
+
+# ------------------------------------------------------------------------------
+# VISTA CONSULTAR TUTOR
+# ------------------------------------------------------------------------------
 
 def consultar_tutor_view(request):
     return render(request, 'tutor/consultar_tutor.html')
 
+# ------------------------------------------------------------------------------
+# VISTA VISUALIZAR TUTOR
+# ------------------------------------------------------------------------------
+
 def visualizar_tutor_view(request):
     return render(request, 'tutor/visualizar_tutor.html')
+
+# ------------------------------------------------------------------------------
+# VISTA PARA ALTA DE TUTOR
+# ------------------------------------------------------------------------------
 
 def anadir_tutor_view(request):
     return render(request, 'tutor/anadir_tutor.html')
