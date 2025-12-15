@@ -27,7 +27,7 @@ urlpatterns = [
     path('', views.dashboard_view, name='dashboard'),
     path('alumnos/consultar/', views.consultar_alumno_view, name='consultar_alumno'),
     path('alumnos/visualizar/<int:id_alumno>/', views.visualizar_alumno_view, name='visualizar_alumno'),
-    path('alumnos/anadir/', views.anadir_alumno_view, name='anadir_alumno'),
+    path('alumno/anadir/', views.anadir_alumno_view, name='anadir_alumno'),
     path('alumnos/baja/<int:id_alumno>/', views.baja_alumno_view, name='baja_alumno'),
     path('alumno/cambio-carrera/<int:id_alumno>/', views.cambio_carrera_view, name='cambio_carrera'),
     path('docentes/consultar/', views.consultar_docente_view, name='consultar_docente'),
@@ -35,8 +35,8 @@ urlpatterns = [
     path('docente/asignar-materia/<int:id_docente>/', views.asignar_materia_view, name='asignar_materia'),
     path('docentes/anadir/', views.anadir_docente_view, name='anadir_docente'),
     path('tutores/consultar/', views.consultar_tutor_view, name='consultar_tutor'),
-    path('tutores/visualizar/', views.visualizar_tutor_view, name='visualizar_tutor'),
-    path('tutores/anadir/', views.anadir_tutor_view, name='anadir_tutor'),
+    path('tutor/visualizar/<int:id_tutor>/', views.visualizar_tutor_view, name='visualizar_tutor'),
+    path('api/crear-tutor/', views.api_crear_tutor, name='api_crear_tutor'),
 ]
 
 if settings.DEBUG:

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
@@ -375,18 +376,66 @@ def anadir_docente_view(request):
 # ------------------------------------------------------------------------------
 
 def consultar_tutor_view(request):
-    return render(request, 'tutor/consultar_tutor.html')
+    query = request.GET.get('busqueda')
+    
+    if query:
+        # Buscar tutores relacionados con alumnos cuya boleta coincida con la consulta
+        tutores = PadreTutor.objects.filter(alumno__boleta__icontains=query).distinct().order_by('id_tutor')
+    else:
+        tutores = PadreTutor.objects.none()
+
+    return render(request, 'tutor/consultar_tutor.html', {'tutores': tutores})
 
 # ------------------------------------------------------------------------------
 # VISTA VISUALIZAR TUTOR
 # ------------------------------------------------------------------------------
 
-def visualizar_tutor_view(request):
-    return render(request, 'tutor/visualizar_tutor.html')
+def visualizar_tutor_view(request, id_tutor):
+    tutor = get_object_or_404(PadreTutor, pk=id_tutor)
+    hijos = tutor.alumno_set.all()
+
+    hijo_seleccionado = None
+    id_hijo_param = request.GET.get('id_hijo')
+
+    if id_hijo_param:
+        # Si el usuario selecciono uno especifico en el dropdown
+        hijo_seleccionado = hijos.filter(pk=id_hijo_param).first()
+    elif hijos.exists():
+        # Por defecto mostramos el primero de la lista
+        hijo_seleccionado = hijos.first()
+
+    return render(request, 'tutor/visualizar_tutor.html', {
+        'tutor': tutor,
+        'hijos': hijos,
+        'hijo_seleccionado': hijo_seleccionado
+    })
 
 # ------------------------------------------------------------------------------
 # VISTA PARA ALTA DE TUTOR
 # ------------------------------------------------------------------------------
 
-def anadir_tutor_view(request):
-    return render(request, 'tutor/anadir_tutor.html')
+def api_crear_tutor(request):
+    if request.method == 'POST':
+        try:
+            # Crear el tutor con los datos del modal
+            nuevo_tutor = PadreTutor.objects.create(
+                nombre=request.POST.get('nombre'),
+                ape_paterno=request.POST.get('ape_paterno'),
+                ape_materno=request.POST.get('ape_materno'),
+                curp=request.POST.get('curp'),
+                # Ajusta 'parentesco' y 'telefono' a los nombres reales de tus campos en models.py
+                # Si tu modelo usa 'telefono_principal', cámbialo aquí.
+                telefono=request.POST.get('telefono'), 
+                # Si tienes email en el modelo:
+                # email=request.POST.get('email')
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'tutor_id': nuevo_tutor.id_tutor,
+                'tutor_nombre': f"{nuevo_tutor.nombre} {nuevo_tutor.ape_paterno}"
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
