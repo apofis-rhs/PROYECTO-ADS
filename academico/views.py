@@ -3,7 +3,10 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
-from .models import Alumno, PadreTutor, Carrera, NivelEducativo, Docente, Grupo, AreaInteres
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from .models import Alumno, PadreTutor, Carrera, NivelEducativo, Docente, Grupo, AreaInteres, HistorialAcademico, Incidente
 
 def dashboard_view(request):
     return render(request, 'dashboard.html')
@@ -439,3 +442,94 @@ def api_crear_tutor(request):
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+# ------------------------------------------------------------------------------
+# VISTA PARA RENDERIZAR PDF
+# ------------------------------------------------------------------------------
+
+def render_pdf(template_src, context_dict={}):
+    """Función auxiliar para renderizar HTML a PDF"""
+    template = get_template(template_src)
+    html  = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    # Descarga directa: attachment; filename="report.pdf"
+    # Visualizar en navegador: inline; filename="report.pdf"
+    response['Content-Disposition'] = 'inline; filename="documento.pdf"'
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Tuvimos errores <pre>' + html + '</pre>')
+    return response
+
+# ------------------------------------------------------------------------------
+# VISTA PARA GENERAR DOCUMENTO PDF DEL ALUMNO
+# ------------------------------------------------------------------------------
+
+def generar_documento_alumno(request, id_alumno):
+    tipo_documento = request.GET.get('tipo')
+    alumno = get_object_or_404(Alumno, pk=id_alumno)
+
+    context = {'alumno': alumno}
+    template_name = ""
+
+    if tipo_documento == 'horario':
+        # Corrección anterior: 'alumnogrupo_set' en lugar de 'alumno_grupo_set'
+        grupos = alumno.alumnogrupo_set.all() 
+        context['grupos'] = grupos
+        template_name = 'pdfs/documento_horario.html'
+
+    elif tipo_documento == 'historial':
+        # --- CORRECCIÓN AQUÍ ---
+        # Cambiamos 'id_alumno=' por 'alumno='
+        historial = HistorialAcademico.objects.filter(alumno=alumno)
+        context['historial'] = historial
+        template_name = 'pdfs/documento_historial.html'
+
+    elif tipo_documento == 'incidencias':
+        incidencias = Incidente.objects.filter(alumno=alumno)
+        context['incidencias'] = incidencias
+        template_name = 'pdfs/documento_incidencias.html'
+        
+    elif tipo_documento == 'ficha':
+        # Solo necesitamos los datos del alumno, que ya están en el context
+        template_name = 'pdfs/documento_ficha.html'
+
+    else:
+        return HttpResponse("Tipo de documento no válido.")
+
+    return render_pdf(template_name, context)
+
+# ------------------------------------------------------------------------------
+# VISTA PARA GENERAR DOCUMENTO PDF DEL DOCENTE
+# ------------------------------------------------------------------------------
+
+def generar_documento_docente(request, id_docente):
+    # 1. Obtenemos parámetros
+    tipo_documento = request.GET.get('tipo')
+    docente = get_object_or_404(Docente, pk=id_docente)
+
+    context = {'docente': docente}
+    template_name = ""
+
+    # 2. Lógica segun el reporte
+    if tipo_documento == 'horario':
+        # Buscamos los grupos donde este docente da clases
+        grupos = Grupo.objects.filter(docente=docente)
+        context['grupos'] = grupos
+        template_name = 'pdfs/docente_horario.html'
+
+    elif tipo_documento == 'incidencias':
+        # Buscamos incidentes donde este docente este involucrado
+        incidencias = Incidente.objects.filter(docente=docente).order_by('-fecha')
+        context['incidencias'] = incidencias
+        template_name = 'pdfs/docente_incidencias.html'
+    
+    elif tipo_documento == 'ficha':
+        # Placeholder para la ficha tecnica
+        template_name = 'pdfs/docente_ficha.html'
+
+    else:
+        return HttpResponse("Tipo de documento no válido.")
+
+    # 3. Generar PDF
+    return render_pdf(template_name, context)

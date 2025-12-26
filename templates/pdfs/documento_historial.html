@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; font-size: 12px; color: #333; }
+        
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { color: #003366; margin: 0; font-size: 22px; }
+        .header h3 { margin: 5px 0; color: #555; }
+
+        .info-container { width: 100%; margin-bottom: 20px; border-bottom: 2px solid #003366; padding-bottom: 10px; }
+        .info-col { width: 48%; display: inline-block; vertical-align: top; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border-bottom: 1px solid #ccc; padding: 6px; text-align: left; }
+        th { background-color: #f2f2f2; border-bottom: 2px solid #003366; color: #003366; font-weight: bold; }
+        
+        .calif-aprobada { color: #006600; font-weight: bold; }
+        .calif-reprobada { color: #cc0000; font-weight: bold; }
+
+        .resumen { margin-top: 30px; text-align: right; font-size: 14px; }
+        .footer { position: fixed; bottom: 0; text-align: center; font-size: 10px; color: #999; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Historial Académico</h1>
+        <h3>Kardex de Calificaciones</h3>
+    </div>
+
+    <div class="info-container">
+        <div class="info-col">
+            <strong>Alumno:</strong> {{ alumno.nombre }} {{ alumno.ape_paterno }} {{ alumno.ape_materno }}<br>
+            <strong>Boleta:</strong> {{ alumno.boleta }}
+        </div>
+        <div class="info-col" style="text-align: right;">
+            <strong>Nivel Educativo:</strong> {{ alumno.nivel.nombre }}<br>
+            <strong>Carrera/Grado:</strong> {{ alumno.grado|default:"--" }}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%;">Periodo</th>
+                <th style="width: 15%;">Clave</th>
+                <th style="width: 40%;">Materia</th>
+                <th style="width: 15%; text-align: center;">Calificación</th>
+                <th style="width: 15%;">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in historial %}
+            <tr>
+                <td>{{ item.periodo }}</td>
+                <td>{{ item.materia.clave }}</td>
+                <td>{{ item.materia.nombre }}</td>
+                
+                <td style="text-align: center;">
+                    {% if item.calificacion >= 6 %}
+                        <span class="calif-aprobada">{{ item.calificacion }}</span>
+                    {% else %}
+                        <span class="calif-reprobada">{{ item.calificacion }}</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {{ item.estado_historial.nombre|default:"Sin Estado" }}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 20px;">
+                    No hay registros académicos en el historial.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="resumen">
+        <p><strong>Total de materias cursadas:</strong> {{ historial|length }}</p>
+    </div>
+
+    <div class="footer">
+        Este documento es informativo y no constituye un certificado oficial.
+    </div>
+
+</body>
+</html>
