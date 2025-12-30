@@ -111,13 +111,15 @@ class UsuarioAdminManager(BaseUserManager):
 #         return f"{self.usuario} - {self.nombre}"
     
 class UsuarioAdmin(AbstractBaseUser, PermissionsMixin):
+    id_admin = models.AutoField(primary_key=True) 
     usuario = models.CharField(max_length=50, unique=True)
-    # num_empleado = models.CharField(max_length=20, unique=True)
+    
+    num_empleado = models.CharField(max_length=50) 
     
     correo = models.EmailField(unique=True)
     nombre = models.CharField(max_length=100)
-    num_empleado = models.IntegerField()
-    # Campos OBLIGATORIOS para Django
+    
+    # Campos obligatorios de Django
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
