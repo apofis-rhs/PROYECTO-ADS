@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; font-size: 12px; color: #333; }
+        
+        /* Encabezado */
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #003366; padding-bottom: 10px; }
+        .header h1 { color: #003366; margin: 0; font-size: 24px; }
+        .header h2 { color: #cc0000; margin: 5px 0 0 0; font-size: 16px; }
+
+        /* Datos del Alumno */
+        .info-alumno { margin-bottom: 20px; background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        .info-alumno p { margin: 5px 0; }
+
+        /* Tabla */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #999; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #003366; color: white; font-weight: bold; text-align: center; }
+        
+        /* Colores de gravedad */
+        .gravedad-alta { color: red; font-weight: bold; }
+        
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 10px; color: #777; border-top: 1px solid #ccc; padding-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Reporte de Incidencias</h1>
+        <h2>Comportamiento y Disciplina</h2>
+    </div>
+
+    <div class="info-alumno">
+        <p><strong>Alumno:</strong> {{ alumno.nombre }} {{ alumno.ape_paterno }} {{ alumno.ape_materno }}</p>
+        <p><strong>Boleta:</strong> {{ alumno.boleta }} | <strong>Nivel:</strong> {{ alumno.nivel.nombre }}</p>
+        <p><strong>Fecha de emisión:</strong> {% now "d/m/Y H:i" %}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%;">Fecha</th>
+                <th style="width: 20%;">Tipo</th>
+                <th style="width: 15%;">Gravedad</th>
+                <th style="width: 50%;">Descripción / Observaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for incidencia in incidencias %}
+            <tr>
+                <td style="text-align: center;">{{ incidencia.fecha|date:"d/m/Y" }}</td>
+                
+                <td>{{ incidencia.tipo_incidente.nombre|default:"General" }}</td>
+                
+                <td style="text-align: center;">
+                    {% if "Alta" in incidencia.gravedad_incidente.nombre %}
+                        <span class="gravedad-alta">{{ incidencia.gravedad_incidente.nombre }}</span>
+                    {% else %}
+                        {{ incidencia.gravedad_incidente.nombre }}
+                    {% endif %}
+                </td>
+                
+                <td>{{ incidencia.descripcion }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 20px; color: #666;">
+                    <em>El alumno no presenta incidencias registradas hasta la fecha.</em>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Documento confidencial generado por el Sistema de Gestión Escolar.
+    </div>
+
+</body>
+</html>

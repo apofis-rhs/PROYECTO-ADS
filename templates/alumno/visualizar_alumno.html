@@ -14,7 +14,6 @@
     <div class="caja caja-central d-flex gap-4 mb-4">
 
         <div class="col-4 d-flex flex-column align-items-center p-3 border rounded">
-
             <div class="foto-placeholder mb-3"
                 style="width:200px; height:200px; border:2px dashed #999; border-radius:8px; 
                        background-image: url('{% if alumno.foto %}{{ alumno.foto.url }}{% else %}{% static 'img/alumno_placeholder.png' %}{% endif %}'); 
@@ -25,10 +24,13 @@
                 Subir Foto
             </button>
 
-            <button class="btn btnDescargar" style="width: 50%; align-self: center; padding: 6px 0;">
+            <button id="btnImprimirFicha" 
+                    type="button"
+                    data-url="{% url 'generar_documento_alumno' alumno.id_alumno %}"
+                    class="btn btnDescargar" 
+                    style="width: 50%; align-self: center; padding: 6px 0;">
                 Imprimir Información
             </button>
-
         </div>
 
         <div class="col-8 p-3 border rounded">
@@ -82,19 +84,25 @@
                 Expedir Documento
             </label>
 
-            <select class="form-select mb-3">
-                <option selected>Seleccione una opción</option>
-                <option>Horario</option>
-                <option>Lista de Incidencias</option>
-                <option>Historial académico</option>
+            <select id="selectDocumento" class="form-select mb-3">
+                <option value="" selected>Seleccione una opción</option>
+                <option value="horario">Horario</option>
+                <option value="incidencias">Lista de Incidencias</option>
+                <option value="historial">Historial académico</option>
             </select>
 
-            <button class="btn btnVisualizar mb-2" style="width: 70%; align-self: center; padding: 6px 0;">
-                Visualizar
+            <button id="btnVisualizarDoc" 
+                    data-url="{% url 'generar_documento_alumno' alumno.id_alumno %}"
+                    class="btn btnVisualizar mb-2" 
+                    style="width: 70%; align-self: center; padding: 6px 0;">
+                Visualizar PDF
             </button>
 
-            <button class="btn btnDescargar" style="width: 70%; align-self: center; padding: 6px 0;">
-                Descargar
+            <button id="btnDescargarDoc" 
+                    data-url="{% url 'generar_documento_alumno' alumno.id_alumno %}"
+                    class="btn btnDescargar" 
+                    style="width: 70%; align-self: center; padding: 6px 0;">
+                Descargar PDF
             </button>
         </div>
 
@@ -123,4 +131,7 @@
 </div>
 
 <br><br> 
+
+<script src="{% static 'js/scripts_alumno.js' %}"></script>
+
 {% endblock %}

@@ -1,27 +1,23 @@
 document.addEventListener('DOMContentLoaded', function() {
     
     // ==========================================
-    // 1. AÑADIR/EDITAR ALUMNO
+    // 1. VALIDACIÓN DINÁMICA DE NIVEL/TUTOR
     // ==========================================
     const selectNivel = document.querySelector('select[name="nivel"]');
     const selectTutor = document.querySelector('select[name="tutor"]');
 
-    // Solo ejecutamos esto si existen los elementos (estamos en la pantalla de Añadir)
     if (selectNivel && selectTutor) {
-        
-        // Buscamos el label del tutor
         const contenedorTutor = selectTutor.closest('.col-8') || selectTutor.parentElement;
         const labelTutor = contenedorTutor.querySelector('label');
 
         function validarNivel() {
             const nivelId = parseInt(selectNivel.value);
-
             if (isNaN(nivelId)) {
+                // Si no hay nivel, forzamos requerir tutor por seguridad
                 selectTutor.required = true;
                 return;
             }
-
-            // Lógica: 1-3 (Básico) -> Obligatorio | 4-5 (Superior) -> Opcional
+            // 1-3: Básica (Obligatorio) | 4-5: Superior (Opcional)
             if (nivelId >= 1 && nivelId <= 3) {
                 selectTutor.required = true;
                 if(labelTutor) labelTutor.innerHTML = "Tutor Asignado *";
@@ -32,23 +28,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         selectNivel.addEventListener('change', validarNivel);
-        validarNivel(); // Ejecutar al cargar
+        // Ejecutar al inicio por si es una edición
+        validarNivel(); 
     }
 
 
     // ==========================================
-    // 2. BAJA DE ALUMNO
+    // 2. CONFIRMACIÓN DE BAJA
     // ==========================================
     const formBaja = document.getElementById('formBaja');
 
-    // Solo ejecutamos esto si existe el formulario de baja (estamos en pantalla Baja)
     if (formBaja) {
-        
         formBaja.addEventListener('submit', function(event) {
-            // Buscamos qué opción seleccionó
             const opcionSeleccionada = document.querySelector('input[name="tipoBaja"]:checked');
-            
-            if (!opcionSeleccionada) return; // Por si acaso
+            if (!opcionSeleccionada) return; 
 
             const tipoBaja = opcionSeleccionada.value;
             let mensaje = "";
@@ -58,58 +51,39 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 mensaje = "¿Confirmas que deseas dar de BAJA TEMPORAL a este alumno?";
             }
-
-            // Mostramos la confirmación
+            
             const confirmado = confirm(mensaje);
-
             if (!confirmado) {
-                // Si el usuario cancela, evitamos que el formulario se envíe
                 event.preventDefault();
             }
         });
     }
 
-});
-
-// ==========================================
-// 3. REGISTRAR NUEVO TUTOR DESDE MODAL
-// ==========================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    
+    // ==========================================
+    // 3. REGISTRAR NUEVO TUTOR DESDE MODAL
+    // ==========================================
     const formTutor = document.getElementById('formNuevoTutor');
 
     if (formTutor) {
         formTutor.addEventListener('submit', function(e) {
             e.preventDefault(); 
-
-            // 1. Obtenemos la URL desde el atributo data-api-url que pusimos en el HTML
             const apiUrl = this.getAttribute('data-api-url');
-            
-            // 2. Obtenemos el token CSRF buscando el input oculto dentro del form
             const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
-
             let formData = new FormData(this);
             
             fetch(apiUrl, { 
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-CSRFToken': csrfToken
-                }
+                headers: { 'X-CSRFToken': csrfToken }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Cerrar el modal (usando Bootstrap 5)
                     var modalElem = document.getElementById('modalNuevoTutor');
                     var modalInstance = bootstrap.Modal.getInstance(modalElem);
                     modalInstance.hide();
-                    
-                    // Limpiar formulario
                     formTutor.reset();
 
-                    // Agregar y seleccionar el nuevo tutor en el select principal
                     let selectTutor = document.getElementById('selectTutor');
                     let option = new Option(data.tutor_nombre, data.tutor_id);
                     selectTutor.add(option);
@@ -125,4 +99,47 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error:', error));
         });
     }
+
+    // ==========================================
+    // 4. GENERACIÓN DE DOCUMENTOS (PDF) - COMBOBOX
+    // ==========================================
+    const btnVisualizar = document.getElementById('btnVisualizarDoc');
+    const btnDescargar = document.getElementById('btnDescargarDoc');
+    const selectDoc = document.getElementById('selectDocumento');
+
+    function abrirDocumento(downloadMode) {
+        const tipo = selectDoc.value;
+        const baseUrl = btnVisualizar.getAttribute('data-url'); 
+        
+        if (!tipo) {
+            alert('Por favor, seleccione un tipo de documento de la lista.');
+            return;
+        }
+        let finalUrl = `${baseUrl}?tipo=${tipo}`;
+        if (downloadMode) { finalUrl += '&download=true'; }
+
+        window.open(finalUrl, '_blank');
+    }
+
+    if (btnVisualizar && selectDoc) {
+        btnVisualizar.addEventListener('click', function() { abrirDocumento(false); });
+    }
+
+    if (btnDescargar && selectDoc) {
+        btnDescargar.addEventListener('click', function() { abrirDocumento(true); });
+    }
+
+    // ==========================================
+    // 5. IMPRIMIR FICHA TÉCNICA (Botón Individual)
+    // ==========================================
+    const btnFicha = document.getElementById('btnImprimirFicha');
+
+    if (btnFicha) {
+        console.log("Botón ficha encontrado, agregando evento..."); // Debug en consola
+        btnFicha.addEventListener('click', function() {
+            const baseUrl = this.getAttribute('data-url');
+            window.open(`${baseUrl}?tipo=ficha`, '_blank');
+        });
+    }
+
 });

@@ -37,6 +37,8 @@ urlpatterns = [
     path('tutores/consultar/', views.consultar_tutor_view, name='consultar_tutor'),
     path('tutor/visualizar/<int:id_tutor>/', views.visualizar_tutor_view, name='visualizar_tutor'),
     path('api/crear-tutor/', views.api_crear_tutor, name='api_crear_tutor'),
+    path('alumno/documento/<int:id_alumno>/', views.generar_documento_alumno, name='generar_documento_alumno'),
+    path('docente/documento/<int:id_docente>/', views.generar_documento_docente, name='generar_documento_docente'),
 ]
 
 if settings.DEBUG:

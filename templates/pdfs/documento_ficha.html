@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; font-size: 14px; color: #333; }
+        
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #003366; padding-bottom: 10px; }
+        .header h1 { color: #003366; margin: 0; }
+        
+        /* Contenedor principal con tabla para simular dos columnas (xhtml2pdf maneja mal los float/flex) */
+        .layout-table { width: 100%; margin-top: 20px; }
+        .col-foto { width: 30%; vertical-align: top; text-align: center; }
+        .col-datos { width: 70%; vertical-align: top; padding-left: 20px; }
+
+        .foto-marco { 
+            width: 150px; height: 150px; 
+            border: 1px solid #999; padding: 5px; 
+            display: inline-block;
+        }
+        .foto-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .seccion-titulo { 
+            background-color: #f2f2f2; color: #003366; 
+            padding: 5px 10px; font-weight: bold; border-left: 5px solid #003366;
+            margin-bottom: 10px; margin-top: 15px;
+        }
+
+        .dato-row { margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        .label { font-weight: bold; color: #555; width: 140px; display: inline-block; }
+
+        .footer { position: fixed; bottom: 0; text-align: center; font-size: 10px; color: #999; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Ficha Técnica del Alumno</h1>
+        <p>Sistema de Gestión Escolar</p>
+    </div>
+
+    <table class="layout-table">
+        <tr>
+            <td class="col-foto">
+                <div class="foto-marco">
+                    {% if alumno.foto %}
+                        <img src="{{ alumno.foto.path }}" class="foto-img" />
+                    {% else %}
+                        <div style="padding-top: 60px; color: #ccc;">Sin Foto</div>
+                    {% endif %}
+                </div>
+                <br><br>
+                <strong>Estado:</strong> {{ alumno.estado_alumno.nombre|default:"Activo" }}
+            </td>
+
+            <td class="col-datos">
+                
+                <div class="seccion-titulo">DATOS PERSONALES</div>
+                <div class="dato-row"><span class="label">Nombre Completo:</span> {{ alumno.nombre }} {{ alumno.ape_paterno }} {{ alumno.ape_materno }}</div>
+                <div class="dato-row"><span class="label">CURP:</span> {{ alumno.curp }}</div>
+                <div class="dato-row"><span class="label">Fecha Nacimiento:</span> {{ alumno.fecha_nacimiento|date:"d/m/Y" }}</div>
+                <div class="dato-row"><span class="label">Nacionalidad:</span> {{ alumno.nacionalidad|default:"Mexicana" }}</div>
+                <div class="dato-row"><span class="label">Dirección:</span> {{ alumno.direccion|default:"--" }}</div>
+
+                <div class="seccion-titulo">INFORMACIÓN ACADÉMICA</div>
+                <div class="dato-row"><span class="label">Boleta / Matrícula:</span> <strong>{{ alumno.boleta }}</strong></div>
+                <div class="dato-row"><span class="label">Nivel Educativo:</span> {{ alumno.nivel.nombre }}</div>
+                <div class="dato-row"><span class="label">Grado / Semestre:</span> {{ alumno.grado|default:"--" }}</div>
+                <div class="dato-row"><span class="label">Carrera:</span> {{ alumno.carrera.nombre|default:"N/A" }}</div>
+
+                <div class="seccion-titulo">CONTACTO Y TUTOR</div>
+                <div class="dato-row"><span class="label">Tutor Legal:</span> 
+                    {% if alumno.tutor %}
+                        {{ alumno.tutor.nombre }} {{ alumno.tutor.ape_paterno }}
+                    {% else %}
+                        No registrado
+                    {% endif %}
+                </div>
+                <div class="dato-row"><span class="label">Contacto Emergencia:</span> {{ alumno.contacto_emergencia_nombre|default:"--" }}</div>
+                <div class="dato-row"><span class="label">Tel. Emergencia:</span> {{ alumno.contacto_emergencia_telefono|default:"--" }}</div>
+
+            </td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        Ficha generada el {% now "d/m/Y H:i" %}
+    </div>
+
+</body>
+</html>

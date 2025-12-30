@@ -30,7 +30,11 @@
         Subir Foto
       </button>
 
-      <button class="btn btnDescargar" style="width: 50%; align-self: center; padding: 6px 0;">
+      <button id="btnImprimirFichaDocente" 
+              type="button"
+              data-url="{% url 'generar_documento_docente' docente.id_docente %}"
+              class="btn btnDescargar" 
+              style="width: 50%; align-self: center; padding: 6px 0;">
         Imprimir Información
       </button>
 
@@ -87,7 +91,6 @@
 
   </div>
 
-  
   <div class="caja caja-inferior d-flex gap-4">
 
     <div class="col-4 p-3 border rounded d-flex flex-column">
@@ -95,18 +98,26 @@
         Expedir Documento
       </label>
 
-      <select class="form-select mb-3">
-        <option selected>Seleccione una opción</option>
-        <option>Horario Actual</option>
-        <option>Historial de Cursos</option>
+      <select id="selectDocumentoDocente" class="form-select mb-3">
+        <option value="" selected>Seleccione una opción</option>
+        <option value="horario">Horario Actual</option>
+        <option value="incidencias">Lista de Incidencias</option>
       </select>
 
-      <button class="btn btnVisualizar mb-2" style="width: 70%; align-self: center; padding: 6px 0;">
-        Visualizar
+      <button id="btnVisualizarDocente" 
+              type="button"
+              data-url="{% url 'generar_documento_docente' docente.id_docente %}"
+              class="btn btnVisualizar mb-2" 
+              style="width: 70%; align-self: center; padding: 6px 0;">
+        Visualizar PDF
       </button>
 
-      <button class="btn btnDescargar" style="width: 70%; align-self: center; padding: 6px 0;">
-        Descargar
+      <button id="btnDescargarDocente" 
+              type="button"
+              data-url="{% url 'generar_documento_docente' docente.id_docente %}"
+              class="btn btnDescargar" 
+              style="width: 70%; align-self: center; padding: 6px 0;">
+        Descargar PDF
       </button>
     </div>
 
@@ -129,5 +140,7 @@
   </div>
 
 </div>
+
+<script src="{% static 'js/scripts_docente.js' %}"></script>
 
 {% endblock %}
