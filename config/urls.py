@@ -22,9 +22,9 @@ from academico import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+    path('', views.login_view, name='login'),
     # ruta raiz (localhost:8000/)
-    path('', views.dashboard_view, name='dashboard'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
     path('alumnos/consultar/', views.consultar_alumno_view, name='consultar_alumno'),
     path('alumnos/visualizar/<int:id_alumno>/', views.visualizar_alumno_view, name='visualizar_alumno'),
     path('alumno/anadir/', views.anadir_alumno_view, name='anadir_alumno'),

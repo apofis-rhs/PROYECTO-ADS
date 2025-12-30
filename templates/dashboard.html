@@ -3,5 +3,7 @@
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
+    <h1>Bienvenido {{ request.user.username }}</h1>
 
+    <a href="{% url 'login' %}">Cerrar sesión</a>
 {% endblock %}

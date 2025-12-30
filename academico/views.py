@@ -4,9 +4,53 @@ from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
 from .models import Alumno, PadreTutor, Carrera, NivelEducativo, Docente, Grupo, AreaInteres
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 
+
+# def dashboard_view(request):
+#     return render(request, 'dashboard.html')
+
+
+# def login_admin(request):
+#     if request.method == 'POST':
+#         usuario = request.POST.get('username')
+#         password = request.POST.get('password')
+
+#         user = authenticate(request, username=usuario, password=password)
+
+#         if user is not None:
+#             login(request, user)
+#             return redirect('/dashboard/')
+#         else:
+#             messages.error(request, 'Usuario o contraseña incorrectos')
+
+#     return render(request, 'login.html')
+
+# from django.contrib.auth import authenticate, login
+# from django.shortcuts import render, redirect
+
+def login_view(request):
+    if request.method == 'POST':
+        user = authenticate(
+            request,
+            username=request.POST['username'],
+            password=request.POST['password']
+        )
+        if user:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            return render(request, 'login.html', {
+                'error': 'Credenciales incorrectas'
+            })
+
+    return render(request, 'login.html')
+
+@login_required
 def dashboard_view(request):
     return render(request, 'dashboard.html')
+
 
 # -----------------------------------------------------------------------------
 # VISTA PARA CONSULTAR ALUMNO
