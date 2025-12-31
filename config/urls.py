@@ -19,6 +19,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 from academico import views
+from django.urls import include
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,6 +39,8 @@ urlpatterns = [
     path('tutores/consultar/', views.consultar_tutor_view, name='consultar_tutor'),
     path('tutor/visualizar/<int:id_tutor>/', views.visualizar_tutor_view, name='visualizar_tutor'),
     path('api/crear-tutor/', views.api_crear_tutor, name='api_crear_tutor'),
+        # API academico/Horarios
+    path("api/", include("academico.urls")),
 ]
 
 if settings.DEBUG:

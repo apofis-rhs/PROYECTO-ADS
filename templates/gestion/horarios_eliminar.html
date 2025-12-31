@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar horarios{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- TÍTULO + ACCIONES -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-danger mb-0">Eliminar horarios</h2>
+        <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
+            ← Volver a Gestión de horarios
+        </a>
+    </div>
+
+    {% if total > 0 %}
+
+        <!-- AVISO PRINCIPAL -->
+        <div class="alert alert-warning border-warning shadow-sm">
+            <h5 class="alert-heading mb-1">Atención</h5>
+            <p class="mb-1">
+                Actualmente hay <strong>{{ total }}</strong> registros de horario en el sistema.
+            </p>
+            <p class="mb-0">
+                Puedes eliminar los horarios de uno o varios salones, o eliminar <strong>todos</strong> los horarios.
+                <span class="fw-semibold">Esta acción no se puede deshacer.</span>
+            </p>
+        </div>
+
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+
+            <!-- LISTA DE SALONES -->
+            {% if salones %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <strong>Salones con horarios registrados</strong>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40px;">Sel.</th>
+                                        <th>Salón</th>
+                                        <th class="text-center">Horarios registrados</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in salones %}
+                                        <tr>
+                                            <td class="text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    name="salones"
+                                                    value="{{ s.value }}"
+                                                >
+                                            </td>
+                                            <td>{{ s.label }}</td>
+                                            <td class="text-center">{{ s.total_salon }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No hay salones con horarios registrados.
+                </div>
+            {% endif %}
+
+            <!-- ACCIONES -->
+            <p class="fw-semibold mb-2">¿Qué deseas hacer?</p>
+
+            <div class="d-flex flex-wrap gap-2 mb-5">
+                <button
+                    type="submit"
+                    name="accion"
+                    value="eliminar_seleccionados"
+                    class="btn btn-danger"
+                    {% if not salones %}disabled{% endif %}
+                >
+                    Eliminar horarios de salones seleccionados
+                </button>
+
+                <button
+                    type="submit"
+                    name="accion"
+                    value="eliminar_todos"
+                    class="btn btn-outline-danger"
+                >
+                    Eliminar TODOS los horarios
+                </button>
+
+                <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-secondary">
+                    Cancelar y volver
+                </a>
+            </div>
+        </form>
+
+    {% else %}
+        <div class="alert alert-info border-0 shadow-sm">
+            <p class="mb-0">
+                Actualmente no hay horarios registrados en el sistema.
+            </p>
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-primary">
+                Volver al menú de gestión de horarios
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

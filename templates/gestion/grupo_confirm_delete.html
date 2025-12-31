@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar grupo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Eliminar grupo</h1>
+
+    <div class="alert alert-warning">
+        <p>
+            ¿Seguro que deseas eliminar el grupo
+            <strong>{{ grupo.clave_grupo }}</strong>
+            ({{ grupo.materia.nombre }}, periodo {{ grupo.periodo }})?
+        </p>
+        <p class="mb-0 text-danger">
+            Tambien se eliminaran los horarios asociados a este grupo.
+        </p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Si, eliminar</button>
+        <a href="{% url 'academico:grupo_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

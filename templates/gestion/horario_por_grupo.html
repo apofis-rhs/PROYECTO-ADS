@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Horario por grupo{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- TÍTULO + ACCIONES -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Horario por grupo</h2>
+        <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
+            ← Volver a Gestión de horarios
+        </a>
+    </div>
+
+    <p class="text-muted mb-4">
+        Selecciona un grupo para visualizar su horario en formato de cuadrícula
+        (días vs rangos de hora). Los horarios mostrados se generan a partir de
+        las reglas configuradas y de los grupos registrados.
+    </p>
+
+    <!-- SELECTOR DE GRUPO -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-8">
+            <label for="id_grupo" class="form-label fw-semibold">Grupo</label>
+            <select id="id_grupo" name="grupo_id" class="form-select" required>
+                <option value="">-- Selecciona un grupo --</option>
+                {% for g in grupos %}
+                    <option value="{{ g.id_grupo }}"
+                        {% if grupo_seleccionado and g.id_grupo == grupo_seleccionado.id_grupo %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ g.nivel.nombre }} - Grado {{ g.grado }} - {{ g.clave_grupo }} - {{ g.materia.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary">
+                Ver horario
+            </button>
+        </div>
+    </form>
+
+    {% if grupo_seleccionado %}
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <strong>
+                    {{ grupo_seleccionado.nivel.nombre }}
+                    - Grado {{ grupo_seleccionado.grado }}
+                    - {{ grupo_seleccionado.clave_grupo }}
+                    - {{ grupo_seleccionado.materia.nombre }}
+                </strong>
+            </div>
+
+            {% if filas %}
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover text-center mb-0 horario-cuadricula">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="col-hora">Horario</th>
+                                    {% for d in dias %}
+                                        <th class="col-dia">{{ d.nombre }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in filas %}
+                                    <tr>
+                                        <th class="hora-rango">
+                                            {{ fila.rango }}
+                                        </th>
+                                        {% for celda in fila.celdas %}
+                                            <td class="celda-horario">
+                                                {% if celda %}
+                                                    <span class="materia-nombre">{{ celda }}</span>
+                                                {% else %}
+                                                    &nbsp;
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card-body">
+                    <div class="alert alert-info mb-0">
+                        Este grupo no tiene horarios registrados aún.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="alert alert-secondary mt-3">
+            Selecciona un grupo y pulsa <strong>"Ver horario"</strong> para mostrar la cuadrícula.
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* Estilo institucional y uniforme para la cuadrícula de horario */
+
+.horario-cuadricula {
+    table-layout: fixed;          /* columnas de ancho uniforme */
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.horario-cuadricula th,
+.horario-cuadricula td {
+    vertical-align: middle;
+    padding: 0.5rem;
+}
+
+/* Columna de horas consistente */
+.hora-rango,
+.col-hora {
+    width: 130px;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+/* Todas las celdas de horario con la misma altura */
+.celda-horario {
+    height: 80px;                 /* ajusta si quieres más alto/bajo */
+}
+
+/* Texto de la materia dentro de cada celda */
+.materia-nombre {
+    display: inline-block;
+    font-weight: 600;
+}
+</style>
+{% endblock %}

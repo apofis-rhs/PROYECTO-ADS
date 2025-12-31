@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if grupo %}Editar grupo{% else %}Crear grupo{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Titulo principal -->
+    <h2 class="mb-3">
+        {% if grupo %}
+            Editar grupo: {{ grupo.clave_grupo }} ({{ grupo.nivel.nombre }}{% if grupo.grado %} - {{ grupo.grado }}{% endif %})
+        {% else %}
+            Crear nuevo grupo
+        {% endif %}
+    </h2>
+
+    <p class="text-muted mb-4">
+        Define el salon (grupo) asociado a una materia y un nivel educativo.
+        Este grupo se utilizara posteriormente en la generacion de horarios.
+    </p>
+
+    <!-- Errores generales del formulario -->
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- =========================
+             Seccion: Contexto academico
+        ========================== -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Contexto academico</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Nivel educativo -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.nivel.id_for_label }}" class="form-label">
+                            Nivel educativo *
+                        </label>
+                        {{ form.nivel }}
+                        {% if form.nivel.errors %}
+                            <div class="text-danger small">
+                                {{ form.nivel.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Selecciona el nivel al que pertenece este grupo
+                                (KINDER, Primaria, Secundaria, Bachillerato, Universidad, etc.).
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Materia -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.materia.id_for_label }}" class="form-label">
+                            Materia *
+                        </label>
+                        {{ form.materia }}
+                        {% if form.materia.errors %}
+                            <div class="text-danger small">
+                                {{ form.materia.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Selecciona la materia que se impartira en este grupo.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Turno -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.turno.id_for_label }}" class="form-label">
+                            Turno
+                        </label>
+                        {{ form.turno }}
+                        {% if form.turno.errors %}
+                            <div class="text-danger small">
+                                {{ form.turno.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Turno en el que opera el grupo (matutino, vespertino, etc.),
+                                si aplica.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Grado -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.grado.id_for_label }}" class="form-label">
+                            Grado
+                        </label>
+                        {{ form.grado }}
+                        {% if form.grado.errors %}
+                            <div class="text-danger small">
+                                {{ form.grado.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Para niveles basicos/media superior. Puedes dejarlo vacio si
+                                tu nivel trabaja solo por semestre.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Periodo -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.periodo.id_for_label }}" class="form-label">
+                            Periodo *
+                        </label>
+                        {{ form.periodo }}
+                        {% if form.periodo.errors %}
+                            <div class="text-danger small">
+                                {{ form.periodo.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Identificador del periodo escolar en el que existira este grupo
+                                (ejemplo: 2025-1).
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================
+             Seccion: Identificacion del salon
+        ========================== -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Identificacion del salon (grupo)</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Clave de grupo -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.clave_grupo.id_for_label }}" class="form-label">
+                            Clave de grupo *
+                        </label>
+                        {{ form.clave_grupo }}
+                        {% if form.clave_grupo.errors %}
+                            <div class="text-danger small">
+                                {{ form.clave_grupo.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Identificador del salon (ejemplo: K1A, 2B, 3RO-A, ING-SIS-01).
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Nota adicional de uso en horarios -->
+                    <div class="col-md-6 mb-3 d-flex align-items-center">
+                        <p class="text-muted mb-0">
+                            La combinacion <strong>nivel + grado + clave de grupo + periodo</strong>
+                            se usa para mostrar el horario por salon y para detectar posibles
+                            conflictos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================
+             Botones de accion
+        ========================== -->
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                {% if grupo %}Guardar cambios{% else %}Crear grupo{% endif %}
+            </button>
+            <a href="{% url 'academico:grupo_list' %}" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if materia %}Editar materia{% else %}Crear materia{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Título principal -->
+    <h2 class="mb-3">
+        {% if materia %}
+            Editar materia: {{ materia.clave }} - {{ materia.nombre }}
+        {% else %}
+            Crear nueva materia
+        {% endif %}
+    </h2>
+
+    <p class="text-muted mb-4">
+        Completa la información de la materia. Los campos marcados con * son obligatorios.
+    </p>
+
+    <!-- Errores generales del formulario -->
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- =========================
+             Sección: Datos generales
+        ========================== -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Datos generales</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Clave -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.clave.id_for_label }}" class="form-label">
+                            Clave *
+                        </label>
+                        {{ form.clave }}
+                        {% if form.clave.errors %}
+                            <div class="text-danger small">
+                                {{ form.clave.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Identificador corto de la materia (ejemplo: KIN-JYE-01).
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Nombre -->
+                    <div class="col-md-8 mb-3">
+                        <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                            Nombre *
+                        </label>
+                        {{ form.nombre }}
+                        {% if form.nombre.errors %}
+                            <div class="text-danger small">
+                                {{ form.nombre.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Nombre completo de la materia (ejemplo: Juego y Exploración).
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================
+             Sección: Configuración académica
+        ========================== -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Configuración académica</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Nivel educativo -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.nivel_educativo.id_for_label }}" class="form-label">
+                            Nivel educativo *
+                        </label>
+                        {{ form.nivel_educativo }}
+                        {% if form.nivel_educativo.errors %}
+                            <div class="text-danger small">
+                                {{ form.nivel_educativo.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Selecciona el nivel (Kínder, Primaria, Secundaria, Universidad, etc.).
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Carrera (si aplica) -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.carrera.id_for_label }}" class="form-label">
+                            Carrera (opcional)
+                        </label>
+                        {{ form.carrera }}
+                        {% if form.carrera.errors %}
+                            <div class="text-danger small">
+                                {{ form.carrera.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Solo para niveles que manejan carrera (por ejemplo, universidad).
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Nivel sugerido (grado / semestre) -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.nivel_sugerido.id_for_label }}" class="form-label">
+                            Nivel sugerido
+                        </label>
+                        {{ form.nivel_sugerido }}
+                        {% if form.nivel_sugerido.errors %}
+                            <div class="text-danger small">
+                                {{ form.nivel_sugerido.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Grado o semestre en el que normalmente se imparte esta materia.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Créditos -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.creditos.id_for_label }}" class="form-label">
+                            Créditos
+                        </label>
+                        {{ form.creditos }}
+                        {% if form.creditos.errors %}
+                            <div class="text-danger small">
+                                {{ form.creditos.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Número de créditos asignados a la materia (si aplica).
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Sesiones por semana -->
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.sesiones_por_semana.id_for_label }}" class="form-label">
+                            Sesiones por semana
+                        </label>
+                        {{ form.sesiones_por_semana }}
+                        {% if form.sesiones_por_semana.errors %}
+                            <div class="text-danger small">
+                                {{ form.sesiones_por_semana.errors|striptags }}
+                            </div>
+                        {% else %}
+                            <div class="form-text">
+                                Cuántas veces a la semana debe aparecer en el horario
+                                (ejemplo: 3 para Kinder).
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================
+             Botones de acción
+        ========================== -->
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                {% if materia %}Guardar cambios{% else %}Crear materia{% endif %}
+            </button>
+            <a href="{% url 'academico:materia_list' %}" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
+
