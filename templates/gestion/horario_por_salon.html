@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Horario por salón{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- TÍTULO + ACCIONES -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Horario por salón</h2>
+        <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
+            ← Volver a Gestión de horarios
+        </a>
+    </div>
+
+    <p class="text-muted mb-4">
+        Selecciona un salón (grupo + periodo) para consultar su horario semanal
+        en formato de cuadrícula, similar a un horario escolar institucional.
+    </p>
+
+    <!-- Selector de salón -->
+    <form method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-md-6">
+            <label class="form-label fw-semibold" for="id_salon">Salón</label>
+            <select name="salon" id="id_salon" class="form-select">
+                {% for s in salones %}
+                    <option value="{{ s.value }}" {% if s.selected %}selected{% endif %}>
+                        {{ s.label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6 d-flex gap-2 mt-3 mt-md-0">
+            <button type="submit" class="btn btn-primary">
+                Ver horario
+            </button>
+        </div>
+    </form>
+
+    {% if filas %}
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <strong>Horario de {{ clave_grupo }} – {{ periodo }}</strong>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center mb-0 horario-cuadricula">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="col-hora">Horario</th>
+                                {% for d in dias %}
+                                    <th class="col-dia">{{ d.nombre }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fila in filas %}
+                                <tr>
+                                    <th class="align-middle hora-rango">
+                                        {{ fila.rango }}
+                                    </th>
+                                    {% for celda in fila.celdas %}
+                                        <td class="align-middle celda-horario">
+                                            {% if celda %}
+                                                <div class="materia-celda">
+                                                    {% for line in celda.splitlines %}
+                                                        {% if forloop.first %}
+                                                            <div class="materia-nombre">
+                                                                {{ line }}
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="materia-docente">
+                                                                {{ line }}
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    {% elif salon_value %}
+        <div class="alert alert-info mt-3">
+            No hay horarios generados para el salón seleccionado.
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">
+            No hay salones registrados con horarios.
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* Tabla tipo horario institucional */
+.horario-cuadricula {
+    table-layout: fixed;          /* columnas de ancho uniforme */
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.horario-cuadricula th,
+.horario-cuadricula td {
+    vertical-align: middle;
+    padding: 0.5rem;
+}
+
+/* Columna de horas un poco más angosta y consistente */
+.hora-rango,
+.col-hora {
+    width: 130px;
+    white-space: nowrap;
+}
+
+/* Todas las celdas de horario con la MISMA altura */
+.celda-horario {
+    height: 90px;                 /* ajusta este valor si quieres más alto/bajo */
+}
+
+/* Contenido centrado dentro de la celda */
+.materia-celda {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    line-height: 1.1;
+}
+
+/* Estilo uniforme de texto */
+.materia-nombre {
+    font-weight: 600;
+}
+
+.materia-docente {
+    font-size: 0.8rem;
+    color: #6c757d;               /* gris Bootstrap */
+}
+</style>
+{% endblock %}

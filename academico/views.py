@@ -4,6 +4,14 @@ from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
 
+from collections import defaultdict
+from .services import HorarioGenerator
+from .forms import MateriaForm, GrupoForm
+
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.contrib.auth import authenticate, login
+
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.contrib.auth import authenticate, login
@@ -11,7 +19,8 @@ from django.contrib.auth.decorators import login_required
 from .models import (
     Alumno, PadreTutor, Carrera, NivelEducativo, 
     Docente, Grupo, AreaInteres, 
-    HistorialAcademico, Incidente
+    HistorialAcademico, Incidente, 
+    Materia, Horario
 )
 
 
@@ -581,3 +590,602 @@ def generar_documento_docente(request, id_docente):
 
     # 3. Generar PDF
     return render_pdf(template_name, context)
+
+
+# =========================================================================
+# SECCIÓN: GESTIÓN ACADÉMICA (MATERIAS, GRUPOS, HORARIOS)
+# Agregado desde la rama del colaborador
+# =========================================================================
+
+# -------------------------------------------------------------------------
+# CRUD de MATERIA
+# -------------------------------------------------------------------------
+
+
+def materia_list_view(request):
+    materias = (
+        Materia.objects
+        .select_related("nivel_educativo", "carrera")
+        .order_by("nivel_educativo__nombre", "nivel_sugerido", "clave")
+    )
+    return render(request, "gestion/materia_list.html", {"materias": materias})
+
+
+def materia_create_view(request):
+    if request.method == "POST":
+        form = MateriaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Materia creada correctamente.")
+            return redirect("academico:materia_list")
+    else:
+        form = MateriaForm()
+
+    return render(request, "gestion/materia_form.html", {"form": form})
+
+
+def materia_update_view(request, pk):
+    materia = get_object_or_404(Materia, pk=pk)
+
+    if request.method == "POST":
+        form = MateriaForm(request.POST, instance=materia)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Materia actualizada correctamente.")
+            return redirect("academico:materia_list")
+    else:
+        form = MateriaForm(instance=materia)
+
+    return render(
+        request,
+        "gestion/materia_form.html",
+        {"form": form, "materia": materia},
+    )
+
+
+def materia_delete_view(request, pk):
+    materia = get_object_or_404(Materia, pk=pk)
+
+    if request.method == "POST":
+        materia.delete()
+        messages.success(request, "Materia eliminada correctamente.")
+        return redirect("academico:materia_list")
+
+    return render(request, "gestion/materia_confirm_delete.html", {"materia": materia})
+
+# -------------------------------------------------------------------------
+# CRUD de GRUPO
+# -------------------------------------------------------------------------
+
+
+def grupo_list_view(request):
+    """
+    Lista de grupos (salon + materia + docente).
+    """
+    grupos = (
+        Grupo.objects
+        .select_related("nivel", "turno", "materia", "docente")
+        .order_by("nivel__nombre", "grado", "clave_grupo", "materia__nombre")
+    )
+    return render(request, "gestion/grupo_list.html", {"grupos": grupos})
+
+
+def grupo_create_view(request):
+    """
+    Crear un nuevo grupo (salon + materia).
+    La generacion de horarios se hace en el modulo 'Generar horarios'.
+    """
+    initial = {}
+    periodo = request.GET.get("periodo")
+    id_nivel = request.GET.get("id_nivel")
+
+    if periodo:
+        initial["periodo"] = periodo
+    if id_nivel:
+        initial["nivel"] = id_nivel  # ModelForm convierte PK -> objeto
+
+    if request.method == "POST":
+        form = GrupoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Grupo creado correctamente.")
+            return redirect("academico:grupo_list")
+    else:
+        form = GrupoForm(initial=initial)
+
+    return render(request, "gestion/grupo_form.html", {"form": form})
+
+
+def grupo_update_view(request, pk):
+    """
+    Editar un grupo existente.
+    """
+    grupo = get_object_or_404(Grupo, pk=pk)
+
+    if request.method == "POST":
+        form = GrupoForm(request.POST, instance=grupo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Grupo actualizado correctamente.")
+            return redirect("academico:grupo_list")
+    else:
+        form = GrupoForm(instance=grupo)
+
+    return render(request, "gestion/grupo_form.html", {"form": form, "grupo": grupo})
+
+
+def grupo_delete_view(request, pk):
+    """
+    Eliminar un grupo. Por el on_delete=CASCADE en Horario,
+    tambien se borran sus horarios asociados.
+    """
+    grupo = get_object_or_404(Grupo, pk=pk)
+
+    if request.method == "POST":
+        grupo.delete()
+        messages.success(request, "Grupo eliminado correctamente.")
+        return redirect("academico:grupo_list")
+
+    return render(request, "gestion/grupo_confirm_delete.html", {"grupo": grupo})
+
+# -------------------------------------------------------------------------
+# VISTAS PARA GESTION DE HORARIOS
+# -------------------------------------------------------------------------
+
+
+def gestion_horarios_view(request):
+    """
+    Pantalla principal de gestion de horarios.
+    Desde aqui el usuario puede:
+      - Generar horarios
+      - Visualizar horarios
+      - Eliminar horarios
+    """
+    return render(request, "gestion/horarios_dashboard.html")
+
+
+def eliminar_horarios_view(request):
+    """
+    Vista para eliminar horarios.
+
+    Permite:
+      - Eliminar TODOS los horarios del sistema.
+      - Eliminar solo los horarios de uno o varios salones
+        (combinacion clave_grupo + periodo).
+    """
+    total = Horario.objects.count()
+
+    salones_qs = (
+        Grupo.objects
+        .values("clave_grupo", "periodo", "grado", "nivel__nombre")
+        .distinct()
+        .order_by("nivel__nombre", "grado", "clave_grupo", "periodo")
+    )
+
+    salones = []
+    for s in salones_qs:
+        grupos_salon = Grupo.objects.filter(
+            clave_grupo=s["clave_grupo"],
+            periodo=s["periodo"],
+        )
+        total_salon = Horario.objects.filter(grupo__in=grupos_salon).count()
+        if total_salon == 0:
+            continue
+
+        value = f'{s["clave_grupo"]}|{s["periodo"]}'
+        label = f'{s["nivel__nombre"]} - {s["grado"]} - {s["clave_grupo"]} ({s["periodo"]})'
+
+        salones.append(
+            {
+                "value": value,
+                "label": label,
+                "total_salon": total_salon,
+            }
+        )
+
+    if request.method == "POST":
+        accion = request.POST.get("accion")
+
+        # Eliminar horarios de salones seleccionados
+        if accion == "eliminar_seleccionados":
+            seleccionados = request.POST.getlist("salones")
+
+            if not seleccionados:
+                messages.warning(
+                    request,
+                    "Debes seleccionar al menos un salon para eliminar sus horarios.",
+                )
+            else:
+                total_eliminados = 0
+
+                for salon_value in seleccionados:
+                    try:
+                        clave_grupo, periodo = salon_value.split("|", 1)
+                    except ValueError:
+                        continue
+
+                    grupos_salon = Grupo.objects.filter(
+                        clave_grupo=clave_grupo,
+                        periodo=periodo,
+                    )
+                    qs = Horario.objects.filter(grupo__in=grupos_salon)
+                    count = qs.count()
+                    if count:
+                        total_eliminados += count
+                        qs.delete()
+
+                messages.success(
+                    request,
+                    f"Se eliminaron {total_eliminados} horarios de los salones seleccionados.",
+                )
+                return redirect("academico:gestion_horarios")
+
+        # Eliminar TODOS los horarios
+        elif accion == "eliminar_todos":
+            total_eliminados = Horario.objects.count()
+            Horario.objects.all().delete()
+            messages.success(
+                request,
+                f"Se eliminaron {total_eliminados} horarios de todos los salones.",
+            )
+            return redirect("academico:gestion_horarios")
+
+        # Cancelar
+        else:
+            return redirect("academico:gestion_horarios")
+
+    context = {
+        "total": total,
+        "salones": salones,
+    }
+    return render(request, "gestion/horarios_eliminar.html", context)
+
+
+def lista_horarios_view(request):
+    """
+    Muestra los horarios generados en una tabla simple.
+    Se pueden filtrar por nivel, periodo y grado.
+    """
+    nivel_id = request.GET.get("id_nivel")
+    periodo = request.GET.get("periodo")
+    grado = request.GET.get("grado")
+
+    horarios_qs = (
+        Horario.objects
+        .select_related("grupo", "grupo__materia", "grupo__docente", "grupo__nivel")
+        .order_by(
+            "grupo__nivel__nombre",
+            "grupo__grado",
+            "grupo__clave_grupo",
+            "dia_semana",
+            "hora_inicio",
+        )
+    )
+
+    if nivel_id:
+        horarios_qs = horarios_qs.filter(grupo__nivel_id=nivel_id)
+    if periodo:
+        horarios_qs = horarios_qs.filter(grupo__periodo=periodo)
+    if grado:
+        horarios_qs = horarios_qs.filter(grupo__grado=grado)
+
+    DIAS = {
+        1: "Lunes",
+        2: "Martes",
+        3: "Miercoles",
+        4: "Jueves",
+        5: "Viernes",
+        6: "Sabado",
+        7: "Domingo",
+    }
+
+    horarios = []
+    for h in horarios_qs:
+        docente = h.grupo.docente
+        horarios.append(
+            {
+                "id_grupo": h.grupo.id_grupo,
+                "grupo": h.grupo.clave_grupo,
+                "nivel": h.grupo.nivel.nombre if h.grupo.nivel else "",
+                "grado": h.grupo.grado,
+                "periodo": h.grupo.periodo,
+                "materia": h.grupo.materia.nombre,
+                "docente": (
+                    f"{docente.nombre} {docente.ape_paterno}" if docente else ""
+                ),
+                "dia": DIAS.get(h.dia_semana, h.dia_semana),
+                "hora_inicio": h.hora_inicio,
+                "hora_fin": h.hora_fin,
+                "aula": h.aula or "",
+            }
+        )
+
+    context = {
+        "horarios": horarios,
+        "niveles": NivelEducativo.objects.all().order_by("id_nivel"),
+        "filtros": {
+            "id_nivel": nivel_id or "",
+            "periodo": periodo or "",
+            "grado": grado or "",
+        },
+    }
+    return render(request, "gestion/horarios_lista.html", context)
+
+
+def generar_horarios_form_view(request):
+    """
+    Formulario para elegir periodo, nivel y grado/semestre.
+    Permite:
+      - Previsualizar los grupos encontrados.
+      - Generar horarios usando HorarioGenerator solo para los grupos seleccionados
+        (o para todos los filtrados si no se marca ninguno).
+    """
+    niveles = NivelEducativo.objects.all().order_by("id_nivel")
+
+    mensaje = None
+    errores: list[str] = []
+    grupos_filtrados = []
+    valores = {
+        "periodo": "",
+        "id_nivel": None,
+        "grado": "",
+        "semestre": "",
+        "tipo_alumno": "",
+        "id_carrera": "",
+    }
+
+    if request.method == "POST":
+        accion = request.POST.get("accion") or "generar"
+
+        periodo = (request.POST.get("periodo") or "").strip()
+        id_nivel = (request.POST.get("id_nivel") or "").strip()
+        grado = (request.POST.get("grado") or "").strip()
+        semestre = (request.POST.get("semestre") or "").strip()
+        tipo_alumno = (request.POST.get("tipo_alumno") or "").strip()
+        id_carrera = (request.POST.get("id_carrera") or "").strip()
+
+        # Guardamos los valores para rellenar el formulario
+        try:
+            id_nivel_int = int(id_nivel) if id_nivel else None
+        except ValueError:
+            id_nivel_int = None
+
+        valores = {
+            "periodo": periodo,
+            "id_nivel": id_nivel_int,
+            "grado": grado,
+            "semestre": semestre,
+            "tipo_alumno": tipo_alumno,
+            "id_carrera": id_carrera,
+        }
+
+        # Validacion basica
+        if not periodo or not id_nivel:
+            errores.append("Debes indicar al menos el Periodo y el Nivel educativo.")
+
+        if not errores:
+            generator = HorarioGenerator(
+                periodo=periodo,
+                id_nivel=id_nivel,
+                grado=grado,
+                semestre=semestre,
+                tipo_alumno=tipo_alumno,
+                id_carrera=id_carrera,
+            )
+
+            # 1) PREVISUALIZAR GRUPOS
+            if accion == "previsualizar":
+                nivel = generator._obtener_nivel()
+                if not nivel:
+                    errores.append("No se encontro el nivel educativo seleccionado.")
+                else:
+                    grupos_filtrados = generator._obtener_grupos(nivel)
+                    if not grupos_filtrados:
+                        mensaje = "No se encontraron grupos con esos filtros."
+
+            # 2) GENERAR HORARIOS
+            elif accion == "generar":
+                grupo_ids_raw = request.POST.getlist("grupo_ids")
+                grupos_ids = []
+                for v in grupo_ids_raw:
+                    try:
+                        grupos_ids.append(int(v))
+                    except ValueError:
+                        continue
+
+                if grupos_ids:
+                    generator.grupos_ids_seleccionados = grupos_ids
+
+                resultado = generator.generar()
+
+                if resultado.es_valido:
+                    mensaje = (
+                        "Horarios generados correctamente. "
+                        f"Asignaciones: {resultado.total_asignaciones}"
+                    )
+                else:
+                    errores = resultado.errores
+
+    context = {
+        "niveles": niveles,
+        "mensaje": mensaje,
+        "errores": errores,
+        "grupos_filtrados": grupos_filtrados,
+        "valores": valores,
+    }
+    return render(request, "gestion/horarios_generar_form.html", context)
+
+
+def horario_por_grupo_view(request):
+    """
+    Permite seleccionar un grupo y muestra su horario en formato de cuadricula:
+
+        columnas = dias (Lunes a Viernes)
+        filas    = rangos horarios (07:00-08:30, 08:30-10:00, ...)
+
+    Cada celda contiene el nombre de la materia (o queda vacia si no hay clase).
+    """
+    grupos = (
+        Grupo.objects
+        .select_related("nivel", "materia", "docente")
+        .order_by("nivel__nombre", "grado", "clave_grupo")
+    )
+
+    grupo_id = request.GET.get("grupo_id")
+    grupo_seleccionado = None
+    filas = []
+    dias = [
+        {"id": 1, "nombre": "Lunes"},
+        {"id": 2, "nombre": "Martes"},
+        {"id": 3, "nombre": "Miercoles"},
+        {"id": 4, "nombre": "Jueves"},
+        {"id": 5, "nombre": "Viernes"},
+    ]
+
+    if grupo_id:
+        grupo_seleccionado = get_object_or_404(Grupo, pk=grupo_id)
+
+        horarios = (
+            Horario.objects.filter(grupo=grupo_seleccionado)
+            .order_by("dia_semana", "hora_inicio")
+        )
+
+        if horarios.exists():
+            rangos = sorted(
+                {(h.hora_inicio, h.hora_fin) for h in horarios},
+                key=lambda x: (x[0], x[1]),
+            )
+
+            celdas = defaultdict(dict)
+            for h in horarios:
+                clave_rango = (h.hora_inicio, h.hora_fin)
+                nombre_materia = h.grupo.materia.nombre
+                celdas[h.dia_semana][clave_rango] = nombre_materia
+
+            for inicio, fin in rangos:
+                rango_str = f"{inicio.strftime('%H:%M')} - {fin.strftime('%H:%M')}"
+                fila = {"rango": rango_str, "celdas": []}
+                for d in dias:
+                    texto = celdas[d["id"]].get((inicio, fin), "")
+                    fila["celdas"].append(texto)
+                filas.append(fila)
+
+    context = {
+        "grupos": grupos,
+        "grupo_seleccionado": grupo_seleccionado,
+        "dias": dias,
+        "filas": filas,
+    }
+    return render(request, "gestion/horario_por_grupo.html", context)
+
+
+def horario_por_salon_view(request):
+    """
+    Muestra el horario semanal para un salon (clave_grupo + periodo),
+    armando una cuadricula de Horas x Dias con la materia y el docente.
+    """
+    salones_qs = (
+        Grupo.objects
+        .values("clave_grupo", "periodo", "grado", "nivel__nombre")
+        .distinct()
+        .order_by("nivel__nombre", "grado", "clave_grupo", "periodo")
+    )
+
+    salones = []
+    for s in salones_qs:
+        value = f'{s["clave_grupo"]}|{s["periodo"]}'
+        label = f'{s["nivel__nombre"]} - {s["grado"]} - {s["clave_grupo"]} ({s["periodo"]})'
+        salones.append(
+            {
+                "value": value,
+                "clave_grupo": s["clave_grupo"],
+                "periodo": s["periodo"],
+                "grado": s["grado"],
+                "nivel_nombre": s["nivel__nombre"],
+                "label": label,
+                "selected": False,
+            }
+        )
+
+    salon_value = request.GET.get("salon")
+    if not salon_value and salones:
+        salon_value = salones[0]["value"]
+
+    clave_grupo = None
+    periodo = None
+    if salon_value:
+        try:
+            clave_grupo, periodo = salon_value.split("|", 1)
+        except ValueError:
+            clave_grupo, periodo = None, None
+
+    for s in salones:
+        s["selected"] = (s["value"] == salon_value)
+
+    dias = [
+        {"id": 1, "nombre": "Lun"},
+        {"id": 2, "nombre": "Mar"},
+        {"id": 3, "nombre": "Mie"},
+        {"id": 4, "nombre": "Jue"},
+        {"id": 5, "nombre": "Vie"},
+    ]
+
+    filas = []
+
+    if clave_grupo and periodo:
+        grupos_salon = Grupo.objects.filter(
+            clave_grupo=clave_grupo,
+            periodo=periodo,
+        )
+
+        horarios_qs = (
+            Horario.objects
+            .filter(grupo__in=grupos_salon)
+            .select_related("grupo", "grupo__materia", "grupo__docente")
+            .order_by("dia_semana", "hora_inicio")
+        )
+
+        if horarios_qs.exists():
+            rangos = sorted(
+                {(h.hora_inicio, h.hora_fin) for h in horarios_qs},
+                key=lambda x: (x[0], x[1]),
+            )
+
+            celdas = defaultdict(list)
+            for h in horarios_qs:
+                key = (h.dia_semana, h.hora_inicio, h.hora_fin)
+                materia = h.grupo.materia
+                docente = h.grupo.docente
+                texto = materia.nombre
+                if docente:
+                    texto += f"\n{docente.nombre} {docente.ape_paterno}"
+                celdas[key].append(texto)
+
+            for inicio, fin in rangos:
+                rango_str = f"{inicio.strftime('%H:%M')} - {fin.strftime('%H:%M')}"
+                fila = {"rango": rango_str, "celdas": []}
+
+                for d in dias:
+                    key = (d["id"], inicio, fin)
+                    asign = celdas.get(key, [])
+
+                    if not asign:
+                        celda_texto = ""
+                    elif len(asign) == 1:
+                        celda_texto = asign[0]
+                    else:
+                        celda_texto = "CONFLICTO\n" + " / ".join(asign)
+
+                    fila["celdas"].append(celda_texto)
+
+                filas.append(fila)
+
+    context = {
+        "salones": salones,
+        "dias": dias,
+        "filas": filas,
+        "salon_value": salon_value or "",
+        "clave_grupo": clave_grupo or "",
+        "periodo": periodo or "",
+    }
+    return render(request, "gestion/horario_por_salon.html", context)

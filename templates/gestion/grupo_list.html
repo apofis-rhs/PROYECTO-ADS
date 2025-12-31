@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Grupos{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- TÍTULO + ACCIÓN -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Grupos</h2>
+        <a href="{% url 'academico:grupo_create' %}" class="btn btn-primary shadow-sm">
+            + Nuevo grupo
+        </a>
+    </div>
+
+    <!-- MENSAJES FLASH (creado / actualizado / eliminado) -->
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- DESCRIPCIÓN -->
+    <p class="text-muted mb-4">
+        Lista de grupos (salones) registrados en el sistema. Desde aquí puedes crear, editar y eliminar grupos
+        que después se utilizarán en la generación de horarios.
+    </p>
+
+    <!-- TABLA DE GRUPOS -->
+    {% if grupos %}
+        <div class="table-responsive rounded border bg-white shadow-sm">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nivel</th>
+                        <th>Clave grupo</th>
+                        <th class="text-center">Grado</th>
+                        <th class="text-center">Periodo</th>
+                        <th>Turno</th>
+                        <th>Materia</th>
+                        <th>Docente</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in grupos %}
+                        <tr>
+                            <td>{{ g.nivel.nombre }}</td>
+                            <td class="fw-semibold">{{ g.clave_grupo }}</td>
+                            <td class="text-center">
+                                {{ g.grado|default:"-" }}
+                            </td>
+                            <td class="text-center">{{ g.periodo }}</td>
+                            <td>
+                                {% if g.turno %}
+                                    {{ g.turno.nombre }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ g.materia.nombre }}</td>
+                            <td>
+                                {% if g.docente %}
+                                    {{ g.docente.nombre }} {{ g.docente.ape_paterno }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'academico:grupo_update' g.id_grupo %}"
+                                   class="btn btn-sm btn-outline-secondary me-1">
+                                    Editar
+                                </a>
+                                <a href="{% url 'academico:grupo_delete' g.id_grupo %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info border-0 shadow-sm">
+            No hay grupos registrados todavía. Usa el botón
+            "<strong>Nuevo grupo</strong>" para crear el primero.
+        </div>
+    {% endif %}
+
+    <!-- BOTÓN VOLVER -->
+    <div class="mt-4">
+        <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
+            ← Volver a Gestión de horarios
+        </a>
+    </div>
+
+</div>
+{% endblock %}

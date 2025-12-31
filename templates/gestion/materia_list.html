@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Materias{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- TÍTULO + ACCIÓN -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Materias</h2>
+        <a href="{% url 'academico:materia_create' %}" class="btn btn-primary shadow-sm">
+            + Nueva materia
+        </a>
+    </div>
+
+    <!-- MENSAJES FLASH -->
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- DESCRIPCIÓN -->
+    <p class="text-muted mb-4">
+        Lista completa de materias registradas en el sistema. Usa el botón “Nueva materia” para agregar más.
+    </p>
+
+    <!-- TABLA -->
+    {% if materias %}
+        <div class="table-responsive rounded border bg-white shadow-sm">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Clave</th>
+                        <th>Nombre</th>
+                        <th class="text-center">Créditos</th>
+                        <th>Nivel educativo</th>
+                        <th class="text-center">Nivel sugerido</th>
+                        <th>Carrera</th>
+                        <th class="text-center">Sesiones/semana</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in materias %}
+                        <tr>
+                            <td class="fw-semibold">{{ m.clave }}</td>
+                            <td>{{ m.nombre }}</td>
+                            <td class="text-center">{{ m.creditos }}</td>
+                            <td>{{ m.nivel_educativo.nombre }}</td>
+                            <td class="text-center">
+                                {{ m.nivel_sugerido|default:"-" }}
+                            </td>
+                            <td>{{ m.carrera.nombre|default:"-" }}</td>
+                            <td class="text-center">{{ m.sesiones_por_semana }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'academico:materia_update' m.pk %}"
+                                   class="btn btn-sm btn-outline-secondary me-1">
+                                    Editar
+                                </a>
+                                <a href="{% url 'academico:materia_delete' m.pk %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info border-0 shadow-sm">
+            No hay materias registradas. Usa el botón "<strong>Nueva materia</strong>" para agregar una materia al sistema.
+        </div>
+    {% endif %}
+
+    <!-- BOTÓN DE RETORNO -->
+    <div class="mt-4">
+        <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
+            ← Volver a Gestión de horarios
+        </a>
+    </div>
+
+</div>
+{% endblock %}

@@ -245,6 +245,7 @@ class Materia(models.Model):
 
     carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, null=True, blank=True, db_column='id_carrera')
     nivel_educativo = models.ForeignKey(NivelEducativo, on_delete=models.CASCADE, db_column='id_nivel')
+    sesiones_por_semana = models.IntegerField(default=5)
 
     class Meta:
         db_table = 'materia'
@@ -390,3 +391,72 @@ class Incidente(models.Model):
 
     def __str__(self):
         return f"Incidente {self.id_incidente} - {self.fecha}"
+
+# -------------------------------------------------------------------------
+# 10) REGLAS DE HORARIO Y DISPONIBILIDAD
+# -------------------------------------------------------------------------
+
+class ReglaHorario(models.Model):
+    id_regla = models.AutoField(primary_key=True)
+    # Relación con nivel educativo (kinder, primaria, secundaria, prepa, universidad)
+    nivel = models.ForeignKey(NivelEducativo, on_delete=models.CASCADE, db_column='id_nivel')
+
+    # Para universidad (opcional)
+    semestre = models.IntegerField(null=True, blank=True)
+    tipo_alumno = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True  # 'NUEVO_INGRESO', 'POSTERIOR' o null para K–Prepa
+    )
+
+    # Parámetros principales
+    duracion_bloque_min = models.IntegerField()          # ej. 90
+    materias_max_por_dia = models.IntegerField()         # ej. 5
+    descanso_duracion_min = models.IntegerField()        # ej. 30
+    descanso_despues_bloque = models.IntegerField()      # ej. 2
+
+    permitir_taller = models.BooleanField(default=False)
+    bloque_taller = models.IntegerField(null=True, blank=True)
+
+    carga_docente_max = models.IntegerField()            # ej. 4
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'regla_horario'
+        verbose_name = 'Regla de horario'
+        verbose_name_plural = 'Reglas de horario'
+
+    def __str__(self):
+        return f"Regla {self.id_regla} - {self.nivel.nombre}"
+
+
+class DisponibilidadDocente(models.Model):
+    id_disponibilidad = models.AutoField(primary_key=True)
+    docente = models.ForeignKey(Docente, on_delete=models.CASCADE, db_column='id_docente')
+    dia_semana = models.SmallIntegerField()  # 1=Lunes ... 7=Domingo
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+
+    class Meta:
+        db_table = 'disponibilidad_docente'
+        verbose_name = 'Disponibilidad docente'
+        verbose_name_plural = 'Disponibilidades docentes'
+
+    def __str__(self):
+        return f"{self.docente.nombre} - día {self.dia_semana}"
+
+
+class DocenteMateria(models.Model):
+    id_docente_materia = models.AutoField(primary_key=True)
+    docente = models.ForeignKey(Docente, on_delete=models.CASCADE, db_column='id_docente')
+    materia = models.ForeignKey(Materia, on_delete=models.CASCADE, db_column='id_materia')
+    prioridad = models.SmallIntegerField(default=1)  # 1 = titular, 2 = suplente, etc.
+
+    class Meta:
+        db_table = 'docente_materia'
+        verbose_name = 'Docente por materia'
+        verbose_name_plural = 'Docentes por materia'
+        unique_together = ('docente', 'materia')
+
+    def __str__(self):
+        return f"{self.docente.nombre} -> {self.materia.nombre} (prio {self.prioridad})"
