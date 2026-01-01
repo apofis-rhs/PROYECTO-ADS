@@ -602,13 +602,57 @@ def generar_documento_docente(request, id_docente):
 # -------------------------------------------------------------------------
 
 
+# -------------------------------------------------------------------------
+# CRUD de MATERIA
+# -------------------------------------------------------------------------
+
+
 def materia_list_view(request):
-    materias = (
+    """
+    Lista de materias con filtros por nivel educativo y grado (nivel_sugerido).
+    """
+    # Leer filtros desde la query string (?id_nivel=...&grado=...)
+    nivel_id_raw = (request.GET.get("id_nivel") or "").strip()
+    grado_raw = (request.GET.get("grado") or "").strip()
+
+    materias_qs = (
         Materia.objects
         .select_related("nivel_educativo", "carrera")
         .order_by("nivel_educativo__nombre", "nivel_sugerido", "clave")
     )
-    return render(request, "gestion/materia_list.html", {"materias": materias})
+
+    # Filtro por nivel educativo
+    if nivel_id_raw:
+        try:
+            nivel_id_int = int(nivel_id_raw)
+            materias_qs = materias_qs.filter(nivel_educativo_id=nivel_id_int)
+        except ValueError:
+            nivel_id_int = None
+    else:
+        nivel_id_int = None
+
+    # Filtro por grado / nivel sugerido
+    if grado_raw:
+        try:
+            grado_int = int(grado_raw)
+            materias_qs = materias_qs.filter(nivel_sugerido=grado_int)
+        except ValueError:
+            grado_int = None
+    else:
+        grado_int = None
+
+    niveles = NivelEducativo.objects.all().order_by("nombre")
+
+    context = {
+        "materias": materias_qs,
+        "niveles": niveles,
+        "filtros": {
+            "id_nivel": nivel_id_int,
+            "grado": grado_raw,  # lo dejamos como texto para rellenar el input
+        },
+    }
+    return render(request, "gestion/materia_list.html", context)
+
 
 
 def materia_create_view(request):
