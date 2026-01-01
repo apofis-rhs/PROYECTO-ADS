@@ -26,11 +26,57 @@
     {% endif %}
 
     <!-- DESCRIPCIÓN -->
-    <p class="text-muted mb-4">
-        Lista completa de materias registradas en el sistema. Usa el botón “Nueva materia” para agregar más.
+    <p class="text-muted mb-3">
+        Lista de materias registradas en el sistema. Las materias se asignan a grupos para construir los horarios.
     </p>
 
-    <!-- TABLA -->
+    <!-- FILTROS -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label for="id_nivel" class="form-label">Nivel educativo</label>
+            <select id="id_nivel" name="id_nivel" class="form-select">
+                <option value="">Todos los niveles</option>
+                {% for nivel in niveles %}
+                    <option value="{{ nivel.id_nivel }}"
+                        {% if filtros.id_nivel == nivel.id_nivel %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ nivel.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="id_grado" class="form-label">Nivel sugerido / grado</label>
+            <input
+                type="number"
+                min="1"
+                class="form-control"
+                id="id_grado"
+                name="grado"
+                placeholder="Ej: 1"
+                value="{{ filtros.grado }}"
+            >
+            <div class="form-text">
+                Deja vacío para mostrar todos los grados del nivel seleccionado.
+            </div>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end justify-content-end">
+            <div>
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    Filtrar
+                </button>
+                <a href="{% url 'academico:materia_list' %}" class="btn btn-outline-secondary">
+                    Limpiar filtros
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- TABLA DE MATERIAS -->
     {% if materias %}
         <div class="table-responsive rounded border bg-white shadow-sm">
             <table class="table table-hover align-middle mb-0">
@@ -53,20 +99,20 @@
                             <td>{{ m.nombre }}</td>
                             <td class="text-center">{{ m.creditos }}</td>
                             <td>{{ m.nivel_educativo.nombre }}</td>
-                            <td class="text-center">
-                                {{ m.nivel_sugerido|default:"-" }}
-                            </td>
+                            <td class="text-center">{{ m.nivel_sugerido|default:"-" }}</td>
                             <td>{{ m.carrera.nombre|default:"-" }}</td>
                             <td class="text-center">{{ m.sesiones_por_semana }}</td>
                             <td class="text-center">
-                                <a href="{% url 'academico:materia_update' m.pk %}"
-                                   class="btn btn-sm btn-outline-secondary me-1">
-                                    Editar
-                                </a>
-                                <a href="{% url 'academico:materia_delete' m.pk %}"
-                                   class="btn btn-sm btn-outline-danger">
-                                    Eliminar
-                                </a>
+                                <div class="btn-group" role="group" aria-label="Acciones materia">
+                                    <a href="{% url 'academico:materia_update' m.pk %}"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        Editar
+                                    </a>
+                                    <a href="{% url 'academico:materia_delete' m.pk %}"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Eliminar
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
@@ -75,11 +121,12 @@
         </div>
     {% else %}
         <div class="alert alert-info border-0 shadow-sm">
-            No hay materias registradas. Usa el botón "<strong>Nueva materia</strong>" para agregar una materia al sistema.
+            No hay materias registradas con los filtros actuales. Ajusta los filtros o
+            usa el botón "<strong>Nueva materia</strong>" para crear la primera.
         </div>
     {% endif %}
 
-    <!-- BOTÓN DE RETORNO -->
+    <!-- BOTÓN VOLVER -->
     <div class="mt-4">
         <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
             ← Volver a Gestión de horarios
