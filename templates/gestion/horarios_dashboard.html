@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de horarios{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Gestión de horarios</h2>
+
+    <p class="text-muted">
+        Desde esta pantalla puedes administrar materias, grupos y horarios de clase.
+        La carga académica de los docentes se asigna en otra pantalla, por lo que
+        estos horarios NO dependen directamente del maestro.
+    </p>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Materias</h5>
+                    <p class="card-text">Crear, editar y eliminar materias.</p>
+                    <a href="{% url 'academico:materia_list' %}" class="btn btn-primary">Ver materias</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Grupos</h5>
+                    <p class="card-text">Crear nuevos grupos asociados a materias.</p>
+                    <a href="{% url 'academico:grupo_list' %}" class="btn btn-secondary">Ver grupos</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Generar horarios</h5>
+                    <p class="card-text">
+                        Generar automáticamente los horarios.
+                    </p>
+                    <a href="{% url 'academico:generar_horarios_form' %}" class="btn btn-primary">
+                        Generar horarios
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Ver lista de horarios</h5>
+                    <p class="card-text">Consultar todos los horarios generados.</p>
+                    <a href="{% url 'academico:horario_por_salon' %}" class="btn btn-secondary">Ver Horarios</a>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Horario por grupo</h5>
+                    <p class="card-text">
+                        Ver el horario de un grupo específico.
+                    </p>
+                    <a href="{% url 'academico:horario_por_grupo' %}" class="btn btn-primary">Ver horarios por grupo</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Eliminar horarios</h5>
+                    <p class="card-text">
+                        Eliminar todos los horarios generados (uso sólo para admin).
+                    </p>
+                    <a href="{% url 'academico:eliminar_horarios' %}" class="btn btn-outline-danger">
+                        Eliminar horarios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

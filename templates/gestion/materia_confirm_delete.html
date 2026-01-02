@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar materia{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3 text-danger">Eliminar materia</h2>
+
+    <div class="alert alert-warning">
+        <p>
+            ¿Seguro que deseas eliminar la materia
+            <strong>{{ materia.clave }} - {{ materia.nombre }}</strong>?
+        </p>
+        <p class="mb-0">
+            Esta accion no se puede deshacer y puede afectar grupos u horarios que la usen.
+        </p>
+    </div>
+
+    <form method="post" class="mt-3 d-flex gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            Sí, eliminar
+        </button>
+        <a href="{% url 'academico:materia_list' %}" class="btn btn-secondary">
+            Cancelar
+        </a>
+    </form>
+</div>
+{% endblock %}
