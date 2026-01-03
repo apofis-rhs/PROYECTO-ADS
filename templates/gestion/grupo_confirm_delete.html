@@ -1,26 +1,112 @@
 {% extends "base.html" %}
-
-{% block title %}Eliminar grupo{% endblock %}
-
+{% block title %}Eliminar grupo{% endblock %} 
 {% block content %}
-<div class="container mt-4">
-    <h1>Eliminar grupo</h1>
+<div
+  class="min-h-[80vh] flex items-center justify-center p-4 animate-fade-in-up"
+>
+  <div
+    class="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-charade-200 overflow-hidden relative"
+  >
+    <div class="h-2 bg-mitec-red-primary w-full"></div>
 
-    <div class="alert alert-warning">
-        <p>
-            ¿Seguro que deseas eliminar el grupo
-            <strong>{{ grupo.clave_grupo }}</strong>
-            ({{ grupo.materia.nombre }}, periodo {{ grupo.periodo }})?
-        </p>
-        <p class="mb-0 text-danger">
-            Tambien se eliminaran los horarios asociados a este grupo.
-        </p>
-    </div>
+    <div class="p-8 sm:p-10 text-center">
+      <div
+        class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-100 mb-6 group"
+      >
+        <svg
+          class="h-10 w-10 text-mitec-red-primary transition-transform duration-300 group-hover:scale-110"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
+        </svg>
+      </div>
 
-    <form method="post">
+      <h1 class="text-3xl font-bold text-charade-900 mb-2">¿Eliminar Grupo?</h1>
+      <p class="text-charade-500 mb-8">
+        Estás a punto de eliminar el grupo
+        <span class="font-bold text-charade-900">{{ grupo.clave_grupo }}</span>
+        .
+      </p>
+
+      <div
+        class="bg-red-50 border border-red-100 rounded-xl p-5 mb-8 text-left relative"
+      >
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <svg
+              class="h-5 w-5 text-red-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-bold text-red-800">
+              Advertencia de pérdida de datos
+            </h3>
+            <div class="mt-1 text-sm text-red-700">
+              <p class="mb-1">
+                Detalles:
+                <strong>{{ grupo.materia.nombre }}</strong>
+                (Periodo {{ grupo.periodo }})
+              </p>
+              <p>
+                Al confirmar,
+                <span
+                  class="underline decoration-red-400 decoration-2 underline-offset-2"
+                >
+                  se eliminarán permanentemente
+                </span>
+                todos los horarios asociados a este grupo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form method="post" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Si, eliminar</button>
-        <a href="{% url 'academico:grupo_list' %}" class="btn btn-secondary">Cancelar</a>
-    </form>
+
+        <a
+          href="{% url 'academico:grupo_list' %}"
+          class="flex justify-center items-center px-6 py-3 border border-charade-300 shadow-sm text-sm font-medium rounded-xl text-charade-700 bg-white hover:bg-charade-50 hover:text-charade-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mitec-blue-light transition-all duration-200"
+        >
+          Cancelar
+        </a>
+
+        <button
+          type="submit"
+          class="flex justify-center items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-mitec-red-primary hover:bg-red-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            ></path>
+          </svg>
+          Sí, eliminar grupo
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}

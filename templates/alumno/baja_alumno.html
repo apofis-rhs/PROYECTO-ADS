@@ -5,106 +5,162 @@
 
 {% block content %}
 
-<div class="container-fluid mt-4">
-  <h1>Dar de Baja al Alumno</h1>
+<div class="animate-fade-in-up pb-10">
+
+  <div class="mb-8 border-b border-charade-200 pb-4">
+    <h1 class="text-3xl font-bold text-tec">Dar de Baja al Alumno</h1>
+    <p class="text-charade-500 mt-1">Gestión del estado activo del estudiante en el sistema.</p>
+  </div>
 
   <form method="POST" id="formBaja">
-      {% csrf_token %}
-      
-      <div class="caja border rounded p-4 mt-4">
-        
-        <div class="caja border rounded p-3 mb-4">
-          <h3>Datos del Alumno</h3>
-          <p class="text-muted">Verifique que sea el alumno correcto antes de continuar.</p>
+    {% csrf_token %}
 
-          <div class="row mt-3">
-            <div class="col-4">
-              <label class="form-label">Nombre completo</label>
-              <input type="text" class="form-control" value="{{ alumno.nombre }} {{ alumno.ape_paterno }} {{ alumno.ape_materno }}" readonly />
-            </div>
-
-            <div class="col-4">
-              <label class="form-label">CURP</label>
-              <input type="text" class="form-control" value="{{ alumno.curp }}" readonly />
-            </div>
-
-            <div class="col-4">
-              <label class="form-label">Fecha de nacimiento</label>
-              <input type="text" class="form-control" value="{{ alumno.fecha_nacimiento|date:'Y-m-d' }}" readonly />
-            </div>
-          </div>
-
-          <div class="row mt-3">
-            <div class="col-4">
-              <label class="form-label">Nivel educativo</label>
-              <input type="text" class="form-control" value="{{ alumno.nivel.nombre }}" readonly />
-            </div>
-
-            <div class="col-4">
-              <label class="form-label">Grado / Semestre</label>
-              <input type="text" class="form-control" value="{{ alumno.grado }}" readonly />
-            </div>
-
-            <div class="col-4">
-              <label class="form-label">Boleta / Matrícula</label>
-              <input type="text" class="form-control" value="{{ alumno.boleta }}" readonly />
-            </div>
-          </div>
-
-          <div class="row mt-3">
-            <div class="col-6">
-              <label class="form-label">Tutor (si aplica)</label>
-              <input type="text" class="form-control" value="{% if alumno.tutor %}{{ alumno.tutor.nombre }} {{ alumno.tutor.ape_paterno }}{% else %}N/A{% endif %}" readonly />
-            </div>
-
-            <div class="col-6">
-              <label class="form-label">Teléfono del tutor</label>
-              <input type="text" class="form-control" value="{{ alumno.tutor.telefono|default:'N/A' }}" readonly />
-            </div>
-          </div>
+    <div class="bg-white rounded-xl shadow-sm border border-charade-200 p-6 mb-6">
+      <div class="flex items-center mb-4 pb-2 border-b border-charade-100">
+        <svg class="w-5 h-5 mr-2 text-charade-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0c0 .884-.5 2-2 2h-4c-1.5 0-2-1.116-2-2">
+          </path>
+        </svg>
+        <div>
+          <h3 class="text-lg font-bold text-charade-900">Datos del Alumno</h3>
+          <p class="text-xs text-charade-500">Verifique que sea el alumno correcto antes de continuar.</p>
         </div>
-
-        <div class="caja border rounded p-3 mb-4">
-          <h3>Tipo de Baja</h3>
-          <p class="text-muted">Selecciona el tipo de baja que deseas aplicar.</p>
-
-          <div class="row mt-3">
-            <div class="col-6">
-              <label class="d-block border rounded p-3 opcionBaja" style="cursor: pointer">
-                <input type="radio" name="tipoBaja" value="temporal" class="form-check-input me-2" checked />
-                <strong>Baja Temporal</strong>
-                <p class="text-muted mt-2 mb-0" style="font-size: 14px">
-                  El alumno pasará a estado inactivo, pero sus datos permanecerán en el sistema.
-                </p>
-              </label>
-            </div>
-
-            <div class="col-6">
-              <label class="d-block border rounded p-3 opcionBaja" style="cursor: pointer">
-                <input type="radio" name="tipoBaja" value="definitiva" class="form-check-input me-2" />
-                <strong>Baja Definitiva</strong>
-                <p class="text-danger mt-2 mb-0" style="font-size: 14px">
-                  <strong>¡Atención!</strong> El alumno se eliminará de la base de datos permanentemente. Esta acción no se puede deshacer.
-                </p>
-              </label>
-            </div>
-          </div>
-
-          <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btnBaja px-4 text-white">Confirmar Baja</button>
-          </div>
-        </div>
-
       </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div class="md:col-span-4">
+          <label class="block text-sm font-medium text-charade-500 mb-1">Nombre completo</label>
+          <input type="text"
+            class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+            value="{{ alumno.nombre }} {{ alumno.ape_paterno }} {{ alumno.ape_materno }}" readonly />
+        </div>
+
+        <div class="md:col-span-4">
+          <label class="block text-sm font-medium text-charade-500 mb-1">CURP</label>
+          <input type="text"
+            class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+            value="{{ alumno.curp }}" readonly />
+        </div>
+
+        <div class="md:col-span-4">
+          <label class="block text-sm font-medium text-charade-500 mb-1">Fecha de nacimiento</label>
+          <input type="text"
+            class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+            value="{{ alumno.fecha_nacimiento|date:'Y-m-d' }}" readonly />
+        </div>
+
+        <div class="md:col-span-4">
+          <label class="block text-sm font-medium text-charade-500 mb-1">Nivel educativo</label>
+          <input type="text"
+            class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+            value="{{ alumno.nivel.nombre }}" readonly />
+        </div>
+
+        <div class="md:col-span-4">
+          <label class="block text-sm font-medium text-charade-500 mb-1">Grado / Semestre</label>
+          <input type="text"
+            class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+            value="{{ alumno.grado }}" readonly />
+        </div>
+
+        <div class="md:col-span-4">
+          <label class="block text-sm font-medium text-charade-500 mb-1">Boleta / Matrícula</label>
+          <input type="text"
+            class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+            value="{{ alumno.boleta }}" readonly />
+        </div>
+
+        <div class="md:col-span-6">
+          <label class="block text-sm font-medium text-charade-500 mb-1">Tutor (si aplica)</label>
+          <input type="text"
+            class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+            value="{% if alumno.tutor %}{{ alumno.tutor.nombre }} {{ alumno.tutor.ape_paterno }}{% else %}N/A{% endif %}"
+            readonly />
+        </div>
+
+        <div class="md:col-span-6">
+          <label class="block text-sm font-medium text-charade-500 mb-1">Teléfono del tutor</label>
+          <input type="text"
+            class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+            value="{{ alumno.tutor.telefono|default:'N/A' }}" readonly />
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-charade-200 p-6 mb-6">
+      <div class="mb-4">
+        <h3 class="text-lg font-bold text-tec">Tipo de Baja</h3>
+        <p class="text-sm text-charade-500">Selecciona el tipo de baja que deseas aplicar.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="relative">
+          <label for="bajaTemporal"
+            class="flex items-start border rounded-xl p-5 cursor-pointer transition-all duration-200 
+                   bg-white border-charade-200 hover:bg-charade-50 hover:border-mitec-blue-light
+                   has-[:checked]:border-mitec-blue-primary has-[:checked]:ring-2 has-[:checked]:ring-mitec-blue-primary/20 has-[:checked]:bg-mitec-blue-primary/5">
+            
+            <div class="flex items-center h-5">
+                <input type="radio" name="tipoBaja" id="bajaTemporal" value="temporal" checked 
+                       class="w-5 h-5 text-mitec-blue-primary border-charade-300 focus:ring-mitec-blue-primary" />
+            </div>
+            
+            <div class="ml-3">
+                <strong class="block text-charade-900 text-base">Baja Temporal</strong>
+                <p class="text-sm text-charade-500 mt-1">
+                  El alumno pasará a estado inactivo, pero sus datos y su historial académico permanecerán en el sistema.
+                </p>
+            </div>
+          </label>
+        </div>
+
+        <div class="relative">
+          <label for="bajaDefinitiva"
+            class="flex items-start border rounded-xl p-5 cursor-pointer transition-all duration-200 
+                   bg-white border-charade-200 hover:bg-red-50 hover:border-red-400
+                   has-[:checked]:border-red-600 has-[:checked]:ring-2 has-[:checked]:ring-red-600/20 has-[:checked]:bg-red-50">
+            
+            <div class="flex items-center h-5">
+                <input type="radio" name="tipoBaja" id="bajaDefinitiva" value="definitiva" 
+                       class="w-5 h-5 text-red-600 border-charade-300 focus:ring-red-600" />
+            </div>
+
+            <div class="ml-3">
+                <strong class="block text-red-600 text-base">Baja Definitiva</strong>
+                <p class="text-sm text-charade-500 mt-1">
+                  <span class="font-bold text-red-600">¡Atención!</span> El alumno se eliminará de la base de
+                  datos permanentemente. Esta acción no se puede deshacer.
+                </p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-8">
+        <button type="submit"
+          class="px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 shadow-md hover:shadow-lg transition-all duration-200 transform active:scale-95 flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"></path>
+          </svg>
+          Confirmar Baja
+        </button>
+      </div>
+    </div>
   </form>
 
-  <div class="mt-4 d-flex justify-content-center">
-    <a href="{% url 'visualizar_alumno' alumno.id_alumno %}" class="btn btnRegresar px-3 py-1 text-white text-decoration-none">
-      Regresar
+  <div class="mt-6 flex justify-center">
+    <a href="{% url 'visualizar_alumno' alumno.id_alumno %}"
+      class="text-charade-500 hover:text-tec font-medium text-sm flex items-center transition-colors">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Cancelar y regresar a detalles del alumno
     </a>
   </div>
-  
-  <br><br>
+
 </div>
 
 <script src="{% static 'js/scripts_alumno.js' %}"></script>

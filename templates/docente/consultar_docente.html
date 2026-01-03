@@ -1,75 +1,197 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block title %}Consultar
+Docentes{% endblock %} {% block content %}
 
-{% block title %}Consultar Docentes{% endblock %}
-
-{% block content %}
-
-<div id="view-docente">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Consultar Datos del Docente</h1>
-
-    <div class="d-flex flex-column align-items-center">
-      <h4>Añadir Docente</h4>
-
-      <a href="{% url 'anadir_docente' %}" class="btn btnAñadirDocente mt-2 text-white text-decoration-none">
-          Añadir Docente
-      </a>
+<div class="animate-fade-in-up">
+  <div
+    class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
+  >
+    <div>
+      <h1 class="text-3xl font-bold text-tec">Consultar Docentes</h1>
+      <p class="text-charade-500 mt-1 text-sm">
+        Administra la información del personal docente de la institución.
+      </p>
     </div>
 
+    <a
+      href="{% url 'anadir_docente' %}"
+      class="inline-flex items-center px-5 py-2.5 bg-tec text-white text-sm font-medium rounded-lg hover:bg-mitec-blue-primary shadow-sm hover:shadow-md transition-all duration-200"
+    >
+      <svg
+        class="w-4 h-4 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+        ></path>
+      </svg>
+      Añadir Docente
+    </a>
   </div>
 
-  <form method="GET" class="d-flex mb-4">
-    <input 
-        type="text" 
-        name="busqueda" 
-        class="form-control w-25 mr-2" 
-        placeholder="Número de Empleado" 
-        value="{{ request.GET.busqueda|default:'' }}" 
-    />
-    <button type="submit" class="btn btnBuscar ml-2">Buscar</button>
-  </form>
+  <div class="bg-white p-5 rounded-xl border border-charade-200 shadow-sm mb-8">
+    <form method="GET" class="flex flex-col sm:flex-row gap-3 items-center">
+      <div class="relative w-full sm:max-w-md">
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
+          <svg
+            class="h-5 w-5 text-charade-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
+        <input
+          type="text"
+          name="busqueda"
+          value="{{ request.GET.busqueda|default:'' }}"
+          class="block w-full pl-10 pr-3 py-2.5 border border-charade-200 rounded-lg leading-5 bg-charade-50 placeholder-charade-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-mitec-blue-light focus:border-mitec-blue-light sm:text-sm transition duration-150 ease-in-out"
+          placeholder="Buscar por Número de Empleado..."
+        />
+      </div>
 
-  <h2 class="mb-3 mt-5">Resultados</h2>
+      <div class="flex gap-2 w-full sm:w-auto">
+        <button
+          type="submit"
+          class="w-full sm:w-auto px-5 py-2.5 bg-mitec-blue-primary text-white text-sm font-medium rounded-lg hover:bg-mitec-blue-light transition-colors shadow-sm"
+        >
+          Buscar
+        </button>
 
-  <table class="table table-bordered table-striped">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Numero de Empleado</th>
-        <th>Nombre</th>
-        <th>Apellido paterno</th>
-        <th>Apellido materno</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for docente in docentes %}
-      <tr>
-        <td>{{ docente.id_docente }}</td>
-        <td>{{ docente.num_empleado }}</td>
-        <td>{{ docente.nombre }}</td>
-        <td>{{ docente.ape_paterno }}</td>
-        <td>{{ docente.ape_materno|default:"" }}</td>
-        <td class="text-center">
-          <a href="{% url 'visualizar_docente' docente.id_docente %}" class="btn btnVisualizar text-white text-decoration-none">
-              Visualizar Información
-          </a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="6" class="text-center text-muted">
-            {% if request.GET.busqueda %}
-                No se encontraron docentes con ese número de empleado.
-            {% else %}
-                Realiza una búsqueda para ver resultados.
-            {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+        {% if request.GET.busqueda %}
+        <a
+          href="{% url 'consultar_docente' %}"
+          class="w-full sm:w-auto flex justify-center items-center px-5 py-2.5 border border-charade-200 text-charade-500 text-sm font-medium rounded-lg hover:bg-charade-50 hover:text-charade-900 transition-colors"
+        >
+          Limpiar
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <div
+    class="bg-white rounded-xl border border-charade-200 shadow-sm overflow-hidden"
+  >
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-charade-100">
+        <thead class="bg-charade-50">
+          <tr>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              ID
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              No. Empleado
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Nombre
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Apellido Paterno
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Apellido Materno
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-center text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-charade-100">
+          {% for docente in docentes %}
+          <tr class="hover:bg-charade-50 transition-colors duration-150">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-charade-500">
+              {{ docente.id_docente }}
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-charade-900"
+            >
+              {{ docente.num_empleado }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-charade-900">
+              {{ docente.nombre }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-charade-900">
+              {{ docente.ape_paterno }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-charade-900">
+              {{ docente.ape_materno|default:"" }}
+            </td>
+
+            <td
+              class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"
+            >
+              <a
+                href="{% url 'visualizar_docente' docente.id_docente %}"
+                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-mitec-blue-primary bg-mitec-blue-primary/10 hover:bg-mitec-blue-primary hover:text-white transition-all duration-200"
+              >
+                Visualizar
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-6 py-12 text-center">
+              <div
+                class="flex flex-col items-center justify-center text-charade-500"
+              >
+                <svg
+                  class="w-12 h-12 mb-3 text-charade-200"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                  ></path>
+                </svg>
+                <p class="text-base font-medium">No se encontraron docentes</p>
+                <p class="text-sm mt-1">
+                  {% if request.GET.busqueda %} No hay resultados para el número
+                  de empleado ingresado. {% else %} Utiliza el buscador para
+                  encontrar un docente. {% endif %}
+                </p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 {% endblock %}
