@@ -1,9 +1,12 @@
 {% extends "base.html" %}
-{% block title %}
+{% load static %} {% block title %}
 {% if grupo %}Editar grupo{% else %}Crear grupo{% endif %}
 {% endblock %}
 
 {% block content %}
+
+
+
 <div class="animate-fade-in-up pb-10">
   <div class="mb-8 border-b border-charade-200 pb-4">
     <h1 class="text-3xl font-bold text-tec">
@@ -138,7 +141,7 @@
           </p>
           {% else %}
           <p class="text-xs text-charade-400 mt-1">
-            Opcional para niveles por semestre.
+            
           </p>
           {% endif %}
         </div>
@@ -156,7 +159,7 @@
             {{ form.periodo.errors|striptags }}
           </p>
           {% else %}
-          <p class="text-xs text-charade-400 mt-1">Ej. 2025-1</p>
+          <p class="text-xs text-charade-400 mt-1"></p>
           {% endif %}
         </div>
       </div>
@@ -197,7 +200,7 @@
           </p>
           {% else %}
           <p class="text-xs text-charade-400 mt-1">
-            Identificador único (Ej: K1A, 3RO-A).
+            Identificador único.
           </p>
           {% endif %}
         </div>
@@ -303,4 +306,5 @@
     background-color: #ffffff;
   }
 </style>
+
 {% endblock %}

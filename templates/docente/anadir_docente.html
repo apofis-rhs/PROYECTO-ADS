@@ -26,10 +26,15 @@
           <h3>Datos Personales</h3>
 
           <div class="row mt-3">
-             <div class="col-4">
+
+            <div class="col-4">
                 <label class="form-label text-danger fw-bold">Número de Empleado *</label>
-                <input type="text" class="form-control" name="num_empleado" required placeholder="Ej: DOC-2024-001" />
-             </div>
+                <input type="text" class="form-control" name="num_empleado" id="num_empleado" 
+                      maxlength="12" required placeholder="Ej: DOC-2024-001" />
+                <div id="errorEmpleado" class="text-danger small fw-bold mt-1" style="display: none"></div>
+            </div>
+
+
              <div class="col-4">
                 <label class="form-label">Nombre(s) *</label>
                 <input type="text" class="form-control" name="nombre" required />
@@ -71,9 +76,11 @@
 
 
           <div class="row mt-3">
+
             <div class="col-4">
-              <label class="form-label">Fecha de Nacimiento</label>
-              <input type="date" class="form-control" name="fecha_nacimiento" />
+                <label class="form-label">Fecha de Nacimiento *</label>
+                <input type="date" class="form-control" name="fecha_nacimiento" id="fecha_nacimiento" required />
+                <div id="errorFecha" class="text-danger small fw-bold mt-1" style="display: none"></div>
             </div>
 
             <div class="col-4">
@@ -91,14 +98,18 @@
               <input type="text" class="form-control" name="nacionalidad" />
             </div>
           </div>
-          
-          <div class="row mt-3">
-            <div class="col-6">
-               <label class="form-label">Fotografía del Docente</label>
-               <input type="file" class="form-control" name="foto" accept="image/*" />
-            </div>
+  
+          <div class="col-6">
+              <label class="form-label">Foto del Docente</label>
+              <div class="input-group">
+                  <input type="file" class="form-control" name="foto" id="foto">
+                  <button type="button" class="btn btn-danger" id="btnLimpiarFoto">X</button>
+              </div>
           </div>
+
         </div>
+
+
 
         <div class="caja border rounded p-3 mb-4">
           <h3>Contactos de Emergencia</h3>

@@ -109,6 +109,7 @@ def visualizar_alumno_view(request, id_alumno):
 #------------------------------------------------------------------------------
 
 def anadir_alumno_view(request):
+    print(request)
     # Obtenemos los catálogos para llenar los <select>
     niveles = NivelEducativo.objects.all()
     tutores = PadreTutor.objects.all()
@@ -173,7 +174,7 @@ def anadir_alumno_view(request):
                 nacionalidad=nacionalidad,
                 lugar_nacimiento=lugar_nacimiento,
                 direccion=direccion,
-                grado=grado,
+                semestre_actual=grado,
                 foto=foto, # Guardamos la imagen
                 
                 # Datos de emergencia

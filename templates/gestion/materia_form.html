@@ -81,7 +81,7 @@
           </p>
           {% else %}
           <p class="text-xs text-charade-400 mt-1">
-            Identificador único (Ej: KIN-JYE-01).
+            Identificador único.
           </p>
           {% endif %}
         </div>
@@ -183,7 +183,7 @@
           {% endif %}
         </div>
 
-        <div>
+       <!--  <div>
           <label
             for="{{ form.creditos.id_for_label }}"
             class="block text-sm font-medium text-charade-900 mb-1"
@@ -197,7 +197,22 @@
           {% else %}
           <p class="text-xs text-charade-400 mt-1">Valor curricular.</p>
           {% endif %}
-        </div>
+        </div> 
+        LO QUE SE HACE AQUI ES ELEGIR LOS CREDITOS, LO CORRECTO ES DEJAR EL 7 FIJOOOO-->
+
+        <div class="col-10">
+                <label class="form-label font-bold text-charade-900">Créditos</label>
+                <input 
+                    type="number" 
+                    name="creditos" 
+                    value="7" 
+                    class="form-control bg-charade-100 cursor-not-allowed select-none" 
+                    readonly
+                    tabindex="-1"
+                >
+                <small class="text-charade-500">Valor fijo.</small>
+            </div>
+
 
         <div>
           <label

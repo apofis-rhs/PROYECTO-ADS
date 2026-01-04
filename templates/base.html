@@ -15,17 +15,19 @@
     <script>
         tailwind.config = {
             theme: {
-                extend: {
-                    colors: {
-                        tec: { DEFAULT: '#0039a6' }, // Institutional Blue
-                        mitec: {
-                            blue: { primary: '#00598d', light: '#00a7f7' },
-                        },
-                        charade: {
-                            50: '#f6f7f9', 100: '#ebedf3', 200: '#d3d7e4',
-                            500: '#617196', 900: '#313649',
-                        },
-                    },
+        extend: {
+            colors: {
+                tec: { DEFAULT: '#0039a6' },
+                mitec: {
+                    blue: { primary: '#00598d', light: '#00a7f7' },
+                    // AGREGA ESTA LÍNEA:
+                    red: { primary: '#dc2626' }, // O el código hex de tu rojo
+                },
+                charade: {
+                    50: '#f6f7f9', 100: '#ebedf3', 200: '#d3d7e4',
+                    500: '#617196', 900: '#313649',
+                },
+            },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
                     }
@@ -49,12 +51,24 @@
     <aside class="w-72 bg-tec flex flex-col shadow-2xl z-20 flex-shrink-0">
 
         <div class="h-16 flex items-center justify-center bg-mitec-blue-primary shadow-md">
-            <span class="text-white font-bold text-lg tracking-wider">TECNOLÓGICO</span>
+            <span class="text-white font-bold text-lg tracking-wider">MENÚ</span>
         </div>
 
         <nav class="flex-1 px-4 py-8 space-y-3 overflow-y-auto">
 
             {% with route_name=request.resolver_match.view_name %}
+
+            <a href="{% url 'dashboard' %}" class="flex items-center w-full px-5 py-3.5 rounded-xl transition-all duration-200 group font-medium text-sm
+                {% if route_name == 'dashboard' %}
+                    bg-white text-tec shadow-lg translate-x-1
+                {% else %}
+                    text-white hover:bg-white/10 hover:translate-x-1
+                {% endif %}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Inicio
+            </a>
 
             <a href="{% url 'consultar_alumno' %}" class="flex items-center w-full px-5 py-3.5 rounded-xl transition-all duration-200 group font-medium text-sm
                {% if route_name == 'consultar_alumno' %}
@@ -91,6 +105,14 @@
                {% endif %}">
                 Consultar Información de Horarios
             </a>
+            <div class="p-4 border-t border-white/10">
+            <a href="{% url 'login' %}" class="flex items-center w-full px-5 py-3.5 rounded-xl text-white/80 hover:bg-red-600 hover:text-white transition-all duration-200 font-medium text-sm group">
+                <svg class="w-5 h-5 mr-3 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Cerrar Sesión
+            </a>
+        </div>
 
             {% endwith %}
         </nav>

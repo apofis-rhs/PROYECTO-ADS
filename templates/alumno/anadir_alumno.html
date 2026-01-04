@@ -1,17 +1,10 @@
-{% extends 'base.html' %} 
-{% load static %} 
-
-{% block title %}Añadir Alumno{% endblock %} 
-
-{% block content %}
+{% extends 'base.html' %} {% load static %} {% block title %}Añadir Alumno{%endblock %} {% block content %}
 
 <div class="container-fluid mt-4">
   <h1>Añadir (Alta) Alumno</h1>
 
-  <form method="POST" enctype="multipart/form-data">
-    {% csrf_token %} 
-    
-    {% if error %}
+    <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %} {% if error %}
     <div class="alert alert-danger">{{ error }}</div>
     {% endif %}
 
@@ -30,7 +23,11 @@
               oninput="this.value = this.value.replace(/[^0-9]/g, '');"
               required
             />
-            <div id="errorBoleta" class="text-danger small fw-bold mt-1" style="display:none;"></div>
+            <div
+              id="errorBoleta"
+              class="text-danger small fw-bold mt-1"
+              style="display: none"
+            ></div>
           </div>
           <div class="col-4">
             <label class="form-label">Nombre(s) *</label>
@@ -38,7 +35,12 @@
           </div>
           <div class="col-4">
             <label class="form-label">Apellido Paterno *</label>
-            <input type="text" class="form-control" name="ape_paterno" required />
+            <input
+              type="text"
+              class="form-control"
+              name="ape_paterno"
+              required
+            />
           </div>
         </div>
 
@@ -48,14 +50,25 @@
             <input type="text" class="form-control" name="ape_materno" />
           </div>
           <div class="col-4">
-    <label class="form-label">CURP</label>
-    <input type="text" class="form-control curp-input" name="curp" maxlength="18">
-    <div class="error-curp text-danger small fw-bold mt-1" style="display:none;"></div>
-</div>
+            <label class="form-label">CURP</label>
+            <input
+              type="text"
+              class="form-control curpVarios"
+              name="curp"
+              maxlength="18"
+              required
+            />
+            <div class="invalid-feedback">CURP inválido.</div>
+          </div>
 
           <div class="col-4">
             <label class="form-label">Fecha Nacimiento</label>
-            <input type="date" class="form-control" name="fecha_nacimiento" id="fecha_nacimiento" />
+            <input
+              type="date"
+              class="form-control"
+              name="fecha_nacimiento"
+              id="fecha_nacimiento"
+            />
           </div>
         </div>
 
@@ -71,9 +84,20 @@
             <label class="form-label">Nacionalidad</label>
             <input type="text" class="form-control" name="nacionalidad" />
           </div>
+
           <div class="col-4">
             <label class="form-label">Foto del Alumno</label>
-            <input type="file" class="form-control" name="foto" />
+
+            <div class="input-group">
+              <input type="file" class="form-control" name="foto" id="foto" />
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="limpiarFoto()"
+              >
+                X
+              </button>
+            </div>
           </div>
         </div>
 
@@ -98,20 +122,34 @@
           </div>
           <div class="col-4">
             <label class="form-label">Parentesco</label>
-            <input type="text" class="form-control" name="contacto_parentesco" />
+            <input
+              type="text"
+              class="form-control"
+              name="contacto_parentesco"
+            />
           </div>
           <div class="col-4">
-    <label class="form-label">Teléfono Principal</label>
-    <input type="text" class="form-control" name="contacto_telefono" maxlength="10" />
-    <div class="invalid-feedback">Debe tener 10 dígitos.</div>
-</div>
+            <label class="form-label">Teléfono Principal</label>
+            <input
+              type="text"
+              class="form-control"
+              name="contacto_telefono"
+              maxlength="10"
+            />
+            <div class="invalid-feedback">Debe tener 10 dígitos.</div>
+          </div>
         </div>
         <div class="row mt-3">
           <div class="col-4">
-    <label class="form-label">Teléfono Secundario (Opcional)</label>
-    <input type="text" class="form-control" name="contacto_telefono2" maxlength="10" />
-    <div class="invalid-feedback">Debe tener 10 dígitos.</div>
-</div>
+            <label class="form-label">Teléfono Secundario (Opcional)</label>
+            <input
+              type="text"
+              class="form-control"
+              name="contacto_telefono2"
+              maxlength="10"
+            />
+            <div class="invalid-feedback">Debe tener 10 dígitos.</div>
+          </div>
         </div>
       </div>
 
@@ -121,23 +159,57 @@
           <div class="col-6">
             <label class="form-label">Nivel Educativo *</label>
             <select class="form-select" name="nivel" id="selectNivel" required>
-              <option value="">Seleccionar...</option>
+              <option value="" selected disabled hidden>
+                Seleccione un nivel...
+              </option>
               {% for nivel in niveles %}
               <option value="{{ nivel.id_nivel }}">{{ nivel.nombre }}</option>
               {% endfor %}
             </select>
-            <div id="errorEdadNivel" class="text-danger small fw-bold mt-1" style="display:none;"></div>
+            <div
+              id="errorEdadNivel"
+              class="text-danger small fw-bold mt-1"
+              style="display: none"
+            ></div>
           </div>
 
           <div class="col-6">
-            <label class="form-label">Grado / Semestre</label>
-            <input type="text" class="form-control" name="grado" placeholder="Ej. 1ro, 5to Semestre" />
+              <label class="form-label">Grado / Semestre *</label>
+              <select class="form-select" name="grado" id="selectGrado" required>
+                <option value="" selected disabled hidden>
+                  Seleccione un nivel primero...
+                </option>
+              </select>
+            </div>
+          </div>
+
+
+        <div class="row mt-3" id="contenedorCorreoAlumno" style="display: none;">
+          <div class="col-12">
+            <label class="form-label">Correo Electrónico del Alumno *</label>
+            <input type="email" class="form-control" name="email_alumno" id="inputCorreoAlumno" placeholder="ejemplo@correo.com" required/>
+            <div class="invalid-feedback">Por favor, ingrese un correo electrónico válido.</div>
           </div>
         </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
         <div class="row mt-4 align-items-end">
           <div class="col-8">
-            <label class="form-label">Tutor Asignado * <small class="text-muted">(Obligatorio para básica)</small></label>
+            <label class="form-label"
+              >Tutor Asignado *
+              <small class="text-muted">(Obligatorio para básica)</small></label
+            >
             <select class="form-select" name="tutor" id="selectTutor">
               <option value="">Seleccione un Tutor existente...</option>
               {% for tutor in tutores %}
@@ -148,7 +220,12 @@
             </select>
           </div>
           <div class="col-4">
-            <button type="button" class="btn bg-blue-600 w-100" data-bs-toggle="modal" data-bs-target="#modalNuevoTutor">
+            <button
+              type="button"
+              class="btn bg-blue-600 w-100"
+              data-bs-toggle="modal"
+              data-bs-target="#modalNuevoTutor"
+            >
               <i class="bi bi-person-plus-fill"></i> + Nuevo Tutor
             </button>
           </div>
@@ -156,9 +233,25 @@
       </div>
 
       <div class="d-flex justify-content-end mt-4">
-        <a href="{% url 'consultar_alumno' %}"   class="w-full sm:w-auto sm:ml-auto px-6 py-3 border border-charade-300 text-charade-700 font-medium rounded-lg hover:bg-white transition-colors text-center">Cancelar</a>
-        <button type="submit" class="btn bg-blue-600 px-4 ml-4">Guardar Alumno</button>
+        <a
+          href="{% url 'consultar_alumno' %}"
+          class="w-full sm:w-auto sm:ml-auto px-6 py-3 border border-charade-300 text-charade-700 font-medium rounded-lg hover:bg-white transition-colors text-center"
+          >Cancelar</a
+        >
+        <button type="submit" class="btn bg-blue-600 px-4 ml-4">
+          Guardar Alumno
+        </button>
       </div>
+    </div>
+    <div class="mt-8 d-flex justify-center">
+        <a href="{% url 'consultar_alumno' %}"
+            class="inline-flex items-center text-charade-500 hover:text-tec font-medium transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12">
+                </path>
+            </svg>
+            Regresar al listado
+        </a>
     </div>
   </form>
 </div>
@@ -168,7 +261,12 @@
     <div class="modal-content">
       <div class="modal-header bg-blue-600 text-white">
         <h5 class="modal-title">Registrar Nuevo Tutor</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
       </div>
       <div class="modal-body">
         <form id="formNuevoTutor" data-api-url="{% url 'api_crear_tutor' %}">
@@ -180,17 +278,28 @@
             </div>
             <div class="col-md-4">
               <label class="form-label">Apellido Paterno *</label>
-              <input type="text" class="form-control" name="ape_paterno" required />
+              <input
+                type="text"
+                class="form-control"
+                name="ape_paterno"
+                required
+              />
             </div>
             <div class="col-md-4">
               <label class="form-label">Apellido Materno</label>
               <input type="text" class="form-control" name="ape_materno" />
             </div>
-            <div class="col-md-6">      
-    <label class="form-label">CURP</label>
-    <input type="text" class="form-control curp-input" name="curp" maxlength="18">
-    <div class="error-curp text-danger small fw-bold mt-1" style="display:none;"></div>
-</div>
+            <div class="col-md-6">
+              <label class="form-label">CURP</label>
+              <input
+                type="text"
+                class="form-control curpVarios"
+                name="curp"
+                maxlength="18"
+                required
+              />
+              <div class="invalid-feedback">CURP inválido.</div>
+            </div>
 
             <div class="col-md-6">
               <label class="form-label">Parentesco</label>
@@ -202,13 +311,20 @@
               </select>
             </div>
             <div class="col-md-6">
-    <label class="form-label">Teléfono Principal *</label>
-    <input type="text" class="form-control" name="telefono" required maxlength="10" />
-    <div class="invalid-feedback">Debe tener 10 dígitos.</div>
-</div>
+              <label class="form-label">Teléfono Principal *</label>
+              <input
+                type="text"
+                class="form-control"
+                name="telefono"
+                required
+                maxlength="10"
+              />
+              <div class="invalid-feedback">Debe tener 10 dígitos.</div>
+            </div>
             <div class="col-md-6">
               <label class="form-label">Correo Electrónico</label>
-              <input type="email" class="form-control" name="email" />
+              <input type="email" class="form-control" name="email" required/>
+              <div class="invalid-feedback">Por favor, ingrese un correo electrónico válido.</div>
             </div>
             <div class="col-12">
               <label class="form-label">Dirección</label>
@@ -219,14 +335,21 @@
             <button type="submit" class="btn bg-blue-600">Guardar Tutor</button>
           </div>
         </form>
-        <div id="msgErrorTutor" class="alert alert-danger mt-2" style="display: none"></div>
-      </div>
+        <div
+          id="msgErrorTutor"
+          class="alert alert-danger mt-2"
+          style="display: none"
+        ></div>
+     </div>
     </div>
   </div>
+
+  
+
 </div>
 
 {% endblock %} 
 
 {% block extra_js %}
 <script src="{% static 'js/scripts_alumno.js' %}"></script>
-{% endblock %}
+{% endblock %}   
