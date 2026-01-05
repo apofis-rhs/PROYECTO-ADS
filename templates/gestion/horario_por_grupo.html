@@ -3,137 +3,153 @@
 {% block title %}Horario por grupo{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="animate-fade-in-up pb-10">
 
-    <!-- TÍTULO + ACCIONES -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Horario por grupo</h2>
-        <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
-            ← Volver a Gestión de horarios
-        </a>
+    <div class="mb-8 border-b border-charade-200 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-tec">Horario por Grupo</h1>
+            <p class="text-charade-500 mt-1">Visualiza el cronograma específico de un grupo escolar.</p>
+        </div>
+        <div>
+            <a href="{% url 'academico:gestion_horarios' %}"
+                class="inline-flex items-center text-charade-500 hover:text-tec font-medium transition-colors text-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Volver a Gestión
+            </a>
+        </div>
     </div>
 
-    <p class="text-muted mb-4">
-        Selecciona un grupo para visualizar su horario en formato de cuadrícula
-        (días vs rangos de hora). Los horarios mostrados se generan a partir de
-        las reglas configuradas y de los grupos registrados.
-    </p>
+    <div class="bg-white p-6 rounded-xl border border-charade-200 shadow-sm mb-8">
+        <p class="text-sm text-charade-500 mb-4">
+            Selecciona un grupo para visualizar su horario en formato de cuadrícula (días vs rangos de hora).
+        </p>
 
-    <!-- SELECTOR DE GRUPO -->
-    <form method="get" class="row g-3 mb-4">
-        <div class="col-md-8">
-            <label for="id_grupo" class="form-label fw-semibold">Grupo</label>
-            <select id="id_grupo" name="grupo_id" class="form-select" required>
-                <option value="">-- Selecciona un grupo --</option>
-                {% for g in grupos %}
-                    <option value="{{ g.id_grupo }}"
-                        {% if grupo_seleccionado and g.id_grupo == grupo_seleccionado.id_grupo %}
-                            selected
-                        {% endif %}
-                    >
-                        {{ g.nivel.nombre }} - Grado {{ g.grado }} - {{ g.clave_grupo }} - {{ g.materia.nombre }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-4 d-flex align-items-end gap-2">
-            <button type="submit" class="btn btn-primary">
-                Ver horario
-            </button>
-        </div>
-    </form>
-
-    {% if grupo_seleccionado %}
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <strong>
-                    {{ grupo_seleccionado.nivel.nombre }}
-                    - Grado {{ grupo_seleccionado.grado }}
-                    - {{ grupo_seleccionado.clave_grupo }}
-                    - {{ grupo_seleccionado.materia.nombre }}
-                </strong>
+        <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <div class="md:col-span-8 lg:col-span-6">
+                <label for="id_grupo" class="block text-sm font-medium text-charade-900 mb-1">Seleccionar Grupo</label>
+                <div class="relative">
+                    <select name="grupo_id" id="id_grupo" required
+                        class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow appearance-none">
+                        <option value="">-- Selecciona un grupo --</option>
+                        {% for g in grupos %}
+                            <option value="{{ g.id_grupo }}" {% if grupo_seleccionado and g.id_grupo == grupo_seleccionado.id_grupo %}selected{% endif %}>
+                                {{ g.nivel.nombre }} - Grado {{ g.grado }} - {{ g.clave_grupo }} - {{ g.materia.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-charade-500">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
             </div>
 
-            {% if filas %}
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover text-center mb-0 horario-cuadricula">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="col-hora">Horario</th>
-                                    {% for d in dias %}
-                                        <th class="col-dia">{{ d.nombre }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for fila in filas %}
-                                    <tr>
-                                        <th class="hora-rango">
-                                            {{ fila.rango }}
-                                        </th>
-                                        {% for celda in fila.celdas %}
-                                            <td class="celda-horario">
-                                                {% if celda %}
-                                                    <span class="materia-nombre">{{ celda }}</span>
-                                                {% else %}
-                                                    &nbsp;
-                                                {% endif %}
-                                            </td>
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% else %}
-                <div class="card-body">
-                    <div class="alert alert-info mb-0">
-                        Este grupo no tiene horarios registrados aún.
-                    </div>
-                </div>
-            {% endif %}
+            <div class="md:col-span-4 lg:col-span-2">
+                <button type="submit"
+                    class="w-full flex justify-center items-center px-4 py-2.5 bg-mitec-blue-primary text-white font-medium rounded-lg hover:bg-mitec-blue-light transition-colors shadow-sm text-sm">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Ver Horario
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if grupo_seleccionado %}
+        
+        {% if filas %}
+        <div class="bg-white rounded-xl shadow-sm border border-charade-200 overflow-hidden">
+            <div class="bg-charade-50 px-6 py-4 border-b border-charade-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <h3 class="text-lg font-bold text-tec flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Grupo: <span class="ml-1 text-charade-800 font-normal">
+                        {{ grupo_seleccionado.nivel.nombre }} {{ grupo_seleccionado.grado }}° - {{ grupo_seleccionado.clave_grupo }}
+                    </span>
+                </h3>
+                <span class="text-sm font-medium text-charade-500 bg-white border border-charade-200 px-3 py-1 rounded-full">
+                    {{ grupo_seleccionado.materia.nombre }}
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse table-fixed">
+                    <thead>
+                        <tr class="bg-charade-100/50 border-b border-charade-200">
+                            <th class="w-32 px-4 py-3 text-center text-xs font-bold text-charade-600 uppercase tracking-wider border-r border-charade-200">
+                                Horario
+                            </th>
+                            {% for d in dias %}
+                            <th class="px-4 py-3 text-center text-xs font-bold text-mitec-blue-primary uppercase tracking-wider border-r border-charade-200 last:border-r-0">
+                                {{ d.nombre }}
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-charade-200">
+                        {% for fila in filas %}
+                        <tr>
+                            <th class="h-24 bg-charade-50 border-r border-charade-200 text-xs font-bold text-charade-500 text-center align-middle px-2">
+                                {{ fila.rango }}
+                            </th>
+
+                            {% for celda in fila.celdas %}
+                            <td class="h-24 border-r border-charade-200 last:border-r-0 p-1 align-middle hover:bg-blue-50/50 transition-colors">
+                                {% if celda %}
+                                <div class="h-full w-full rounded-lg bg-white border border-charade-100 shadow-sm p-2 flex flex-col justify-center items-center text-center">
+                                    <div class="text-sm font-bold text-mitec-blue-primary leading-tight">
+                                        {{ celda }}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="h-full w-full flex items-center justify-center">
+                                    <span class="text-charade-200 text-lg">•</span>
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        {% else %}
+        <div class="bg-blue-50 border-l-4 border-mitec-blue-primary p-4 rounded-r-lg flex items-start">
+            <svg class="w-6 h-6 text-mitec-blue-primary mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <h4 class="text-mitec-blue-primary font-bold">Sin Información</h4>
+                <p class="text-charade-600 text-sm mt-1">Este grupo no tiene horarios registrados aún.</p>
+            </div>
+        </div>
+        {% endif %}
+
     {% else %}
-        <div class="alert alert-secondary mt-3">
-            Selecciona un grupo y pulsa <strong>"Ver horario"</strong> para mostrar la cuadrícula.
+    <div class="bg-charade-50 border border-charade-200 rounded-xl p-8 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-charade-100 text-charade-400 mb-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
         </div>
+        <h3 class="text-lg font-bold text-charade-900">Esperando selección</h3>
+        <p class="text-charade-500 mt-2">Por favor selecciona un grupo arriba para visualizar la cuadrícula de horarios.
+        </p>
+    </div>
     {% endif %}
 </div>
-
-<style>
-/* Estilo institucional y uniforme para la cuadrícula de horario */
-
-.horario-cuadricula {
-    table-layout: fixed;          /* columnas de ancho uniforme */
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
-
-.horario-cuadricula th,
-.horario-cuadricula td {
-    vertical-align: middle;
-    padding: 0.5rem;
-}
-
-/* Columna de horas consistente */
-.hora-rango,
-.col-hora {
-    width: 130px;
-    white-space: nowrap;
-    font-weight: 600;
-}
-
-/* Todas las celdas de horario con la misma altura */
-.celda-horario {
-    height: 80px;                 /* ajusta si quieres más alto/bajo */
-}
-
-/* Texto de la materia dentro de cada celda */
-.materia-nombre {
-    display: inline-block;
-    font-weight: 600;
-}
-</style>
 {% endblock %}

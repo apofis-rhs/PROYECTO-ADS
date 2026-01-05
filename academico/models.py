@@ -1,3 +1,5 @@
+import random               # ### Para los números aleatorios (PARA LAS VALIDACIONES)
+from datetime import date    # ### Para obtener el año actual (PARA LAS VALIDACIONES)
 from django.db import models
 # IMPORTANTE: Importamos el modelo de la otra app para evitar el error de duplicidad
 from users.models import UsuarioAdmin 

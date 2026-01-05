@@ -4,249 +4,248 @@
 {% block title %}Generar horarios{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="animate-fade-in-up pb-10">
 
-    <!-- TÍTULO -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Generar horarios</h2>
-        <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
-            ← Volver a Gestión de horarios
-        </a>
+    <div class="mb-8 border-b border-charade-200 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-tec">Generar Horarios</h1>
+            <p class="text-charade-500 mt-1">Configura los parámetros para la generación automática de horarios
+                escolares.</p>
+        </div>
+        <div>
+            <a href="{% url 'academico:gestion_horarios' %}"
+                class="inline-flex items-center text-charade-500 hover:text-tec font-medium transition-colors text-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Volver a Gestión
+            </a>
+        </div>
     </div>
 
-    <p class="text-muted mb-4">
-        En esta pantalla se genera el horario a partir de los grupos, materias y niveles.
-        La asignación de carga académica a los docentes se realiza en otra vista independiente.
-    </p>
-
-    <!-- MENSAJE DE ÉXITO -->
     {% if mensaje %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ mensaje }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="mb-6">
+        <div class="p-4 rounded-lg bg-green-50 border-l-4 border-green-500 text-green-700 relative flex items-start shadow-sm"
+            role="alert">
+            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="flex-1 font-medium">{{ mensaje }}</div>
+            <button type="button" class="text-green-500 hover:text-green-800 ml-2" data-bs-dismiss="alert">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
         </div>
+    </div>
     {% endif %}
 
-    <!-- ERRORES DEL GENERADOR -->
     {% if errores %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <p class="mb-2">
-                Se encontraron los siguientes problemas al generar los horarios:
-            </p>
-            <ul class="mb-0">
-                {% for error in errores %}
+    <div class="mb-6">
+        <div class="p-4 rounded-lg bg-red-50 border-l-4 border-mitec-red-primary text-charade-700 relative flex items-start shadow-sm"
+            role="alert">
+            <svg class="w-5 h-5 text-mitec-red-primary mr-3 mt-0.5" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="flex-1">
+                <p class="font-bold text-mitec-red-primary mb-2">Se encontraron problemas:</p>
+                <ul class="list-disc list-inside text-sm space-y-1 ml-1">
+                    {% for error in errores %}
                     <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    {% endfor %}
+                </ul>
+            </div>
+            <button type="button" class="text-charade-400 hover:text-charade-900 ml-2" data-bs-dismiss="alert">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
         </div>
+    </div>
     {% endif %}
 
-    <form method="post" class="mt-3" novalidate>
+    <form method="post" novalidate>
         {% csrf_token %}
 
-        <!-- =========================
-             SECCIÓN: FILTROS BÁSICOS
-        ========================== -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <strong>Parámetros de generación</strong>
-            </div>
-            <div class="card-body">
+        <div class="bg-white rounded-xl shadow-sm border border-charade-200 p-6 mb-8">
+            <h3 class="text-lg font-bold text-tec border-b border-charade-100 pb-2 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-mitec-blue-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+                    </path>
+                </svg>
+                Parámetros de Configuración
+            </h3>
 
-                <!-- PERIODO -->
-                <div class="mb-3">
-                    <label for="id_periodo" class="form-label">Periodo</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="id_periodo"
-                        name="periodo"
-                        placeholder="Ejemplo: 2025-1"
-                        required
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div>
+                    <label for="id_periodo" class="block text-sm font-medium text-charade-900 mb-1">Periodo
+                        Escolar</label>
+                    <input type="text" id="id_periodo" name="periodo" placeholder="Ejemplo: 2025-1" required
                         value="{{ valores.periodo }}"
-                    >
-                    <div class="form-text">
-                        Identificador del periodo escolar (ajusta el formato al que uses en tu sistema).
-                    </div>
+                        class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow placeholder-charade-400">
+                    <p class="text-xs text-charade-400 mt-1">Identificador del ciclo escolar activo.</p>
                 </div>
 
-                <!-- NIVEL EDUCATIVO -->
-                <div class="mb-3">
-                    <label for="id_nivel" class="form-label">Nivel educativo</label>
-                    <select
-                        class="form-select"
-                        id="id_nivel"
-                        name="id_nivel"
-                        required
-                    >
+                <div>
+                    <label for="id_nivel" class="block text-sm font-medium text-charade-900 mb-1">Nivel
+                        Educativo</label>
+                    <select id="id_nivel" name="id_nivel" required
+                        class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow">
                         <option value="">-- Selecciona un nivel --</option>
                         {% for nivel in niveles %}
-                            <option value="{{ nivel.id_nivel }}"
-                                {% if valores.id_nivel == nivel.id_nivel %}
-                                    selected
-                                {% endif %}
-                            >
-                                {{ nivel.nombre }}
-                            </option>
+                        <option value="{{ nivel.id_nivel }}" {% if valores.id_nivel == nivel.id_nivel %} selected{% endif %}>
+                            {{ nivel.nombre }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <!-- GRADO / SEMESTRE -->
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="id_grado" class="form-label">
-                            Grado (kínder, primaria, secundaria, bachillerato)
-                        </label>
-                        <input
-                            type="number"
-                            class="form-control"
-                            id="id_grado"
-                            name="grado"
-                            min="1"
-                            value="{{ valores.grado }}"
-                        >
-                        <div class="form-text">
-                            Si el nivel usa grado, llena este campo. Si es universidad, puedes dejarlo vacío.
-                        </div>
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="id_grado" class="block text-sm font-medium text-charade-900 mb-1">Grado
+                            (Básica/Media)</label>
+                        <input type="number" id="id_grado" name="grado" min="1" value="{{ valores.grado }}"
+                            class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow">
+                        <p class="text-xs text-charade-400 mt-1">Opcional para universidad.</p>
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="id_semestre" class="form-label">
-                            Semestre (universidad)
-                        </label>
-                        <input
-                            type="number"
-                            class="form-control"
-                            id="id_semestre"
-                            name="semestre"
-                            min="1"
-                            value="{{ valores.semestre }}"
-                        >
-                        <div class="form-text">
-                            Si el nivel usa semestre, llena este campo. Si es básica / media superior, puedes dejarlo vacío.
-                        </div>
+                    <div>
+                        <label for="id_semestre" class="block text-sm font-medium text-charade-900 mb-1">Semestre
+                            (Universidad)</label>
+                        <input type="number" id="id_semestre" name="semestre" min="1" value="{{ valores.semestre }}"
+                            class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow">
+                        <p class="text-xs text-charade-400 mt-1">Opcional para básica.</p>
                     </div>
                 </div>
 
-                <!-- TIPO DE ALUMNO -->
-                <div class="mb-3">
-                    <label for="id_tipo_alumno" class="form-label">Tipo de alumno</label>
-                    <select
-                        class="form-select"
-                        id="id_tipo_alumno"
-                        name="tipo_alumno"
-                    >
+                <div>
+                    <label for="id_tipo_alumno" class="block text-sm font-medium text-charade-900 mb-1">Tipo de
+                        Alumno</label>
+                    <select id="id_tipo_alumno" name="tipo_alumno"
+                        class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow">
                         <option value="" {% if not valores.tipo_alumno %}selected{% endif %}>Todos</option>
-                        <option value="REGULAR" {% if valores.tipo_alumno == "REGULAR" %}selected{% endif %}>Regular</option>
-                        <option value="IRREGULAR" {% if valores.tipo_alumno == "IRREGULAR" %}selected{% endif %}>Irregular</option>
+                        <option value="REGULAR" {% if valores.tipo_alumno == "REGULAR" %}selected{% endif %}>Regular
+                        </option>
+                        <option value="IRREGULAR" {% if valores.tipo_alumno == "IRREGULAR" %}selected{% endif %}>Irregular
+                        </option>
                     </select>
-                    <div class="form-text">
-                        Opcional. Utilízalo solo si manejas reglas distintas para alumnos regulares / irregulares.
-                    </div>
                 </div>
 
-                <!-- CARRERA -->
-                <div class="mb-3">
-                    <label for="id_carrera" class="form-label">Carrera (opcional)</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="id_carrera"
-                        name="id_carrera"
-                        placeholder="ID de la carrera, si aplica"
+                <div>
+                    <label for="id_carrera" class="block text-sm font-medium text-charade-900 mb-1">Carrera
+                        (Opcional)</label>
+                    <input type="text" id="id_carrera" name="id_carrera" placeholder="ID de carrera"
                         value="{{ valores.id_carrera }}"
-                    >
-                    <div class="form-text">
-                        Para niveles universitarios donde la generación de horarios se hace por carrera.
-                    </div>
+                        class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow placeholder-charade-400">
                 </div>
-
             </div>
         </div>
 
-        <!-- =========================
-             SECCIÓN: GRUPOS FILTRADOS
-        ========================== -->
         {% if grupos_filtrados %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <strong>Grupos encontrados</strong>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">
-                        Marca los grupos para los que deseas generar horario.
-                        Si no seleccionas ninguno, se generará para todos los grupos filtrados.
-                    </p>
-
-                    <div class="table-responsive">
-                        <table class="table table-sm table-striped align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 40px;">Sel.</th>
-                                    <th>Nivel</th>
-                                    <th class="text-center">Grado</th>
-                                    <th>Grupo</th>
-                                    <th>Clave materia</th>
-                                    <th>Materia</th>
-                                    <th>Docente</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for g in grupos_filtrados %}
-                                    <tr>
-                                        <td class="text-center">
-                                            <input
-                                                type="checkbox"
-                                                name="grupo_ids"
-                                                value="{{ g.id_grupo }}"
-                                            >
-                                        </td>
-                                        <td>{{ g.nivel.nombre }}</td>
-                                        <td class="text-center">{{ g.grado }}</td>
-                                        <td class="fw-semibold">{{ g.clave_grupo }}</td>
-                                        <td>{{ g.materia.clave }}</td>
-                                        <td>{{ g.materia.nombre }}</td>
-                                        <td>
-                                            {% if g.docente %}
-                                                {{ g.docente.nombre }} {{ g.docente.ape_paterno }}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
+        <div class="bg-white rounded-xl shadow-sm border border-charade-200 overflow-hidden mb-8">
+            <div class="bg-charade-50 px-6 py-4 border-b border-charade-200">
+                <h3 class="text-lg font-bold text-tec">Grupos Encontrados</h3>
+                <p class="text-sm text-charade-500 mt-1">Selecciona los grupos específicos. Si no marcas ninguno, se
+                    generará para todos.</p>
             </div>
+
+            <div class="overflow-x-auto max-h-[400px]">
+                <table class="min-w-full divide-y divide-charade-100">
+                    <thead class="bg-charade-50 sticky top-0 z-10">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-center w-16">
+                                <span class="sr-only">Seleccionar</span>
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider">
+                                Nivel</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-semibold text-charade-500 uppercase tracking-wider">
+                                Grado</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider">
+                                Grupo</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider">
+                                Clave Materia</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider">
+                                Materia</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider">
+                                Docente</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-charade-100">
+                        {% for g in grupos_filtrados %}
+                        <tr class="hover:bg-blue-50/50 transition-colors">
+                            <td class="px-6 py-3 text-center">
+                                <input type="checkbox" name="grupo_ids" value="{{ g.id_grupo }}"
+                                    class="w-4 h-4 text-mitec-blue-primary border-charade-300 rounded focus:ring-mitec-blue-light cursor-pointer">
+                            </td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-charade-600">{{ g.nivel.nombre }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-center text-charade-900">{{ g.grado }}
+                            </td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm font-bold text-mitec-blue-primary">{{
+                                g.clave_grupo }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-charade-500 font-mono">{{
+                                g.materia.clave }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-charade-900">{{ g.materia.nombre }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-charade-600">
+                                {% if g.docente %}
+                                {{ g.docente.nombre }} {{ g.docente.ape_paterno }}
+                                {% else %}
+                                <span class="text-charade-300">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
         {% endif %}
 
-        <!-- =========================
-             ACCIONES
-        ========================== -->
-<div class="d-flex flex-wrap gap-2 mb-5">
+        <div
+            class="bg-charade-50 rounded-xl p-6 border border-charade-200 flex flex-col sm:flex-row items-center gap-4">
 
-    <!-- Siempre visible -->
-    <button type="submit" name="accion" value="previsualizar" class="btn btn-outline-secondary">
-        Previsualizar grupos
-    </button>
+            <button type="submit" name="accion" value="previsualizar"
+                class="w-full sm:w-auto px-6 py-3 bg-white border border-mitec-blue-primary text-mitec-blue-primary font-medium rounded-lg hover:bg-mitec-blue-primary/5 transition-colors shadow-sm flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                    </path>
+                </svg>
+                Previsualizar Grupos
+            </button>
 
-    <!-- Solo mostrar si ya se encontraron grupos -->
-    {% if grupos_filtrados %}
-        <button type="submit" name="accion" value="generar" class="btn btn-primary">
-            Generar horarios
-        </button>
-    {% endif %}
+            {% if grupos_filtrados %}
+            <button type="submit" name="accion" value="generar"
+                class="w-full sm:w-auto px-6 py-3 bg-mitec-blue-primary text-white font-medium rounded-lg hover:bg-mitec-blue-light transition-all shadow-md hover:shadow-lg flex items-center justify-center transform active:scale-95">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                    </path>
+                </svg>
+                Generar Horarios
+            </button>
+            {% endif %}
 
-    <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-secondary">
-        Cancelar
-    </a>
-</div>
-
+            <a href="{% url 'academico:gestion_horarios' %}"
+                class="w-full sm:w-auto sm:ml-auto px-6 py-3 border border-charade-300 text-charade-700 font-medium rounded-lg hover:bg-white transition-colors text-center">
+                Cancelar
+            </a>
+        </div>
 
     </form>
 

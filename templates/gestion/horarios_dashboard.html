@@ -1,88 +1,326 @@
-{% extends "base.html" %}
-
-{% block title %}Gestión de horarios{% endblock %}
-
-{% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Gestión de horarios</h2>
-
-    <p class="text-muted">
-        Desde esta pantalla puedes administrar materias, grupos y horarios de clase.
-        La carga académica de los docentes se asigna en otra pantalla, por lo que
-        estos horarios NO dependen directamente del maestro.
+{% extends "base.html" %} {% load static %} {% block title %}Gestión de
+Horarios{% endblock %} {% block content %}
+<div class="animate-fade-in-up pb-10">
+  <div class="mb-8 border-b border-charade-200 pb-4">
+    <h1 class="text-3xl font-bold text-tec">Gestión de Horarios</h1>
+    <p class="text-charade-500 mt-1 max-w-3xl">
+      Centro de control para la administración académica. Gestiona materias,
+      grupos y la generación automática de horarios.
+      <span
+        class="block mt-1 text-xs text-charade-400 font-medium bg-charade-50 inline-block px-2 py-1 rounded"
+      >
+        Nota: La carga académica docente se asigna en el perfil del profesor.
+      </span>
     </p>
+  </div>
 
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Materias</h5>
-                    <p class="card-text">Crear, editar y eliminar materias.</p>
-                    <a href="{% url 'academico:materia_list' %}" class="btn btn-primary">Ver materias</a>
-                </div>
-            </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <a
+      href="{% url 'academico:materia_list' %}"
+      class="group bg-white p-6 rounded-xl border border-charade-200 shadow-sm hover:shadow-md hover:border-mitec-blue-light transition-all duration-200 flex flex-col h-full"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="p-3 rounded-lg bg-mitec-blue-primary/10 text-mitec-blue-primary group-hover:bg-mitec-blue-primary group-hover:text-white transition-colors"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            ></path>
+          </svg>
         </div>
+      </div>
+      <h3
+        class="text-lg font-bold text-charade-900 group-hover:text-mitec-blue-primary transition-colors"
+      >
+        Materias
+      </h3>
+      <p class="text-sm text-charade-500 mt-2 mb-4 flex-1">
+        Crear, editar y eliminar el catálogo de materias disponibles.
+      </p>
+      <span
+        class="text-sm font-medium text-mitec-blue-primary flex items-center group-hover:underline"
+      >
+        Gestionar Materias
+        <svg
+          class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </span>
+    </a>
 
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Grupos</h5>
-                    <p class="card-text">Crear nuevos grupos asociados a materias.</p>
-                    <a href="{% url 'academico:grupo_list' %}" class="btn btn-secondary">Ver grupos</a>
-                </div>
-            </div>
+    <a
+      href="{% url 'academico:grupo_list' %}"
+      class="group bg-white p-6 rounded-xl border border-charade-200 shadow-sm hover:shadow-md hover:border-mitec-blue-light transition-all duration-200 flex flex-col h-full"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="p-3 rounded-lg bg-mitec-green-primary/10 text-mitec-green-primary group-hover:bg-mitec-green-primary group-hover:text-white transition-colors"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+            ></path>
+          </svg>
         </div>
+      </div>
+      <h3
+        class="text-lg font-bold text-charade-900 group-hover:text-mitec-green-primary transition-colors"
+      >
+        Grupos
+      </h3>
+      <p class="text-sm text-charade-500 mt-2 mb-4 flex-1">
+        Crear y administrar grupos académicos asociados a materias.
+      </p>
+      <span
+        class="text-sm font-medium text-mitec-green-primary flex items-center group-hover:underline"
+      >
+        Ver Grupos
+        <svg
+          class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </span>
+    </a>
 
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Generar horarios</h5>
-                    <p class="card-text">
-                        Generar automáticamente los horarios.
-                    </p>
-                    <a href="{% url 'academico:generar_horarios_form' %}" class="btn btn-primary">
-                        Generar horarios
-                    </a>
-                </div>
-            </div>
+    <a
+      href="{% url 'academico:generar_horarios_form' %}"
+      class="group bg-white p-6 rounded-xl border border-charade-200 shadow-sm hover:shadow-md hover:border-mitec-purple-light transition-all duration-200 flex flex-col h-full"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="p-3 rounded-lg bg-mitec-purple-primary/10 text-mitec-purple-primary group-hover:bg-mitec-purple-primary group-hover:text-white transition-colors"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+            ></path>
+          </svg>
         </div>
+      </div>
+      <h3
+        class="text-lg font-bold text-charade-900 group-hover:text-mitec-purple-primary transition-colors"
+      >
+        Generar Horarios
+      </h3>
+      <p class="text-sm text-charade-500 mt-2 mb-4 flex-1">
+        Algoritmo para generación automática de espacios y tiempos.
+      </p>
+      <span
+        class="text-sm font-medium text-mitec-purple-primary flex items-center group-hover:underline"
+      >
+        Iniciar Generación
+        <svg
+          class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </span>
+    </a>
 
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Ver lista de horarios</h5>
-                    <p class="card-text">Consultar todos los horarios generados.</p>
-                    <a href="{% url 'academico:horario_por_salon' %}" class="btn btn-secondary">Ver Horarios</a>
-
-                </div>
-            </div>
+    <a
+      href="{% url 'academico:horario_por_salon' %}"
+      class="group bg-white p-6 rounded-xl border border-charade-200 shadow-sm hover:shadow-md hover:border-mitec-blue-light transition-all duration-200 flex flex-col h-full"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="p-3 rounded-lg bg-charade-100 text-charade-600 group-hover:bg-charade-600 group-hover:text-white transition-colors"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            ></path>
+          </svg>
         </div>
+      </div>
+      <h3
+        class="text-lg font-bold text-charade-900 group-hover:text-tec transition-colors"
+      >
+        Horarios por Salón
+      </h3>
+      <p class="text-sm text-charade-500 mt-2 mb-4 flex-1">
+        Consulta la ocupación de espacios y lista general de horarios.
+      </p>
+      <span
+        class="text-sm font-medium text-charade-600 flex items-center group-hover:underline"
+      >
+        Consultar
+        <svg
+          class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </span>
+    </a>
 
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Horario por grupo</h5>
-                    <p class="card-text">
-                        Ver el horario de un grupo específico.
-                    </p>
-                    <a href="{% url 'academico:horario_por_grupo' %}" class="btn btn-primary">Ver horarios por grupo</a>
-                </div>
-            </div>
+    <a
+      href="{% url 'academico:horario_por_grupo' %}"
+      class="group bg-white p-6 rounded-xl border border-charade-200 shadow-sm hover:shadow-md hover:border-mitec-blue-light transition-all duration-200 flex flex-col h-full"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="p-3 rounded-lg bg-charade-100 text-charade-600 group-hover:bg-charade-600 group-hover:text-white transition-colors"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            ></path>
+          </svg>
         </div>
+      </div>
+      <h3
+        class="text-lg font-bold text-charade-900 group-hover:text-tec transition-colors"
+      >
+        Horario por Grupo
+      </h3>
+      <p class="text-sm text-charade-500 mt-2 mb-4 flex-1">
+        Visualiza el cronograma específico de un grupo.
+      </p>
+      <span
+        class="text-sm font-medium text-charade-600 flex items-center group-hover:underline"
+      >
+        Consultar
+        <svg
+          class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </span>
+    </a>
 
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-danger">Eliminar horarios</h5>
-                    <p class="card-text">
-                        Eliminar todos los horarios generados (uso sólo para admin).
-                    </p>
-                    <a href="{% url 'academico:eliminar_horarios' %}" class="btn btn-outline-danger">
-                        Eliminar horarios
-                    </a>
-                </div>
-            </div>
+    <a
+      href="{% url 'academico:eliminar_horarios' %}"
+      class="group bg-white p-6 rounded-xl border border-charade-200 shadow-sm hover:shadow-md hover:border-mitec-red-light transition-all duration-200 flex flex-col h-full border-l-4 border-l-transparent hover:border-l-mitec-red-primary"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <div
+          class="p-3 rounded-lg bg-mitec-red-primary/10 text-mitec-red-primary group-hover:bg-mitec-red-primary group-hover:text-white transition-colors"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            ></path>
+          </svg>
         </div>
-    </div>
+      </div>
+      <h3 class="text-lg font-bold text-mitec-red-primary mb-1">
+        Eliminar Horarios
+      </h3>
+      <p class="text-xs text-charade-400 font-semibold uppercase mb-2">
+        Zona de Peligro
+      </p>
+      <p class="text-sm text-charade-500 mb-4 flex-1">
+        Eliminar todos los horarios generados. Solo para administradores.
+      </p>
+      <span
+        class="text-sm font-medium text-mitec-red-primary flex items-center group-hover:underline"
+      >
+        Proceder a Eliminar
+        <svg
+          class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </span>
+    </a>
+  </div>
 </div>
 {% endblock %}

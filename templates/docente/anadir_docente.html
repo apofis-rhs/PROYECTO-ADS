@@ -26,10 +26,15 @@
           <h3>Datos Personales</h3>
 
           <div class="row mt-3">
-             <div class="col-4">
+
+            <div class="col-4">
                 <label class="form-label text-danger fw-bold">Número de Empleado *</label>
-                <input type="text" class="form-control" name="num_empleado" required placeholder="Ej: DOC-2024-001" />
-             </div>
+                <input type="text" class="form-control" name="num_empleado" id="num_empleado" 
+                      maxlength="12" required placeholder="Ej: DOC-2024-001" />
+                <div id="errorEmpleado" class="text-danger small fw-bold mt-1" style="display: none"></div>
+            </div>
+
+
              <div class="col-4">
                 <label class="form-label">Nombre(s) *</label>
                 <input type="text" class="form-control" name="nombre" required />
@@ -46,21 +51,36 @@
               <input type="text" class="form-control" name="ape_materno" />
             </div>
 
+           
+     
             <div class="col-4">
-              <label class="form-label">CURP</label>
-              <input type="text" class="form-control" name="curp" />
-            </div>
+    <label class="form-label">CURP</label>
+    <input type="text" class="form-control" name="curp" maxlength="18" required />
+    <div class="invalid-feedback">CURP inválido.</div>
+</div>
 
-            <div class="col-4">
-              <label class="form-label">RFC</label>
-              <input type="text" class="form-control" name="rfc" />
-            </div>
-          </div>
+<div class="col-4">
+    <label class="form-label">RFC</label>
+    <input type="text" class="form-control" name="rfc"  maxlength="13" required/>
+    <div class="invalid-feedback">RFC inválido.</div>
+</div>
+
+
+
+
+
+
+
+
+
+
 
           <div class="row mt-3">
+
             <div class="col-4">
-              <label class="form-label">Fecha de Nacimiento</label>
-              <input type="date" class="form-control" name="fecha_nacimiento" />
+                <label class="form-label">Fecha de Nacimiento *</label>
+                <input type="date" class="form-control" name="fecha_nacimiento" id="fecha_nacimiento" required />
+                <div id="errorFecha" class="text-danger small fw-bold mt-1" style="display: none"></div>
             </div>
 
             <div class="col-4">
@@ -78,14 +98,18 @@
               <input type="text" class="form-control" name="nacionalidad" />
             </div>
           </div>
-          
-          <div class="row mt-3">
-            <div class="col-6">
-               <label class="form-label">Fotografía del Docente</label>
-               <input type="file" class="form-control" name="foto" accept="image/*" />
-            </div>
+  
+          <div class="col-6">
+              <label class="form-label">Foto del Docente</label>
+              <div class="input-group">
+                  <input type="file" class="form-control" name="foto" id="foto">
+                  <button type="button" class="btn btn-danger" id="btnLimpiarFoto">X</button>
+              </div>
           </div>
+
         </div>
+
+
 
         <div class="caja border rounded p-3 mb-4">
           <h3>Contactos de Emergencia</h3>
@@ -103,16 +127,18 @@
             </div>
 
             <div class="col-4">
-              <label class="form-label">Teléfono principal</label>
-              <input type="text" class="form-control" name="contacto_telefono" />
-            </div>
+    <label class="form-label">Teléfono Principal</label>
+    <input type="tel" class="form-control" name="contacto_telefono" maxlength="10" />
+    <div class="invalid-feedback">Debe tener 10 dígitos.</div>
+</div>
           </div>
 
           <div class="row mt-3">
             <div class="col-4">
-              <label class="form-label">Teléfono secundario (opcional)</label>
-              <input type="text" class="form-control" name="contacto_telefono2" />
-            </div>
+    <label class="form-label">Teléfono Secundario (Opcional)</label>
+    <input type="tel" class="form-control" name="contacto_telefono2" maxlength="10" />
+    <div class="invalid-feedback">Debe tener 10 dígitos.</div>
+</div>
 
             <div class="col-8">
               <label class="form-label">Dirección</label>
@@ -179,21 +205,30 @@
         </div>
 
         <div class="d-flex justify-content-end mt-4">
-          <a href="{% url 'consultar_docente' %}" class="btn btnCancelar px-4 text-white text-decoration-none">
+          <a href="{% url 'consultar_docente' %}"  class="w-full sm:w-auto sm:ml-auto px-6 py-3 border border-charade-300 text-charade-700 font-medium rounded-lg hover:bg-white transition-colors text-center">
             Cancelar
           </a>
-          <button type="submit" class="btn btnGuardarAlumno px-4 ml-4">
+          <button type="submit" class="btn bg-blue-600 btnGuardarAlumno px-4 ml-4">
             Guardar Docente
           </button>
         </div>
       </div>
   </form>
 
-  <div class="mt-4 d-flex justify-content-center">
-    <a href="{% url 'consultar_docente' %}" class="btn btnRegresar px-3 py-1 text-white text-decoration-none">
-      Regresar
-    </a>
-  </div>
+<div class="mt-8 flex justify-center">
+        <a href="{% url 'consultar_docente' %}"
+            class="text-gray-500 hover:text-gray-800 font-medium text-sm flex items-center transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+            Regresar al listado
+        </a>
+    </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/scripts_docente.js' %}"></script>
 {% endblock %}

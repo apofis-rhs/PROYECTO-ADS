@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; font-size: 12px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #003366; padding-bottom: 10px;}
+        .header h1 { color: #003366; margin: 0; }
+        .header h3 { color: #555; margin: 5px 0; }
+        
+        .info-docente { margin-bottom: 20px; background-color: #f4f4f4; padding: 10px; border-radius: 4px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+        th { background-color: #003366; color: white; font-weight: bold; }
+        
+        .footer { position: fixed; bottom: 0; text-align: center; font-size: 10px; color: #777; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Carga Académica Docente</h1>
+        <h3>Horario de Clases Asignadas</h3>
+    </div>
+
+    <div class="info-docente">
+        <p><strong>Docente:</strong> {{ docente.nombre }} {{ docente.ape_paterno }} {{ docente.ape_materno }}</p>
+        <p><strong>Num. Empleado:</strong> {{ docente.num_empleado }} | <strong>RFC:</strong> {{ docente.rfc }}</p>
+        <p><strong>Fecha de Emisión:</strong> {% now "d/m/Y H:i" %}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%;">Periodo</th>
+                <th style="width: 15%;">Grupo</th>
+                <th style="width: 40%;">Materia / Asignatura</th>
+                <th style="width: 15%;">Nivel</th>
+                <th style="width: 15%;">Turno</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grupo in grupos %}
+            <tr>
+                <td>{{ grupo.periodo }}</td>
+                <td style="text-align: center; font-weight: bold;">{{ grupo.clave_grupo }}</td>
+                <td>{{ grupo.materia.nombre }}</td>
+                <td>{{ grupo.nivel.nombre }}</td>
+                <td>{{ grupo.turno.nombre|default:"--" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 20px;">
+                    No tiene grupos asignados en este momento.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Documento oficial de carga académica. Sistema de Gestión Escolar.
+    </div>
+
+</body>
+</html>

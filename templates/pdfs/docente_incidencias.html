@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; font-size: 12px; color: #333; }
+        
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #003366; padding-bottom: 10px; }
+        .header h1 { color: #003366; margin: 0; font-size: 24px; }
+        .header h2 { color: #cc0000; margin: 5px 0 0 0; font-size: 16px; }
+
+        .info-docente { margin-bottom: 20px; background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        .info-docente p { margin: 5px 0; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #999; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #003366; color: white; font-weight: bold; text-align: center; }
+        
+        .gravedad-alta { color: red; font-weight: bold; }
+        .texto-secundario { font-size: 10px; color: #666; font-style: italic; }
+        
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 10px; color: #777; border-top: 1px solid #ccc; padding-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Historial de Incidencias</h1>
+        <h2>Expediente Administrativo Docente</h2>
+    </div>
+
+    <div class="info-docente">
+        <p><strong>Docente:</strong> {{ docente.nombre }} {{ docente.ape_paterno }} {{ docente.ape_materno }}</p>
+        <p><strong>No. Empleado:</strong> {{ docente.num_empleado }} | <strong>RFC:</strong> {{ docente.rfc }}</p>
+        <p><strong>Fecha de corte:</strong> {% now "d/m/Y H:i" %}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%;">Fecha</th>
+                <th style="width: 15%;">Tipo</th>
+                <th style="width: 15%;">Gravedad</th>
+                <th style="width: 55%;">Descripción y Detalles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for incidencia in incidencias %}
+            <tr>
+                <td style="text-align: center;">{{ incidencia.fecha|date:"d/m/Y" }}</td>
+                
+                <td>{{ incidencia.tipo_incidente.nombre|default:"General" }}</td>
+                
+                <td style="text-align: center;">
+                    {% if "Alta" in incidencia.gravedad_incidente.nombre %}
+                        <span class="gravedad-alta">{{ incidencia.gravedad_incidente.nombre }}</span>
+                    {% else %}
+                        {{ incidencia.gravedad_incidente.nombre }}
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {{ incidencia.descripcion }}
+                    
+                    {% if incidencia.alumno %}
+                        <br>
+                        <span class="texto-secundario">
+                            Alumno relacionado: {{ incidencia.alumno.nombre }} {{ incidencia.alumno.ape_paterno }}
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 20px; color: #666;">
+                    <em>El docente no presenta incidencias registradas en su expediente.</em>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Documento confidencial para uso exclusivo de la administración escolar.
+    </div>
+
+</body>
+</html>

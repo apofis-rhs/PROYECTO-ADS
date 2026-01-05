@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; font-size: 14px; color: #333; }
+        
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #003366; padding-bottom: 10px; }
+        .header h1 { color: #003366; margin: 0; }
+        .header p { margin: 5px 0 0 0; color: #666; font-size: 12px; }
+
+        /* Usamos tabla para maquetar 2 columnas (xhtml2pdf no soporta bien flexbox) */
+        .layout-table { width: 100%; margin-top: 25px; }
+        .col-foto { width: 30%; vertical-align: top; text-align: center; }
+        .col-datos { width: 70%; vertical-align: top; padding-left: 25px; }
+
+        .foto-marco { 
+            width: 150px; height: 150px; 
+            border: 1px solid #999; padding: 5px; 
+            display: inline-block;
+        }
+
+        .seccion-titulo { 
+            background-color: #f2f2f2; color: #003366; 
+            padding: 5px 10px; font-weight: bold; border-left: 5px solid #003366;
+            margin-bottom: 10px; margin-top: 15px;
+        }
+
+        .dato-row { margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        .label { font-weight: bold; color: #555; width: 160px; display: inline-block; }
+        
+        .badge-activo { color: green; font-weight: bold; }
+        .badge-inactivo { color: red; font-weight: bold; }
+
+        .footer { position: fixed; bottom: 0; text-align: center; font-size: 10px; color: #999; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Ficha Técnica del Docente</h1>
+        <p>Sistema de Gestión Escolar | Perfil de Personal Académico</p>
+    </div>
+
+    <table class="layout-table">
+        <tr>
+            <td class="col-foto">
+                <div class="foto-marco">
+                    {% if docente.foto %}
+                        <img src="{{ docente.foto.path }}" style="width: 100%; height: 100%; object-fit: cover;" />
+                    {% else %}
+                        <div style="padding-top: 60px; color: #ccc;">Sin Foto</div>
+                    {% endif %}
+                </div>
+                <br><br>
+                <strong>Estado Actual:</strong><br>
+                {% if docente.activo %}
+                    <span class="badge-activo">ACTIVO</span>
+                {% else %}
+                    <span class="badge-inactivo">INACTIVO</span>
+                {% endif %}
+            </td>
+
+            <td class="col-datos">
+                
+                <div class="seccion-titulo">DATOS DE IDENTIFICACIÓN</div>
+                <div class="dato-row"><span class="label">Número de Empleado:</span> <strong>{{ docente.num_empleado }}</strong></div>
+                <div class="dato-row"><span class="label">Nombre Completo:</span> {{ docente.nombre }} {{ docente.ape_paterno }} {{ docente.ape_materno }}</div>
+                <div class="dato-row"><span class="label">RFC:</span> {{ docente.rfc|default:"--" }}</div>
+                <div class="dato-row"><span class="label">CURP:</span> {{ docente.curp|default:"--" }}</div>
+                <div class="dato-row"><span class="label">Teléfono:</span> {{ docente.telefono|default:"--" }}</div>
+                <div class="dato-row"><span class="label">Correo Electrónico:</span> {{ docente.correo|default:"--" }}</div>
+
+                <div class="seccion-titulo">PERFIL PROFESIONAL</div>
+                <div class="dato-row"><span class="label">Grado Académico:</span> {{ docente.grado_academico|default:"N/A" }}</div>
+                <div class="dato-row"><span class="label">Especialidad:</span> {{ docente.especialidad|default:"Sin especificar" }}</div>
+                <div class="dato-row"><span class="label">Años de Experiencia:</span> {{ docente.anios_experiencia|default:"0" }}</div>
+                <div class="dato-row"><span class="label">Fecha de Ingreso:</span> {{ docente.fecha_ingreso|date:"d/m/Y" }}</div>
+
+                <div class="seccion-titulo">ÁREAS DE INTERÉS</div>
+                <div style="font-size: 12px; color: #444;">
+                    {% for area in docente.areas_interes.all %}
+                        • {{ area.nombre }}<br>
+                    {% empty %}
+                        <em>No hay áreas de interés registradas.</em>
+                    {% endfor %}
+                </div>
+
+            </td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        Documento generado automáticamente el {% now "d/m/Y H:i" %}. Uso exclusivo administrativo.
+    </div>
+
+</body>
+</html>

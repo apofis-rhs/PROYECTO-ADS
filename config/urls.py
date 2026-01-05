@@ -24,9 +24,9 @@ from django.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+    path('', views.login_view, name='login'),
     # ruta raiz (localhost:8000/)
-    path('', views.dashboard_view, name='dashboard'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
     path('alumnos/consultar/', views.consultar_alumno_view, name='consultar_alumno'),
     path('alumnos/visualizar/<int:id_alumno>/', views.visualizar_alumno_view, name='visualizar_alumno'),
     path('alumno/anadir/', views.anadir_alumno_view, name='anadir_alumno'),
@@ -39,7 +39,8 @@ urlpatterns = [
     path('tutores/consultar/', views.consultar_tutor_view, name='consultar_tutor'),
     path('tutor/visualizar/<int:id_tutor>/', views.visualizar_tutor_view, name='visualizar_tutor'),
     path('api/crear-tutor/', views.api_crear_tutor, name='api_crear_tutor'),
-        # API academico/Horarios
+    path('alumno/documento/<int:id_alumno>/', views.generar_documento_alumno, name='generar_documento_alumno'),
+    path('docente/documento/<int:id_docente>/', views.generar_documento_docente, name='generar_documento_docente'),
     path("api/", include("academico.urls")),
 ]
 

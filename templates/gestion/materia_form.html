@@ -1,196 +1,299 @@
 {% extends "base.html" %}
-
-{% block title %}
-    {% if materia %}Editar materia{% else %}Crear materia{% endif %}
-{% endblock %}
-
+{% block title %} 
+{% if materia %}Editar materia{% else %}Crear materia{% endif %}
+{% endblock %} 
 {% block content %}
-<div class="container mt-4">
-
-    <!-- Título principal -->
-    <h2 class="mb-3">
-        {% if materia %}
-            Editar materia: {{ materia.clave }} - {{ materia.nombre }}
-        {% else %}
-            Crear nueva materia
-        {% endif %}
-    </h2>
-
-    <p class="text-muted mb-4">
-        Completa la información de la materia. Los campos marcados con * son obligatorios.
+<div class="animate-fade-in-up pb-10">
+  <div class="mb-8 border-b border-charade-200 pb-4">
+    <h1 class="text-3xl font-bold text-tec">
+      {% if materia %} Editar Materia {% else %} Crear Nueva Materia {% endif %}
+    </h1>
+    <p class="text-charade-500 mt-1">
+      {% if materia %} Modificando:
+      <span class="font-semibold text-mitec-blue-primary">
+        {{ materia.clave }}
+      </span>
+      - {{ materia.nombre }} {% else %} Registra una nueva unidad de aprendizaje
+      en el catálogo académico. {% endif %}
     </p>
+  </div>
 
-    <!-- Errores generales del formulario -->
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-            {% for error in form.non_field_errors %}
-                <div>{{ error }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
+  {% if form.non_field_errors %}
+  <div class="mb-6">
+    {% for error in form.non_field_errors %}
+    <div
+      class="p-4 rounded-lg bg-red-50 border-l-4 border-mitec-red-primary text-charade-700 relative flex items-start"
+    >
+      <svg
+        class="h-5 w-5 text-mitec-red-primary mr-2 mt-0.5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span class="font-medium">{{ error }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+  <form method="post" novalidate class="space-y-6 django-tailwind-form">
+    {% csrf_token %}
 
-        <!-- =========================
-             Sección: Datos generales
-        ========================== -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <strong>Datos generales</strong>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- Clave -->
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.clave.id_for_label }}" class="form-label">
-                            Clave *
-                        </label>
-                        {{ form.clave }}
-                        {% if form.clave.errors %}
-                            <div class="text-danger small">
-                                {{ form.clave.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Identificador corto de la materia (ejemplo: KIN-JYE-01).
-                            </div>
-                        {% endif %}
-                    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-charade-200 p-6">
+      <h3
+        class="text-lg font-bold text-tec border-b border-charade-100 pb-2 mb-4 flex items-center"
+      >
+        <svg
+          class="w-5 h-5 mr-2 text-mitec-blue-primary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+          ></path>
+        </svg>
+        Datos Generales
+      </h3>
 
-                    <!-- Nombre -->
-                    <div class="col-md-8 mb-3">
-                        <label for="{{ form.nombre.id_for_label }}" class="form-label">
-                            Nombre *
-                        </label>
-                        {{ form.nombre }}
-                        {% if form.nombre.errors %}
-                            <div class="text-danger small">
-                                {{ form.nombre.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Nombre completo de la materia (ejemplo: Juego y Exploración).
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- =========================
-             Sección: Configuración académica
-        ========================== -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <strong>Configuración académica</strong>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- Nivel educativo -->
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.nivel_educativo.id_for_label }}" class="form-label">
-                            Nivel educativo *
-                        </label>
-                        {{ form.nivel_educativo }}
-                        {% if form.nivel_educativo.errors %}
-                            <div class="text-danger small">
-                                {{ form.nivel_educativo.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Selecciona el nivel (Kínder, Primaria, Secundaria, Universidad, etc.).
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Carrera (si aplica) -->
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.carrera.id_for_label }}" class="form-label">
-                            Carrera (opcional)
-                        </label>
-                        {{ form.carrera }}
-                        {% if form.carrera.errors %}
-                            <div class="text-danger small">
-                                {{ form.carrera.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Solo para niveles que manejan carrera (por ejemplo, universidad).
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row">
-                    <!-- Nivel sugerido (grado / semestre) -->
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.nivel_sugerido.id_for_label }}" class="form-label">
-                            Nivel sugerido
-                        </label>
-                        {{ form.nivel_sugerido }}
-                        {% if form.nivel_sugerido.errors %}
-                            <div class="text-danger small">
-                                {{ form.nivel_sugerido.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Grado o semestre en el que normalmente se imparte esta materia.
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Créditos -->
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.creditos.id_for_label }}" class="form-label">
-                            Créditos
-                        </label>
-                        {{ form.creditos }}
-                        {% if form.creditos.errors %}
-                            <div class="text-danger small">
-                                {{ form.creditos.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Número de créditos asignados a la materia (si aplica).
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Sesiones por semana -->
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.sesiones_por_semana.id_for_label }}" class="form-label">
-                            Sesiones por semana
-                        </label>
-                        {{ form.sesiones_por_semana }}
-                        {% if form.sesiones_por_semana.errors %}
-                            <div class="text-danger small">
-                                {{ form.sesiones_por_semana.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Cuántas veces a la semana debe aparecer en el horario
-                                (ejemplo: 3 para Kinder).
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div class="md:col-span-4">
+          <label
+            for="{{ form.clave.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Clave
+            <span class="text-mitec-red-primary">*</span>
+          </label>
+          {{ form.clave }} {% if form.clave.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.clave.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            Identificador único.
+          </p>
+          {% endif %}
         </div>
 
-        <!-- =========================
-             Botones de acción
-        ========================== -->
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary">
-                {% if materia %}Guardar cambios{% else %}Crear materia{% endif %}
-            </button>
-            <a href="{% url 'academico:materia_list' %}" class="btn btn-secondary">
-                Cancelar
-            </a>
+        <div class="md:col-span-8">
+          <label
+            for="{{ form.nombre.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Nombre de la Materia
+            <span class="text-mitec-red-primary">*</span>
+          </label>
+          {{ form.nombre }} {% if form.nombre.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.nombre.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            Nombre completo descriptivo.
+          </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-charade-200 p-6">
+      <h3
+        class="text-lg font-bold text-tec border-b border-charade-100 pb-2 mb-4 flex items-center"
+      >
+        <svg
+          class="w-5 h-5 mr-2 text-mitec-blue-primary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          ></path>
+        </svg>
+        Configuración Académica
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label
+            for="{{ form.nivel_educativo.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Nivel Educativo
+            <span class="text-mitec-red-primary">*</span>
+          </label>
+          {{ form.nivel_educativo }} {% if form.nivel_educativo.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.nivel_educativo.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            Nivel al que pertenece el plan de estudios.
+          </p>
+          {% endif %}
         </div>
 
-    </form>
+        <div>
+          <label
+            for="{{ form.carrera.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Carrera
+          </label>
+          {{ form.carrera }} {% if form.carrera.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.carrera.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            Opcional. Solo para niveles universitarios.
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label
+            for="{{ form.nivel_sugerido.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Nivel Sugerido
+          </label>
+          {{ form.nivel_sugerido }} {% if form.nivel_sugerido.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.nivel_sugerido.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">Grado o semestre típico.</p>
+          {% endif %}
+        </div>
+
+       <!--  <div>
+          <label
+            for="{{ form.creditos.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Créditos
+          </label>
+          {{ form.creditos }} {% if form.creditos.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.creditos.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">Valor curricular.</p>
+          {% endif %}
+        </div> 
+        LO QUE SE HACE AQUI ES ELEGIR LOS CREDITOS, LO CORRECTO ES DEJAR EL 7 FIJOOOO-->
+
+        <div class="col-10">
+                <label class="form-label font-bold text-charade-900">Créditos</label>
+                <input 
+                    type="number" 
+                    name="creditos" 
+                    value="7" 
+                    class="form-control bg-charade-100 cursor-not-allowed select-none" 
+                    readonly
+                    tabindex="-1"
+                >
+                <small class="text-charade-500">Valor fijo.</small>
+            </div>
+
+
+        <div>
+          <label
+            for="{{ form.sesiones_por_semana.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1">
+            Sesiones Semanales
+          </label>
+          {{ form.sesiones_por_semana }} {% if form.sesiones_por_semana.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.sesiones_por_semana.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">Frecuencia en el horario.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="flex items-center justify-end gap-4 mt-8 pt-4 border-t border-charade-200"
+    >
+      <a
+        href="{% url 'academico:materia_list' %}"
+        class="px-6 py-2.5 border border-charade-300 text-charade-700 font-medium rounded-lg hover:bg-charade-50 transition-colors"
+      >
+        Cancelar
+      </a>
+      <button
+        type="submit"
+        class="px-6 py-2.5 bg-tec text-white font-medium rounded-lg hover:bg-mitec-blue-primary shadow-lg hover:shadow-xl transition-all transform active:scale-95 flex items-center"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+        {% if materia %}Guardar Cambios{% else %}Crear Materia{% endif %}
+      </button>
+    </div>
+  </form>
 </div>
-{% endblock %}
 
+<style>
+  /* Estilos para inputs de Django con apariencia Tailwind */
+  .django-tailwind-form input[type="text"],
+  .django-tailwind-form input[type="number"],
+  .django-tailwind-form input[type="email"],
+  .django-tailwind-form input[type="date"],
+  .django-tailwind-form select,
+  .django-tailwind-form textarea {
+    display: block;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #d3d7e4;
+    background-color: #f6f7f9;
+    padding: 0.625rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #313649;
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  .django-tailwind-form input:focus,
+  .django-tailwind-form select:focus,
+  .django-tailwind-form textarea:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-color: #00a7f7;
+    box-shadow: 0 0 0 3px rgba(0, 167, 247, 0.2);
+    background-color: #ffffff;
+  }
+</style>
+{% endblock %}  

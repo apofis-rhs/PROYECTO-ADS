@@ -1,0 +1,156 @@
+-- ===================================================================================
+-- SCRIPT DE POBLADO DE DATOS PARA PRUEBAS (COMPATIBLE CON TU ESQUEMA DJANGO)
+-- ===================================================================================
+
+-- 1. LIMPIEZA INICIAL (Ordenada por dependencias)
+TRUNCATE TABLE 
+    public.incidente, public.historial_academico, public.horario, 
+    public.alumno_grupo, public.grupo, public.docente_materia, public.materia, 
+    public.docente_area_interes, public.docente, public.alumno, public.padre_tutor, 
+    public.carrera, public.universidad, public.nivel_educativo,
+    public.cat_turno, public.cat_tipo_carrera, public.area_interes,
+    public.cat_gravedad_incidente, public.cat_tipo_incidente, public.cat_estado_alumno,
+    public.cat_estado_historial, public.cat_estado_inscripcion, public.usuario_admin
+    RESTART IDENTITY CASCADE;
+
+-- 2. INSERTAR USUARIO ADMIN (¡CRUCIAL PARA INCIDENTES!)
+-- La contraseña es un hash dummy de Django, en pruebas no podrás loguearte con este user 
+-- pero sirve para las Foreing Keys. Crea un superuser real con python manage.py después.
+INSERT INTO public.usuario_admin (
+    password, last_login, is_superuser, usuario, num_empleado, 
+    correo, nombre, is_active, is_staff
+) VALUES (
+    'pbkdf2_sha256$260000$dummyhash...', NOW(), true, 'admin_pruebas', 'ADM001', 
+    'admin@escuela.mx', 'Administrador Sistema', true, true
+);
+
+-- 3. CATÁLOGOS BASE
+INSERT INTO public.nivel_educativo (nombre) VALUES ('Preescolar'), ('Primaria'), ('Secundaria'), ('Bachillerato'), ('Universidad');
+INSERT INTO public.cat_turno (nombre) VALUES ('Matutino'), ('Vespertino'), ('Mixto');
+INSERT INTO public.cat_estado_alumno (nombre) VALUES ('Activo'), ('Baja Temporal'), ('Egresado');
+INSERT INTO public.cat_estado_historial (nombre) VALUES ('Aprobada'), ('Reprobada'), ('Cursando');
+INSERT INTO public.cat_gravedad_incidente (nombre) VALUES ('Leve'), ('Moderada'), ('Grave');
+INSERT INTO public.cat_tipo_incidente (nombre) VALUES ('Conducta'), ('Académico'), ('Asistencia'), ('Salud');
+INSERT INTO public.cat_tipo_carrera (nombre) VALUES ('Ingeniería'), ('Licenciatura'), ('Técnica');
+INSERT INTO public.cat_estado_inscripcion (nombre) VALUES ('Inscrito'), ('Pendiente'); -- Asumiendo que existe este catálogo por tu esquema
+
+INSERT INTO public.universidad (nombre, ciudad, estado, pais) VALUES 
+('UNAM', 'CDMX', 'CDMX', 'México'), 
+('IPN', 'CDMX', 'CDMX', 'México');
+
+INSERT INTO public.area_interes (nombre) VALUES ('Matemáticas'), ('Historia'), ('Programación'), ('Ciencias'), ('Artes');
+
+INSERT INTO public.carrera (nombre, duracion_semestres, activo, id_tipo_carrera, id_universidad) VALUES
+('Ingeniería en Sistemas', 9, true, 1, 2),
+('Licenciatura en Derecho', 9, true, 2, 1);
+
+-- 4. GENERACIÓN DE DATOS (DOCENTES, ALUMNOS, GRUPOS)
+DO $$
+DECLARE
+    -- Datos semilla
+    nombres text[] := ARRAY['Juan', 'Maria', 'Pedro', 'Ana', 'Luis', 'Sofia', 'Carlos', 'Lucia', 'Miguel', 'Elena'];
+    apellidos text[] := ARRAY['Garcia', 'Lopez', 'Martinez', 'Rodriguez', 'Hernandez', 'Perez', 'Sanchez', 'Ramirez'];
+    
+    v_docente_id INT;
+    v_materia_id INT;
+    v_alumno_id INT;
+    v_grupo_id INT;
+    v_admin_id INT;
+    i INT;
+BEGIN
+    -- Obtener ID del admin creado
+    SELECT id_admin INTO v_admin_id FROM public.usuario_admin LIMIT 1;
+
+    -- A) CREAR 10 DOCENTES
+    FOR i IN 1..10 LOOP
+        INSERT INTO public.docente (
+            num_empleado, nombre, ape_paterno, ape_materno, rfc, curp, 
+            activo, fecha_ingreso, sexo, anios_experiencia, direccion, 
+            correo, telefono
+        ) VALUES (
+            'DOC-' || i, 
+            nombres[1 + (i % 10)], 
+            apellidos[1 + (i % 8)], 
+            apellidos[1 + ((i+1) % 8)], 
+            'RFC' || i || floor(random()*1000), 
+            'CURP' || i || floor(random()*1000), 
+            true, '2020-01-01', 'M', 5, 'Calle Conocida ' || i,
+            'docente' || i || '@escuela.mx', '5512345678'
+        ) RETURNING id_docente INTO v_docente_id;
+        
+        -- Asignar área de interés
+        INSERT INTO public.docente_area_interes (docente_id, areainteres_id) VALUES (v_docente_id, 1);
+    END LOOP;
+
+    -- B) CREAR 20 MATERIAS
+    FOR i IN 1..20 LOOP
+        INSERT INTO public.materia (
+            clave, nombre, creditos, nivel_sugerido, sesiones_por_semana, id_nivel, id_carrera
+        ) VALUES (
+            'MAT-' || i, 'Materia ' || i, 8, 1, 3, 
+            (floor(random()*5)+1)::int, -- Nivel random 1-5
+            CASE WHEN i > 15 THEN 1 ELSE NULL END
+        );
+    END LOOP;
+
+    -- C) CREAR 50 ALUMNOS
+    FOR i IN 1..50 LOOP
+        INSERT INTO public.alumno (
+            boleta, nombre, ape_paterno, ape_materno, curp, fecha_nacimiento, 
+            id_nivel, id_carrera, id_estado_alumno, correo, direccion, telefono
+        ) VALUES (
+            '2024' || lpad(i::text, 4, '0'), 
+            nombres[1 + (i % 10)], 
+            apellidos[1 + (i % 8)], 
+            apellidos[1 + ((i+2) % 8)], 
+            'CURPA' || i || floor(random()*1000), 
+            '2005-06-15', 
+            (floor(random()*5)+1)::int, -- Nivel
+            NULL, 1, -- Activo
+            'alumno' || i || '@escuela.mx', 'Av. Siempre Viva ' || i, '5587654321'
+        );
+    END LOOP;
+
+    -- D) CREAR 10 GRUPOS
+    FOR i IN 1..10 LOOP
+        INSERT INTO public.grupo (
+            clave_grupo, grado, periodo, id_docente, id_turno, id_materia, id_nivel
+        ) VALUES (
+            '1GM' || i, 1, '2024-1', 
+            (SELECT id_docente FROM public.docente ORDER BY random() LIMIT 1),
+            1, -- Turno Matutino
+            (SELECT id_materia FROM public.materia ORDER BY random() LIMIT 1),
+            3 -- Secundaria (ejemplo)
+        ) RETURNING id_grupo INTO v_grupo_id;
+
+        -- E) CREAR HORARIOS PARA EL GRUPO
+        INSERT INTO public.horario (dia_semana, hora_inicio, hora_fin, aula, id_grupo)
+        VALUES (1, '07:00', '09:00', 'A-101', v_grupo_id);
+        
+        -- F) INSCRIBIR ALUMNOS AL GRUPO
+        INSERT INTO public.alumno_grupo (fecha_inscripcion, id_alumno, id_grupo, id_estado_inscripcion)
+        SELECT NOW(), id_alumno, v_grupo_id, 1 
+        FROM public.alumno ORDER BY random() LIMIT 5;
+    END LOOP;
+
+    -- G) CREAR INCIDENTES (Aquí fallaba antes, ahora usará v_admin_id)
+    FOR i IN 1..5 LOOP
+        INSERT INTO public.incidente (
+            fecha, descripcion, id_tipo_incidente, id_gravedad_incidente, 
+            id_alumno, id_docente, id_admin
+        ) VALUES (
+            NOW(), 'Falta de respeto en clase', 1, 2,
+            (SELECT id_alumno FROM public.alumno LIMIT 1),
+            (SELECT id_docente FROM public.docente LIMIT 1),
+            v_admin_id -- <--- ¡USAMOS EL ID DEL ADMIN CREADO!
+        );
+    END LOOP;
+END $$;
+
+-- 5. CORRECCIÓN FINAL DE SECUENCIAS (Para evitar errores futuros en Django)
+SELECT setval('public.alumno_id_alumno_seq', COALESCE((SELECT MAX(id_alumno) FROM public.alumno), 1));
+SELECT setval('public.docente_id_docente_seq', COALESCE((SELECT MAX(id_docente) FROM public.docente), 1));
+SELECT setval('public.materia_id_materia_seq', COALESCE((SELECT MAX(id_materia) FROM public.materia), 1));
+SELECT setval('public.grupo_id_grupo_seq', COALESCE((SELECT MAX(id_grupo) FROM public.grupo), 1));
+SELECT setval('public.usuario_admin_id_admin_seq', COALESCE((SELECT MAX(id_admin) FROM public.usuario_admin), 1));
+SELECT setval('public.incidente_id_incidente_seq', COALESCE((SELECT MAX(id_incidente) FROM public.incidente), 1));

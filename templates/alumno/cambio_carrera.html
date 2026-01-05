@@ -1,98 +1,233 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block title %}Cambio de Carrera{% endblock %} {% block content %}
 
-{% block title %}Cambio de Carrera{% endblock %}
+<div class="animate-fade-in-up pb-10">
+  <div class="mb-8 border-b border-charade-200 pb-4">
+    <h1 class="text-3xl font-bold text-tec">Cambio de Carrera</h1>
+    <p class="text-charade-500 mt-1">
+      Realiza la migración del estudiante a un nuevo programa académico.
+    </p>
+  </div>
 
-{% block content %}
-
-<div class="container-fluid mt-4">
-  <h1>Cambio de Carrera</h1>
-
-  <div class="caja border rounded p-4">
-    
-    <div class="caja border rounded p-3 mb-4">
-      <h3>Datos del Alumno</h3>
-
-      <div class="row mt-3">
-        <div class="col-4">
-          <label class="form-label">Nombre completo</label>
-          <input type="text" class="form-control" value="Juan Pérez López" readonly />
-        </div>
-
-        <div class="col-4">
-          <label class="form-label">CURP</label>
-          <input type="text" class="form-control" value="AAAA000000XXXXXX" readonly />
-        </div>
-
-        <div class="col-4">
-          <label class="form-label">Fecha de nacimiento</label>
-          <input type="date" class="form-control" value="2005-01-01" readonly />
-        </div>
-      </div>
-
-      <div class="row mt-3">
-        <div class="col-4">
-          <label class="form-label">Nivel educativo</label>
-          <input type="text" class="form-control" value="Universidad" readonly />
-        </div>
-
-        <div class="col-4">
-          <label class="form-label">Grado / Semestre</label>
-          <input type="text" class="form-control" value="3" readonly />
-        </div>
-
-        <div class="col-4">
-          <label class="form-label">Boleta / Matrícula</label>
-          <input type="text" class="form-control" value="2022001234" readonly />
-        </div>
-      </div>
-
-      <div class="row mt-3">
-        <div class="col-6">
-          <label class="form-label">Tutor (si aplica)</label>
-          <input type="text" class="form-control" value="N/A" readonly />
-        </div>
-
-        <div class="col-6">
-          <label class="form-label">Teléfono del tutor</label>
-          <input type="text" class="form-control" value="N/A" readonly />
-        </div>
-      </div>
+  <div class="bg-white rounded-xl shadow-sm border border-charade-200 p-6 mb-6">
+    <div class="flex items-center mb-4 pb-2 border-b border-charade-100">
+      <svg
+        class="w-5 h-5 mr-2 text-charade-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        ></path>
+      </svg>
+      <h3 class="text-lg font-bold text-charade-900">
+        Datos Actuales del Alumno
+      </h3>
     </div>
 
-    <form method="POST">
-        {% csrf_token %}
-        
-        <div class="caja border rounded p-3 mb-4">
-          <h3>Seleccionar Nueva Carrera</h3>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div class="md:col-span-4">
+        <label class="block text-sm font-medium text-charade-500 mb-1">
+          Nombre completo
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+          value="{{ alumno.nombre }} {{ alumno.ape_paterno }} {{ alumno.ape_materno }}"
+          readonly
+        />
+      </div>
 
-          <div class="row mt-3">
-            <div class="col-6">
-              <label class="form-label">Nueva carrera</label>
-              <select class="form-select" name="nueva_carrera">
-                <option value="">Seleccionar…</option>
-                <option>Ingeniería en Sistemas Computacionales</option>
-                <option>Ingeniería Mecatrónica</option>
-                <option>Ingeniería Industrial</option>
-                <option>Licenciatura en Administración</option>
-                <option>Licenciatura en Informática</option>
-                <option>Ingeniería en Alimentos</option>
-              </select>
-            </div>
-          </div>
+      <div class="md:col-span-4">
+        <label class="block text-sm font-medium text-charade-500 mb-1">
+          CURP
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+          value="{{ alumno.curp }}"
+          readonly
+        />
+      </div>
 
-          <button type="submit" class="btn btnConfirmarCambio mt-4 px-4">
-            Confirmar Cambio
-          </button>
-        </div>
-    </form>
+      <div class="md:col-span-4">
+        <label class="block text-sm font-medium text-charade-500 mb-1">
+          Fecha de nacimiento
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+          value="{{ alumno.fecha_nacimiento|date:'Y-m-d' }}"
+          readonly
+        />
+      </div>
 
-    <div class="mt-4 d-flex justify-content-center">
-      <a href="{% url 'visualizar_alumno' alumno.id_alumno %}" class="btn btnRegresar px-3 py-1 text-white text-decoration-none">
-        Regresar
-      </a>
+      <div class="md:col-span-4">
+        <label class="block text-sm font-medium text-charade-500 mb-1">
+          Nivel educativo
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+          value="{{ alumno.nivel.nombre }}"
+          readonly
+        />
+      </div>
+
+      <div class="md:col-span-4">
+        <label class="block text-sm font-medium text-charade-500 mb-1">
+          Grado / Semestre
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+          value="{{ alumno.grado }}"
+          readonly
+        />
+      </div>
+
+      <div class="md:col-span-4">
+        <label class="block text-sm font-medium text-charade-500 mb-1">
+          Boleta / Matrícula
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+          value="{{ alumno.boleta }}"
+          readonly
+        />
+      </div>
+
+      <div class="md:col-span-6">
+        <label class="block text-sm font-medium text-charade-500 mb-1">
+          Tutor (si aplica)
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+          value="{% if alumno.tutor %}{{ alumno.tutor.nombre }} {{ alumno.tutor.ape_paterno }}{% else %}N/A{% endif %}"
+          readonly
+        />
+      </div>
+
+      <div class="md:col-span-6">
+        <label class="block text-sm font-medium text-charade-500 mb-1">
+          Teléfono del tutor
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded-lg border-charade-200 bg-charade-100 text-charade-700 p-2.5 text-sm cursor-not-allowed select-none"
+          value="{{ alumno.tutor.telefono|default:'N/A' }}"
+          readonly
+        />
+      </div>
     </div>
+  </div>
 
+  <form method="POST">
+    {% csrf_token %}
+
+    <div
+      class="bg-white rounded-xl shadow-lg border border-charade-200 border-l-4 border-l-mitec-blue-primary p-6 mb-8"
+    >
+      <div class="flex items-center mb-6">
+        <div class="bg-mitec-blue-primary/10 p-2 rounded-lg mr-3">
+          <svg
+            class="w-6 h-6 text-mitec-blue-primary"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-tec">Seleccionar Nueva Carrera</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="md:col-span-1">
+          <label class="block text-sm font-medium text-charade-900 mb-2">
+            Nueva carrera de destino
+            <span class="text-mitec-red-primary">*</span>
+          </label>
+          <select
+            class="block w-full rounded-lg border-charade-300 bg-white p-3 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light shadow-sm transition-shadow"
+            name="nueva_carrera"
+            required
+          >
+            <option value="">Seleccionar programa académico…</option>
+            <option value="ISC">Ingeniería en Sistemas Computacionales</option>
+            <option value="IMT">Ingeniería Mecatrónica</option>
+            <option value="IIS">Ingeniería Industrial</option>
+            <option value="LA">Licenciatura en Administración</option>
+            <option value="LIN">Licenciatura en Informática</option>
+            <option value="IAL">Ingeniería en Alimentos</option>
+          </select>
+        </div>
+
+        <div
+          class="md:col-span-1 flex items-center bg-blue-50 rounded-lg p-4 border border-blue-100"
+        >
+          <p class="text-sm text-blue-800">
+            <span class="font-bold">Nota:</span>
+            Al confirmar, se actualizará el historial académico y se generará un
+            nuevo plan de estudios para el alumno.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-4 border-t border-charade-100 flex justify-end">
+        <button
+          type="submit"
+          class="px-6 py-3 bg-tec text-white font-medium rounded-lg hover:bg-mitec-blue-primary shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center"
+        >
+          <svg
+            class="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            ></path>
+          </svg>
+          Confirmar Cambio de Carrera
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div class="mt-6 flex justify-center">
+    <a
+      href="{% url 'visualizar_alumno' alumno.id_alumno %}"
+      class="text-charade-500 hover:text-tec font-medium text-sm flex items-center transition-colors group"
+    >
+      <svg
+        class="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        ></path>
+      </svg>
+      Cancelar y regresar
+    </a>
   </div>
 </div>
 

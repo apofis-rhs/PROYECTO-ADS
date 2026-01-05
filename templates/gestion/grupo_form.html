@@ -1,191 +1,310 @@
 {% extends "base.html" %}
-
-{% block title %}
-    {% if grupo %}Editar grupo{% else %}Crear grupo{% endif %}
+{% load static %} {% block title %}
+{% if grupo %}Editar grupo{% else %}Crear grupo{% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
 
-    <!-- Titulo principal -->
-    <h2 class="mb-3">
-        {% if grupo %}
-            Editar grupo: {{ grupo.clave_grupo }} ({{ grupo.nivel.nombre }}{% if grupo.grado %} - {{ grupo.grado }}{% endif %})
-        {% else %}
-            Crear nuevo grupo
-        {% endif %}
-    </h2>
 
-    <p class="text-muted mb-4">
-        Define el salon (grupo) asociado a una materia y un nivel educativo.
-        Este grupo se utilizara posteriormente en la generacion de horarios.
+
+<div class="animate-fade-in-up pb-10">
+  <div class="mb-8 border-b border-charade-200 pb-4">
+    <h1 class="text-3xl font-bold text-tec">
+      {% if grupo %} Editar Grupo {% else %} Crear Nuevo Grupo {% endif %}
+    </h1>
+    <p class="text-charade-500 mt-1">
+      {% if grupo %} Modificando:
+      <span class="font-semibold text-mitec-blue-primary">
+        {{ grupo.clave_grupo }}
+      </span>
+      ({{ grupo.nivel.nombre }}{% if grupo.grado %} - {{ grupo.grado }}{% endif %}) {% else %} Define el salón (grupo) asociado a una materia y un nivel educativo para la generación de horarios. {% endif %}
     </p>
+  </div>
 
-    <!-- Errores generales del formulario -->
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-            {% for error in form.non_field_errors %}
-                <div>{{ error }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
+  {% if form.non_field_errors %}
+  <div class="mb-6">
+    {% for error in form.non_field_errors %}
+    <div
+      class="p-4 rounded-lg bg-red-50 border-l-4 border-mitec-red-primary text-charade-700 relative flex items-start"
+    >
+      <svg
+        class="h-5 w-5 text-mitec-red-primary mr-2 mt-0.5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span class="font-medium">{{ error }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
-    <form method="post" novalidate>
-        {% csrf_token %}
+  <form method="post" novalidate class="space-y-6 django-tailwind-form">
+    {% csrf_token %}
 
-        <!-- =========================
-             Seccion: Contexto academico
-        ========================== -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <strong>Contexto academico</strong>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- Nivel educativo -->
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.nivel.id_for_label }}" class="form-label">
-                            Nivel educativo *
-                        </label>
-                        {{ form.nivel }}
-                        {% if form.nivel.errors %}
-                            <div class="text-danger small">
-                                {{ form.nivel.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Selecciona el nivel al que pertenece este grupo
-                                (KINDER, Primaria, Secundaria, Bachillerato, Universidad, etc.).
-                            </div>
-                        {% endif %}
-                    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-charade-200 p-6">
+      <h3
+        class="text-lg font-bold text-tec border-b border-charade-100 pb-2 mb-4 flex items-center"
+      >
+        <svg
+          class="w-5 h-5 mr-2 text-mitec-blue-primary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+          ></path>
+        </svg>
+        Contexto Académico
+      </h3>
 
-                    <!-- Materia -->
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.materia.id_for_label }}" class="form-label">
-                            Materia *
-                        </label>
-                        {{ form.materia }}
-                        {% if form.materia.errors %}
-                            <div class="text-danger small">
-                                {{ form.materia.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Selecciona la materia que se impartira en este grupo.
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row">
-                    <!-- Turno -->
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.turno.id_for_label }}" class="form-label">
-                            Turno
-                        </label>
-                        {{ form.turno }}
-                        {% if form.turno.errors %}
-                            <div class="text-danger small">
-                                {{ form.turno.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Turno en el que opera el grupo (matutino, vespertino, etc.),
-                                si aplica.
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Grado -->
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.grado.id_for_label }}" class="form-label">
-                            Grado
-                        </label>
-                        {{ form.grado }}
-                        {% if form.grado.errors %}
-                            <div class="text-danger small">
-                                {{ form.grado.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Para niveles basicos/media superior. Puedes dejarlo vacio si
-                                tu nivel trabaja solo por semestre.
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Periodo -->
-                    <div class="col-md-4 mb-3">
-                        <label for="{{ form.periodo.id_for_label }}" class="form-label">
-                            Periodo *
-                        </label>
-                        {{ form.periodo }}
-                        {% if form.periodo.errors %}
-                            <div class="text-danger small">
-                                {{ form.periodo.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Identificador del periodo escolar en el que existira este grupo
-                                (ejemplo: 2025-1).
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label
+            for="{{ form.nivel.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Nivel educativo
+            <span class="text-mitec-red-primary">*</span>
+          </label>
+          {{ form.nivel }} {% if form.nivel.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.nivel.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            Ej. Primaria, Secundaria, Bachillerato.
+          </p>
+          {% endif %}
         </div>
 
-        <!-- =========================
-             Seccion: Identificacion del salon
-        ========================== -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <strong>Identificacion del salon (grupo)</strong>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- Clave de grupo -->
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.clave_grupo.id_for_label }}" class="form-label">
-                            Clave de grupo *
-                        </label>
-                        {{ form.clave_grupo }}
-                        {% if form.clave_grupo.errors %}
-                            <div class="text-danger small">
-                                {{ form.clave_grupo.errors|striptags }}
-                            </div>
-                        {% else %}
-                            <div class="form-text">
-                                Identificador del salon (ejemplo: K1A, 2B, 3RO-A, ING-SIS-01).
-                            </div>
-                        {% endif %}
-                    </div>
+        <div>
+          <label
+            for="{{ form.materia.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Materia
+            <span class="text-mitec-red-primary">*</span>
+          </label>
+          {{ form.materia }} {% if form.materia.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.materia.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            Materia que se impartirá en este grupo.
+          </p>
+          {% endif %}
+        </div>
+      </div>
 
-                    <!-- Nota adicional de uso en horarios -->
-                    <div class="col-md-6 mb-3 d-flex align-items-center">
-                        <p class="text-muted mb-0">
-                            La combinacion <strong>nivel + grado + clave de grupo + periodo</strong>
-                            se usa para mostrar el horario por salon y para detectar posibles
-                            conflictos.
-                        </p>
-                    </div>
-                </div>
-            </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label
+            for="{{ form.turno.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Turno
+          </label>
+          {{ form.turno }} {% if form.turno.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.turno.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            Matutino, Vespertino, etc.
+          </p>
+          {% endif %}
         </div>
 
-        <!-- =========================
-             Botones de accion
-        ========================== -->
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary">
-                {% if grupo %}Guardar cambios{% else %}Crear grupo{% endif %}
-            </button>
-            <a href="{% url 'academico:grupo_list' %}" class="btn btn-secondary">
-                Cancelar
-            </a>
+        <div>
+          <label
+            for="{{ form.grado.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Grado
+          </label>
+          {{ form.grado }} {% if form.grado.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.grado.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            
+          </p>
+          {% endif %}
         </div>
 
-    </form>
+        <div>
+          <label
+            for="{{ form.periodo.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Periodo
+            <span class="text-mitec-red-primary">*</span>
+          </label>
+          {{ form.periodo }} {% if form.periodo.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.periodo.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1"></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-charade-200 p-6">
+      <h3
+        class="text-lg font-bold text-tec border-b border-charade-100 pb-2 mb-4 flex items-center"
+      >
+        <svg
+          class="w-5 h-5 mr-2 text-mitec-blue-primary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+          ></path>
+        </svg>
+        Identificación del Salón
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div>
+          <label
+            for="{{ form.clave_grupo.id_for_label }}"
+            class="block text-sm font-medium text-charade-900 mb-1"
+          >
+            Clave de grupo
+            <span class="text-mitec-red-primary">*</span>
+          </label>
+          {{ form.clave_grupo }} {% if form.clave_grupo.errors %}
+          <p class="text-xs text-mitec-red-primary mt-1">
+            {{ form.clave_grupo.errors|striptags }}
+          </p>
+          {% else %}
+          <p class="text-xs text-charade-400 mt-1">
+            Identificador único.
+          </p>
+          {% endif %}
+        </div>
+
+        <div
+          class="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start mt-1"
+        >
+          <svg
+            class="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <p class="text-xs text-blue-800 leading-relaxed">
+            La combinación
+            <strong class="font-semibold">
+              nivel + grado + clave + periodo
+            </strong>
+            se utiliza para generar la cuadrícula de horarios y detectar
+            conflictos de aula.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="flex items-center justify-end gap-4 mt-8 pt-4 border-t border-charade-200"
+    >
+      <a
+        href="{% url 'academico:grupo_list' %}"
+        class="px-6 py-2.5 border border-charade-300 text-charade-700 font-medium rounded-lg hover:bg-charade-50 transition-colors"
+      >
+        Cancelar
+      </a>
+      <button
+        type="submit"
+        class="px-6 py-2.5 bg-tec text-white font-medium rounded-lg hover:bg-mitec-blue-primary shadow-lg hover:shadow-xl transition-all transform active:scale-95 flex items-center"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+        {% if grupo %}Guardar Cambios{% else %}Crear Grupo{% endif %}
+      </button>
+    </div>
+  </form>
 </div>
+
+<style>
+  /* Aplica estilos similares a las clases de Tailwind a los inputs generados por Django */
+  .django-tailwind-form input[type="text"],
+  .django-tailwind-form input[type="number"],
+  .django-tailwind-form input[type="email"],
+  .django-tailwind-form input[type="date"],
+  .django-tailwind-form select,
+  .django-tailwind-form textarea {
+    display: block;
+    width: 100%;
+    border-radius: 0.5rem;
+    /* rounded-lg */
+    border: 1px solid #d3d7e4;
+    /* border-charade-200/300 */
+    background-color: #f6f7f9;
+    /* bg-charade-50 */
+    padding: 0.625rem;
+    /* p-2.5 */
+    font-size: 0.875rem;
+    /* text-sm */
+    line-height: 1.25rem;
+    color: #313649;
+    /* text-charade-900 */
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  .django-tailwind-form input:focus,
+  .django-tailwind-form select:focus,
+  .django-tailwind-form textarea:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-color: #00a7f7;
+    /* mitec-blue-light */
+    box-shadow: 0 0 0 3px rgba(0, 167, 247, 0.2);
+    /* ring */
+    background-color: #ffffff;
+  }
+</style>
+
 {% endblock %}

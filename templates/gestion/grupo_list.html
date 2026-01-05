@@ -1,104 +1,315 @@
 {% extends "base.html" %}
-
-{% block title %}Grupos{% endblock %}
+{% block title %}
+Grupos
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="animate-fade-in-up pb-10">
+  <div
+    class="mb-8 border-b border-charade-200 pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+  >
+    <div>
+      <h1 class="text-3xl font-bold text-tec">Grupos</h1>
+      <p class="text-charade-500 mt-1">
+        Administración de grupos académicos registrados en el sistema.
+      </p>
+    </div>
+    <a
+      href="{% url 'academico:grupo_create' %}"
+      class="inline-flex items-center px-5 py-2.5 bg-tec text-white text-sm font-medium rounded-lg hover:bg-mitec-blue-primary shadow-sm hover:shadow-md transition-all duration-200"
+    >
+      <svg
+        class="w-4 h-4 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        ></path>
+      </svg>
+      Nuevo Grupo
+    </a>
+  </div>
 
-    <!-- TÍTULO + ACCIÓN -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Grupos</h2>
-        <a href="{% url 'academico:grupo_create' %}" class="btn btn-primary shadow-sm">
-            + Nuevo grupo
-        </a>
+  {% if messages %}
+  <div class="mb-6 space-y-3">
+    {% for message in messages %}
+    <div
+      class="p-4 rounded-lg bg-mitec-blue-light/10 border-l-4 border-mitec-blue-primary text-charade-700 relative flex items-start shadow-sm"
+      role="alert"
+    >
+      <svg
+        class="w-5 h-5 text-mitec-blue-primary mr-3 mt-0.5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        ></path>
+      </svg>
+      <div class="flex-1 text-sm font-medium">{{ message }}</div>
+      <button
+        type="button"
+        class="text-charade-400 hover:text-charade-900 ml-2"
+        data-bs-dismiss="alert"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %} {% if grupos %}
+  <div
+    class="bg-white rounded-xl shadow-sm border border-charade-200 overflow-hidden"
+  >
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-charade-100">
+        <thead class="bg-charade-50">
+          <tr>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Nivel
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Clave Grupo
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-center text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Grado
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-center text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Periodo
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Turno
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Materia
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-left text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Docente
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-4 text-center text-xs font-semibold text-charade-500 uppercase tracking-wider"
+            >
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-charade-100">
+          {% for g in grupos %}
+          <tr class="hover:bg-charade-50 transition-colors duration-150">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-charade-600">
+              {{ g.nivel.nombre }}
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-bold text-mitec-blue-primary"
+            >
+              {{ g.clave_grupo }}
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-center text-charade-900"
+            >
+              {{ g.grado|default:"-" }}
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-center text-charade-900"
+            >
+              {{ g.periodo }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-charade-600">
+              {% if g.turno %}
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-charade-100 text-charade-800"
+              >
+                {{ g.turno.nombre }}
+              </span>
+              {% else %}
+              <span class="text-charade-300">-</span>
+              {% endif %}
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-charade-900 font-medium"
+            >
+              {{ g.materia.nombre }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-charade-600">
+              {% if g.docente %} {{ g.docente.nombre }} {{ g.docente.ape_paterno }} {% else %}
+              <span
+                class="text-xs text-orange-500 bg-orange-50 border border-orange-100 px-2 py-0.5 rounded"
+              >
+                Vacante
+              </span>
+              {% endif %}
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"
+            >
+              <div class="flex items-center justify-center gap-2">
+                <a
+                  href="{% url 'academico:grupo_update' g.id_grupo %}"
+                  class="text-mitec-blue-primary bg-mitec-blue-primary/10 hover:bg-mitec-blue-primary hover:text-white p-1.5 rounded-md transition-colors"
+                  title="Editar"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    ></path>
+                  </svg>
+                </a>
+                <a
+                  href="{% url 'academico:grupo_delete' g.id_grupo %}"
+                  class="text-mitec-red-primary bg-mitec-red-primary/10 hover:bg-mitec-red-primary hover:text-white p-1.5 rounded-md transition-colors"
+                  title="Eliminar"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    ></path>
+                  </svg>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
-    <!-- MENSAJES FLASH (creado / actualizado / eliminado) -->
-    {% if messages %}
-        <div class="mb-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+    <div
+      class="bg-charade-50 px-6 py-3 border-t border-charade-200 flex items-center justify-between"
+    >
+      <span class="text-xs text-charade-500">
+        Total: {{ grupos|length }} grupos registrados
+      </span>
+    </div>
+  </div>
 
-    <!-- DESCRIPCIÓN -->
-    <p class="text-muted mb-4">
-        Lista de grupos (salones) registrados en el sistema. Desde aquí puedes crear, editar y eliminar grupos
-        que después se utilizarán en la generación de horarios.
+  {% else %}
+  <div
+    class="bg-white border border-charade-200 rounded-xl p-12 text-center shadow-sm"
+  >
+    <div
+      class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-charade-50 text-charade-300 mb-4"
+    >
+      <svg
+        class="w-8 h-8"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+        ></path>
+      </svg>
+    </div>
+    <h3 class="text-lg font-bold text-charade-900">
+      No hay grupos registrados
+    </h3>
+    <p class="text-charade-500 mt-2 mb-6 max-w-md mx-auto">
+      Comienza creando un nuevo grupo para asignar materias y horarios.
     </p>
+    <a
+      href="{% url 'academico:grupo_create' %}"
+      class="inline-flex items-center px-5 py-2.5 bg-mitec-blue-primary text-white text-sm font-medium rounded-lg hover:bg-mitec-blue-light transition-colors"
+    >
+      <svg
+        class="w-4 h-4 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        ></path>
+      </svg>
+      Crear el primer grupo
+    </a>
+  </div>
+  {% endif %}
 
-    <!-- TABLA DE GRUPOS -->
-    {% if grupos %}
-        <div class="table-responsive rounded border bg-white shadow-sm">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nivel</th>
-                        <th>Clave grupo</th>
-                        <th class="text-center">Grado</th>
-                        <th class="text-center">Periodo</th>
-                        <th>Turno</th>
-                        <th>Materia</th>
-                        <th>Docente</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for g in grupos %}
-                        <tr>
-                            <td>{{ g.nivel.nombre }}</td>
-                            <td class="fw-semibold">{{ g.clave_grupo }}</td>
-                            <td class="text-center">
-                                {{ g.grado|default:"-" }}
-                            </td>
-                            <td class="text-center">{{ g.periodo }}</td>
-                            <td>
-                                {% if g.turno %}
-                                    {{ g.turno.nombre }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td>{{ g.materia.nombre }}</td>
-                            <td>
-                                {% if g.docente %}
-                                    {{ g.docente.nombre }} {{ g.docente.ape_paterno }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <a href="{% url 'academico:grupo_update' g.id_grupo %}"
-                                   class="btn btn-sm btn-outline-secondary me-1">
-                                    Editar
-                                </a>
-                                <a href="{% url 'academico:grupo_delete' g.id_grupo %}"
-                                   class="btn btn-sm btn-outline-danger">
-                                    Eliminar
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="alert alert-info border-0 shadow-sm">
-            No hay grupos registrados todavía. Usa el botón
-            "<strong>Nuevo grupo</strong>" para crear el primero.
-        </div>
-    {% endif %}
-
-    <!-- BOTÓN VOLVER -->
-    <div class="mt-4">
-        <a href="{% url 'academico:gestion_horarios' %}" class="btn btn-link">
-            ← Volver a Gestión de horarios
-        </a>
-    </div>
-
+  <div class="mt-8 flex justify-center">
+    <a
+      href="{% url 'academico:gestion_horarios' %}"
+      class="inline-flex items-center text-charade-500 hover:text-tec font-medium transition-colors text-sm"
+    >
+      <svg
+        class="w-4 h-4 mr-1"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        ></path>
+      </svg>
+      Volver a Gestión de Horarios
+    </a>
+  </div>
 </div>
 {% endblock %}
