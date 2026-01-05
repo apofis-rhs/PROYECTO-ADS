@@ -1,6 +1,8 @@
 # academico/forms.py
 from django import forms
 from .models import Materia, Grupo
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 class MateriaForm(forms.ModelForm):
     class Meta:
@@ -29,3 +31,7 @@ class GrupoForm(forms.ModelForm):
             # OJO: no incluimos 'docente' aqui
         ]
 
+class LoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField()
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
