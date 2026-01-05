@@ -56,6 +56,9 @@
           </button>
 
           <button
+            id="btnImprimirFichaTutor"
+            type="button"
+            data-url="{% url 'generar_documento_tutor' tutor.id_tutor %}"
             class="w-full py-2 px-4 bg-mitec-blue-primary text-white font-medium rounded-lg hover:bg-mitec-blue-light transition-colors shadow-sm text-sm flex items-center justify-center">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -64,6 +67,7 @@
             </svg>
             Imprimir Ficha
           </button>
+          
         </div>
       </div>
     </div>
