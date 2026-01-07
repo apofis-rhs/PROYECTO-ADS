@@ -512,7 +512,7 @@ if (selectNivel && selectGrado) {
   // ==========================================
 // 10. PERSISTENCIA DE DATOS (Auto-guardado)
 // ==========================================
-const camposAPersistir = document.querySelectorAll('input:not([type="file"]), select');
+const camposAPersistir = document.querySelectorAll('input:not([type="file"]):not([readonly]), select:not([disabled])');
 
 // 1. Restaurar los datos al cargar la página
 camposAPersistir.forEach(campo => {
