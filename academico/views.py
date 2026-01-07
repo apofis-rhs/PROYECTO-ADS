@@ -23,6 +23,8 @@ from .models import (
     Materia, Horario
 )
 
+from django.contrib.sessions.models import Session
+
 
 # def dashboard_view(request):
 #     return render(request, 'dashboard.html')
@@ -52,11 +54,9 @@ def login_view(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        # Pasamos los datos del HTML al formulario para validarlos (incluido el captcha)
         form = LoginForm(request.POST)
 
         if form.is_valid():
-            # Si el form es válido, el Captcha pasó correctamente
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
 
@@ -64,6 +64,22 @@ def login_view(request):
 
             if user is not None:
                 if user.is_active:
+                    # ========================================================
+                    # LÓGICA DE SESIÓN UNICA
+                    # ========================================================
+                    try:
+                        active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+                        
+                        for session in active_sessions:
+                            data = session.get_decoded()
+                            if data.get('_auth_user_id') == str(user.pk):
+                                session.delete()
+                    except Exception as e:
+                        # Si algo falla al limpiar sesiones, imprimimos el error pero dejamos pasar al usuario
+                        print(f"Error limpiando sesiones previas: {e}")
+
+                    # ========================================================
+                    
                     login(request, user)
                     return redirect('dashboard')
                 else:
@@ -77,14 +93,12 @@ def login_view(request):
                     'error': 'Usuario o contraseña incorrectos.'
                 })
         else:
-            # Si el form no es válido, puede ser que falló el Captcha
             return render(request, 'login.html', {
                 'form': form,
                 'error': 'Por favor completa el Captcha correctamente.'
             })
 
     else:
-        # Petición GET: Formulario vacío
         form = LoginForm()
 
     return render(request, 'login.html', {'form': form})
