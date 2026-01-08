@@ -4,152 +4,100 @@ document.addEventListener('DOMContentLoaded', function() {
     // ==========================================
     // 1. SELECTORES GLOBALES
     // ==========================================
-    const formularioAlumno = document.querySelector('form:not(#formNuevoTutor)');
+    const formularioAlumno = document.querySelector('form:not(#formNuevoTutor):not(#formBaja)');
+    
     const inputBoleta = document.querySelector('input[name="boleta"]');
     const mensajeErrorBoleta = document.getElementById('errorBoleta');
     const selectNivel = document.querySelector('select[name="nivel"]');
-
-    const selectGrado = document.getElementById('selectGrado'); // Añadido
-
-
+    const selectGrado = document.getElementById('selectGrado');
     const selectTutor = document.querySelector('select[name="tutor"]');
     const inputFecha = document.querySelector('input[name="fecha_nacimiento"]');
     const mensajeErrorEdad = document.getElementById('errorEdadNivel');
     const inputCurp = document.querySelector('input[name="curp"]');
-    const mensajeErrorCurp = document.getElementById('errorCurp');
     const camposTelefono = document.querySelectorAll('input[name*="telefono"]');
-
 
     // Selectores para el Correo dinámico
     const contenedorCorreo = document.getElementById('contenedorCorreoAlumno');
     const inputCorreo = document.getElementById('inputCorreoAlumno');
 
     // ==========================================
-    // 2. VALIDACIÓN DE BOLETA (AAAA430###)
+    // 2. VALIDACIÓN DE BOLETA (Visual, si está readonly no afecta)
     // ==========================================
-   
-if (inputBoleta) {
-    inputBoleta.addEventListener('blur', function() {
-        const valor = this.value.trim();
-        const añoActual = new Date().getFullYear();
-        const regexBoleta = /^\d{4}430\d{3}$/;
-        
-        // 1. SIEMPRE LIMPIAMOS TODO AL SALIR
-        this.classList.remove('is-invalid', 'is-valid');
-        if (mensajeErrorBoleta) {
-            mensajeErrorBoleta.style.display = 'none';
-        }
+    if (inputBoleta && !inputBoleta.readOnly) {
+        inputBoleta.addEventListener('blur', function() {
+            const valor = this.value.trim();
+            const añoActual = new Date().getFullYear();
+            const regexBoleta = /^\d{4}430\d{3}$/;
+            
+            this.classList.remove('is-invalid', 'is-valid');
+            if (mensajeErrorBoleta) mensajeErrorBoleta.style.display = 'none';
 
-        // 2. SOLO VALIDAMOS SI EL CAMPO NO ESTÁ VACÍO
-        if (valor !== "") {
-            if (!regexBoleta.test(valor)) {
-                // Formato incorrecto
-                this.classList.add('is-invalid');
-                if (mensajeErrorBoleta) {
-                    mensajeErrorBoleta.textContent = "Formato inválido: Año(4) + 430 + 3 dígitos.";
-                    mensajeErrorBoleta.style.display = 'block';
-                }
-            } else {
-                const añoIngreso = parseInt(valor.substring(0, 4));
-                if (añoIngreso > añoActual) {
-                    // Año futuro
+            if (valor !== "") {
+                if (!regexBoleta.test(valor)) {
                     this.classList.add('is-invalid');
                     if (mensajeErrorBoleta) {
-                        mensajeErrorBoleta.textContent = `El año (${añoIngreso}) no puede ser mayor al actual.`;
+                        mensajeErrorBoleta.textContent = "Formato inválido: Año(4) + 430 + 3 dígitos.";
                         mensajeErrorBoleta.style.display = 'block';
                     }
                 } else {
-                    // TODO CORRECTO
-                    this.classList.add('is-valid');
+                    const añoIngreso = parseInt(valor.substring(0, 4));
+                    if (añoIngreso > añoActual) {
+                        this.classList.add('is-invalid');
+                        if (mensajeErrorBoleta) {
+                            mensajeErrorBoleta.textContent = `El año (${añoIngreso}) no puede ser mayor al actual.`;
+                            mensajeErrorBoleta.style.display = 'block';
+                        }
+                    } else {
+                        this.classList.add('is-valid');
+                    }
                 }
-            }
-        } 
-        // Si valor === "", no entra al IF y el campo se queda limpio (sin clases)
-    });
-
-    // Opcional: Quitar el error mientras el usuario está corrigiendo (mejora la UX)
-    inputBoleta.addEventListener('input', function() {
-        this.classList.remove('is-invalid');
-    });
-}
-  
-// ==========================================
-// 5. VALIDACIÓN DE CURP Y RFC (OPTIMIZADO)
-// ==========================================
-
-const aplicarValidacionDoc = (nombreCampo, regex) => {
-    const inputs = document.querySelectorAll(`input[name="${nombreCampo}"]`);
-    if (inputs.length === 0) return;
-
-    inputs.forEach(input => {
-        // Mientras el usuario escribe
-        input.addEventListener('input', function() {
-            // Convertir a mayúsculas y quitar espacios
-            this.value = this.value.toUpperCase().replace(/\s/g, '');
-            
-            // Quitar el rojo de error mientras edita
-            this.classList.remove('is-invalid');
-
-            // OPCIONAL: Si ya tiene la longitud completa y es válido, poner palomita de una vez
-            const longitudRequerida = (nombreCampo === 'curp') ? 18 : 13;
-            if (this.value.length >= longitudRequerida && regex.test(this.value)) {
-                this.classList.add('is-valid');
-            } else {
-                this.classList.remove('is-valid');
-            }
-        });
-
-        // Cuando el usuario sale del campo (Tab o Click fuera)
-        input.addEventListener('blur', function() {
-            const valor = this.value.trim();
-
-            // 1. Limpieza total de estados antes de validar
-            this.classList.remove('is-invalid', 'is-valid');
-
-            // 2. Si el campo está vacío
-            if (valor === "") {
-                if (this.required) {
-                    this.classList.add('is-invalid');
-                }
-                return; // Salimos sin poner palomita
-            }
-
-            // 3. Validación con la Regex
-            if (regex.test(valor)) {
-                // ÉXITO: Se pone borde verde y palomita
-                this.classList.add('is-valid');
-            } else {
-                // ERROR: Se pone borde rojo y X
-                this.classList.add('is-invalid');
-            }
-        });
-    });
-};
-
-// Regex oficiales
-const regexCURP = /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM]([A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[A-Z\d])(\d)$/;
-const regexRFC = /^[A-ZÑ&]{3,4}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[A-Z\d]{3}$/;
-
-// Ejecución para todos los campos presentes en el HTML (Alumno y Tutor)
-aplicarValidacionDoc('curp', regexCURP);
-aplicarValidacionDoc('rfc', regexRFC);
-
-
-    // ==========================================
-    // 6. BLOQUEO DE ENVÍO SI HAY ERRORES
-    // ==========================================
-    const formulario = document.querySelector('form');
-    if (formulario) {
-        formulario.addEventListener('submit', function(e) {
-            const errores = this.querySelectorAll('.is-invalid');
-            if (errores.length > 0) {
-                e.preventDefault();
-                alert("❌ Por favor, corrija los campos marcados en rojo (CURP, RFC o Teléfono) antes de guardar.");
-                errores[0].focus();
-            }
+            } 
         });
     }
 
+    // ==========================================
+    // 3. VALIDACIÓN DE CURP Y RFC
+    // ==========================================
+    const aplicarValidacionDoc = (nombreCampo, regex) => {
+        const inputs = document.querySelectorAll(`input[name="${nombreCampo}"]`);
+        if (inputs.length === 0) return;
+
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase().replace(/\s/g, '');
+                this.classList.remove('is-invalid');
+                
+                const longitudRequerida = (nombreCampo === 'curp') ? 18 : 13;
+                if (this.value.length >= longitudRequerida && regex.test(this.value)) {
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                const valor = this.value.trim();
+                this.classList.remove('is-invalid', 'is-valid');
+
+                if (valor === "") {
+                    if (this.required) this.classList.add('is-invalid');
+                    return;
+                }
+
+                if (regex.test(valor)) {
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+    };
+
+    const regexCURP = /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM]([A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[A-Z\d])(\d)$/;
+    const regexRFC = /^[A-ZÑ&]{3,4}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[A-Z\d]{3}$/;
+
+    aplicarValidacionDoc('curp', regexCURP);
+    aplicarValidacionDoc('rfc', regexRFC);
 
     // ==========================================
     // 4. EDAD VS NIVEL
@@ -188,13 +136,11 @@ aplicarValidacionDoc('rfc', regexRFC);
                 mensajeErrorEdad.style.display = 'block';
             }
             inputFecha.classList.add(esBloqueante ? 'is-invalid' : 'is-warning');
-            inputFecha.dataset.invalid = esBloqueante ? "true" : "false";
             return !esBloqueante;
         } else {
             if (mensajeErrorEdad) mensajeErrorEdad.style.display = 'none';
             inputFecha.classList.remove('is-invalid', 'is-warning');
             inputFecha.classList.add('is-valid');
-            inputFecha.dataset.invalid = "false";
             return true;
         }
     };
@@ -234,108 +180,110 @@ aplicarValidacionDoc('rfc', regexRFC);
             const nivelId = this.value;
             
             // A. Grados Dinámicos
-            selectGrado.innerHTML = '<option value="">Seleccionar...</option>';
-            let opciones = [];
-            switch (nivelId) {
-                case "1": opciones = ["1° Kinder", "2° Kinder", "3° Kinder"]; break;
-                case "2": opciones = ["1° Primaria", "2° Primaria", "3° Primaria", "4° Primaria", "5° Primaria", "6° Primaria"]; break;
-                case "3": opciones = ["1° Secundaria", "2° Secundaria", "3° Secundaria"]; break;
-                case "4": opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre"]; break;
-                case "5": opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre", "7° Semestre", "8° Semestre"]; break;
+            if (selectGrado) {
+                selectGrado.innerHTML = '<option value="">Seleccionar...</option>';
+                let opciones = [];
+                switch (nivelId) {
+                    case "1": opciones = ["1° Kinder", "2° Kinder", "3° Kinder"]; break;
+                    case "2": opciones = ["1° Primaria", "2° Primaria", "3° Primaria", "4° Primaria", "5° Primaria", "6° Primaria"]; break;
+                    case "3": opciones = ["1° Secundaria", "2° Secundaria", "3° Secundaria"]; break;
+                    case "4": opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre"]; break;
+                    case "5": opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre", "7° Semestre", "8° Semestre", "9° Semestre", "10° Semestre"]; break;
+                }
+                
+                // CORRECCIÓN APLICADA AQUÍ:
+                opciones.forEach((gradoTexto, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = index + 1; // Envía 1, 2, 3... a la Base de Datos
+                    opt.textContent = gradoTexto; // Muestra "1° Kinder", etc.
+                    selectGrado.appendChild(opt);
+                });
             }
-            opciones.forEach(grado => {
-                const opt = new Option(grado, grado); // Corregido: value ahora es el texto completo
-                selectGrado.add(opt);
-            });
 
             // B. Tutor y Correo Dinámico
-            const labelTutor = selectTutor.closest('.col-8').querySelector('label');
-            if (["1", "2", "3"].includes(nivelId)) {
-                // Básica
-                selectTutor.required = true;
-                if(labelTutor) labelTutor.innerHTML = "Tutor Asignado * <small class='text-muted'>(Obligatorio)</small>";
-                if(contenedorCorreo) contenedorCorreo.style.display = 'none';
-                if(inputCorreo) { inputCorreo.required = false; inputCorreo.value = ""; }
-            } else {
-                // Superior
-                selectTutor.required = false;
-                if(labelTutor) labelTutor.innerHTML = "Tutor Asignado <small class='text-muted'>(Opcional)</small>";
-                if(contenedorCorreo) contenedorCorreo.style.display = 'block';
-                if(inputCorreo) inputCorreo.required = true;
+            if (selectTutor) {
+                const labelTutor = selectTutor.closest('.row') ? selectTutor.closest('.row').querySelector('label') : null;
+                
+                if (["1", "2", "3"].includes(nivelId)) {
+                    // Básica: Tutor obligatorio, Correo oculto
+                    selectTutor.required = true;
+                    if(labelTutor) labelTutor.innerHTML = "Tutor Asignado * <small class='text-muted'>(Obligatorio)</small>";
+                    if(contenedorCorreo) contenedorCorreo.style.display = 'none';
+                    
+                } else {
+                    // Superior: Tutor opcional, Correo visible
+                    selectTutor.required = false;
+                    if(labelTutor) labelTutor.innerHTML = "Tutor Asignado <small class='text-muted'>(Opcional)</small>";
+                    if(contenedorCorreo) contenedorCorreo.style.display = 'block';
+                    
+                    if(inputCorreo) {
+                        inputCorreo.required = false; 
+                        inputCorreo.value = "Se generará automáticamente (Regla: Nombre + Fecha)";
+                    }
+                }
             }
         });
     }
 
+    // ==========================================
+    // 7. VALIDACIÓN DE CORREO (Solo para Modal Tutor, NO para Alumno)
+    // ==========================================
+    const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    // (La función existe pero ya no se aplica al inputCorreoAlumno)
 
     // ==========================================
-// 7. BLOQUEO DE ENVÍO (ÚNICO Y UNIFICADO)
-// ==========================================
-if (formularioAlumno) {
+    // 8. BLOQUEO DE ENVÍO (FORMULARIO ALTA/EDICIÓN)
+    // ==========================================
+    if (formularioAlumno) {
         formularioAlumno.addEventListener('submit', function(e) {
-            const nivelId = selectNivel.value;
+            const nivelId = selectNivel ? selectNivel.value : "";
             
-            // Si es Prepa (4) o Universidad (5), validamos el correo del alumno forzosamente
-            if (["4", "5"].includes(nivelId)) {
-                if (inputCorreo) {
-                    validarEmail(inputCorreo);
-                }
-            }
-
-            // Validamos que el Tutor esté seleccionado si es nivel básico
+            // Validamos Tutor obligatorio en básica
             if (["1", "2", "3"].includes(nivelId)) {
-                if (!selectTutor.value) {
+                if (selectTutor && !selectTutor.value) {
                     selectTutor.classList.add('is-invalid');
-                } else {
+                } else if (selectTutor) {
                     selectTutor.classList.remove('is-invalid');
                 }
             }
 
-            // Checamos si hay CUALQUIER error en el formulario
+            // Revisión final de errores
             const errores = document.querySelectorAll('.is-invalid');
             
             if (errores.length > 0) {
                 e.preventDefault();
-                alert(" No se puede guardar. Hay campos obligatorios vacíos o con errores (CURP, Teléfono, Correo o Boleta).");
-                
-                // Scroll al primer error
+                alert("❌ No se puede guardar. Hay campos obligatorios vacíos o con errores.");
                 errores[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 errores[0].focus();
+            } else {
+                // Si todo está bien, limpiamos el localStorage
+                const camposLimpiar = document.querySelectorAll('input:not([type="file"]), select');
+                camposLimpiar.forEach(campo => {
+                    localStorage.removeItem('form_alumno_' + campo.name);
+                });
             }
         });
     }
 
     // ==========================================
-    // 8. OTROS (MODAL TUTOR, BAJA, DOCUMENTOS)
+    // 9. MODAL NUEVO TUTOR (AJAX) - Este sí valida correo del Tutor
     // ==========================================
-    // Tutor Dinámico
-    if (selectNivel && selectTutor) {
-        function actualizarTutor() {
-            const nivelId = parseInt(selectNivel.value);
-            const labelTutor = selectTutor.closest('.row').querySelector('label');
-            if (nivelId >= 1 && nivelId <= 3) {
-                selectTutor.required = true;
-                if(labelTutor) labelTutor.innerHTML = "Tutor Asignado *";
-            } else {
-                selectTutor.required = false;
-                if(labelTutor) labelTutor.innerHTML = "Tutor Asignado (Opcional)";
-            }
-        }
-        selectNivel.addEventListener('change', actualizarTutor);
-    }
-
-    // Modal Tutor AJAX
     const formTutorModal = document.getElementById('formNuevoTutor');
     if (formTutorModal) {
         formTutorModal.addEventListener('submit', function(e) {
             e.preventDefault();
-            const curpTutor = this.querySelector('.curp-input');
-        if (curpTutor && curpTutor.classList.contains('is-invalid')) {
-            alert(" CURP del tutor inválido");
-            curpTutor.focus();
-            return; 
-        }
+            
+            const curpTutor = this.querySelector('.curp-input'); 
+            if (curpTutor && curpTutor.classList.contains('is-invalid')) {
+                alert("⚠️ CURP del tutor inválido");
+                curpTutor.focus();
+                return; 
+            }
+
             const apiUrl = this.getAttribute('data-api-url');
             const formData = new FormData(this);
+            
             fetch(apiUrl, { 
                 method: 'POST', 
                 body: formData, 
@@ -344,202 +292,109 @@ if (formularioAlumno) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('modalNuevoTutor')).hide();
-                    const opt = new Option(data.tutor_nombre, data.tutor_id);
-                    selectTutor.add(opt);
-                    selectTutor.value = data.tutor_id;
-                    alert('Tutor registrado.');
+                    const modalElement = document.getElementById('modalNuevoTutor');
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (modalInstance) modalInstance.hide();
+                    
+                    if (selectTutor) {
+                        const opt = new Option(data.tutor_nombre, data.tutor_id);
+                        selectTutor.add(opt);
+                        selectTutor.value = data.tutor_id;
+                    }
+                    this.reset();
+                    alert('✅ Tutor registrado correctamente.');
+                } else {
+                    alert('❌ Error al registrar tutor: ' + data.error);
                 }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error de conexión.');
             });
         });
     }
 
     // ==========================================
-// 9. GRADOS Y SEMESTRES DINÁMICOS
-// ==========================================
-
-if (selectNivel && selectGrado) {
-    selectNivel.addEventListener('change', function() {
-        const nivelId = this.value; // El ID del nivel seleccionado
-        
-        // Limpiar opciones anteriores
-        selectGrado.innerHTML = '<option value="">Seleccionar...</option>';
-        
-        let opciones = [];
-
-        // Definimos grados según el ID del nivel
-        // Ajusta los números (1, 2, 3...) según tus IDs de la base de datos
-        switch (nivelId) {
-            case "1": // Kinder
-                opciones = ["1° Kinder", "2° Kinder", "3° Kinder"];
-                break;
-            case "2": // Primaria   
-                opciones = ["1° Primaria", "2° Primaria", "3° Primaria", "4° Primaria", "5° Primaria", "6° Primaria"];
-                break;
-            case "3": // Secundaria
-                opciones = ["1° Secundaria", "2° Secundaria", "3° Secundaria"];
-                break;
-            case "4": // Preparatoria
-                opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre"];
-                break;
-            case "5": // Universidad
-                opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre", "7° Semestre", "8° Semestre", "9° Semestre", "10° Semestre"];
-                break;
-        }
-
-        // Agregar las nuevas opciones al select
-        opciones.forEach(grado => {
-            const opt = document.createElement('option');
-            opt.value = grado[0];
-            opt.textContent = grado;
-            selectGrado.appendChild(opt);
-        });
-    });
-}
-
-// ==========================================
-    // 10. VALIDACIÓN DE CORREOS OBLIGATORIOS
-    // ==========================================
-    const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    const validarEmail = (input) => {
-        const valor = input.value.trim();
-        input.classList.remove('is-invalid', 'is-valid');
-
-        // 1. Validar que no esté vacío (Obligatorio)
-        if (valor === "") {
-            input.classList.add('is-invalid');
-            return false;
-        }
-
-        // 2. Validar formato con Regex
-        if (regexCorreo.test(valor)) {
-            input.classList.add('is-valid');
-            return true;
-        } else {
-            input.classList.add('is-invalid');
-            return false;
-        }
-    };
-
-    // Aplicar a todos los campos de email
-    const camposCorreo = document.querySelectorAll('input[type="email"]');
-    camposCorreo.forEach(input => {
-        // Validar al salir del campo
-        input.addEventListener('blur', function() {
-            validarEmail(this);
-        });
-        
-        // Limpiar error mientras el usuario corrige
-        input.addEventListener('input', function() {
-            this.classList.remove('is-invalid');
-        });
-    });
-
-    
-});
-
-//tache para eliminar documento adjunto
-
-    function limpiarFoto() {
-    document.getElementById("foto").value = "";
-  }
-
-    // ==========================================
-    // 7. GESTIÓN CENTRALIZADA DE DOCUMENTOS (Ver, Bajar, Ficha)
+    // 10. GESTIÓN CENTRALIZADA DE DOCUMENTOS (Ver / Descargar / Ficha)
     // ==========================================
     const btnVisualizar = document.getElementById('btnVisualizarDoc');
     const btnDescargar = document.getElementById('btnDescargarDoc');
     const btnFicha = document.getElementById('btnImprimirFicha');
     const selectDocumento = document.getElementById('selectDocumento');
 
-    // Función genérica para abrir documentos (PDFs y Ficha)
     function gestionarAperturaDocumento(tipoAccion) {
-        
-        // 1. Caso: Imprimir Ficha Técnica (Botón independiente)
         if (tipoAccion === 'ficha') {
             if (btnFicha) {
                 const urlFicha = btnFicha.getAttribute('data-url');
-                window.open(`${urlFicha}?tipo=ficha`, '_blank');
+                if (urlFicha) window.open(`${urlFicha}?tipo=ficha`, '_blank');
             }
             return;
         }
 
-        // 2. Caso: Documentos del Select (Horario, Historial, Incidencias)
         if (!selectDocumento.value) {
             alert('⚠️ Por favor, selecciona un tipo de documento del listado.');
             selectDocumento.focus();
             return;
         }
 
-        // Usamos la URL base que ya tiene el botón de visualizar
-        // (Nota: Ambos botones apuntan a la misma vista en Django)
         const baseUrl = btnVisualizar.getAttribute('data-url');
         let urlFinal = `${baseUrl}?tipo=${selectDocumento.value}`;
 
-        // Si es descarga, añadimos el parámetro mágico que configuramos en views.py
         if (tipoAccion === 'descargar') {
             urlFinal += '&download=true';
         }
 
-        // Abrir en nueva pestaña (si es descarga, el navegador lo bajará automáticamente)
         window.open(urlFinal, '_blank');
     }
 
-    // --- ASIGNACIÓN DE EVENTOS ---
+    if (btnVisualizar) btnVisualizar.addEventListener('click', () => gestionarAperturaDocumento('ver'));
+    if (btnDescargar) btnDescargar.addEventListener('click', () => gestionarAperturaDocumento('descargar'));
+    if (btnFicha) btnFicha.addEventListener('click', () => gestionarAperturaDocumento('ficha'));
 
-    // A) Botón "Ver"
-    if (btnVisualizar) {
-        btnVisualizar.addEventListener('click', function() {
-            gestionarAperturaDocumento('ver');
-        });
-    }
 
-    // B) Botón "Bajar"
-    if (btnDescargar) {
-        btnDescargar.addEventListener('click', function() {
-            gestionarAperturaDocumento('descargar');
-        });
-    }
+    // ==========================================
+    // 11. PERSISTENCIA DE DATOS (Auto-guardado)
+    // ==========================================
+    const camposAPersistir = document.querySelectorAll('input:not([type="file"]):not([type="radio"]):not([type="checkbox"]):not([readonly]), select:not([disabled])');
 
-    // C) Botón "Imprimir Ficha"
-    if (btnFicha) {
-        btnFicha.addEventListener('click', function() {
-            gestionarAperturaDocumento('ficha');
-        });
-    }
-
-  // ==========================================
-// 10. PERSISTENCIA DE DATOS (Auto-guardado)
-// ==========================================
-const camposAPersistir = document.querySelectorAll('input:not([type="file"]):not([readonly]), select:not([disabled])');
-
-// 1. Restaurar los datos al cargar la página
-camposAPersistir.forEach(campo => {
-    const valorGuardado = localStorage.getItem('form_alumno_' + campo.name);
-    if (valorGuardado) {
-        campo.value = valorGuardado;
-        // Disparar evento change para que se activen tus validaciones y lógica dinámica
-        campo.dispatchEvent(new Event('change'));
-    }
-});
-
-// 2. Guardar los datos cada vez que el usuario escriba o cambie algo
-camposAPersistir.forEach(campo => {
-    campo.addEventListener('input', () => {
-        localStorage.setItem('form_alumno_' + campo.name, campo.value);
-    });
-});
-
-// 3. Limpiar el localStorage solo cuando el formulario se envíe con éxito
-if (formularioAlumno) {
-    formularioAlumno.addEventListener('submit', (e) => {
-        // Solo si no hay errores (is-invalid), procedemos a limpiar
-        const errores = document.querySelectorAll('.is-invalid');
-        if (errores.length === 0) {
-            camposAPersistir.forEach(campo => {
-                localStorage.removeItem('form_alumno_' + campo.name);
-            });
+    camposAPersistir.forEach(campo => {
+        const valorGuardado = localStorage.getItem('form_alumno_' + campo.name);
+        if (valorGuardado) {
+            campo.value = valorGuardado;
+            campo.dispatchEvent(new Event('change')); 
         }
     });
-}
+
+    camposAPersistir.forEach(campo => {
+        campo.addEventListener('input', () => {
+            localStorage.setItem('form_alumno_' + campo.name, campo.value);
+        });
+    });
+
+    // ==========================================
+    // 12. CONFIRMACIÓN DE BAJA
+    // ==========================================
+    const formBaja = document.getElementById('formBaja');
+    if (formBaja) {
+        formBaja.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            const formData = new FormData(formBaja);
+            const tipo = formData.get('tipoBaja'); 
+
+            if (!tipo) {
+                alert("⚠️ Por favor, selecciona un tipo de baja.");
+                return;
+            }
+            let mensaje = "";
+            if (tipo === 'definitiva') {
+                mensaje = "⚠️ ¡ATENCIÓN: ACCIÓN IRREVERSIBLE! ⚠️\n\n¿Estás completamente seguro de ELIMINAR a este alumno?";
+            } else {
+                mensaje = "CONFIRMACIÓN DE BAJA TEMPORAL\n\n¿Deseas desactivar temporalmente al alumno?";
+            }
+
+            if (confirm(mensaje)) {
+                this.submit();
+            }
+        });
+    }
+});

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            size: letter;
+            margin: 2cm;
+        }
+        body { 
+            font-family: 'Helvetica', sans-serif; 
+            color: #333; 
+            line-height: 1.5; 
+            font-size: 12pt;
+        }
+        .header { 
+            text-align: right; 
+            margin-bottom: 40px; 
+            color: #666; 
+            font-size: 10pt; 
+        }
+        .logo { 
+            font-size: 22pt; 
+            font-weight: bold; 
+            color: #003366; 
+            margin-bottom: 10px; 
+            border-bottom: 2px solid #003366;
+            padding-bottom: 10px;
+        }
+        .titulo { 
+            text-align: center; 
+            font-size: 16pt; 
+            font-weight: bold; 
+            margin: 40px 0; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .contenido { 
+            text-align: justify; 
+            margin-bottom: 30px;
+        }
+        .caja-credenciales {
+            border: 2px dashed #003366;
+            background-color: #f4f8fb;
+            padding: 20px;
+            margin: 30px auto;
+            width: 80%;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .dato-fila {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .etiqueta {
+            font-size: 10pt;
+            color: #666;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .valor {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #003366;
+            font-family: 'Courier New', monospace;
+        }
+        .nota {
+            font-size: 9pt;
+            color: #777;
+            font-style: italic;
+            margin-top: 40px;
+            text-align: center;
+        }
+        .firma {
+            margin-top: 80px;
+            text-align: center;
+        }
+        .linea-firma {
+            border-top: 1px solid #333;
+            width: 40%;
+            margin: 0 auto;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        Ciudad de México, a {{ fecha_hoy|date:"d de F de Y" }}<br>
+        Asunto: Asignación de Credenciales de Acceso
+    </div>
+
+    <div class="logo">
+        SISTEMA DE GESTIÓN ACADÉMICA
+    </div>
+
+    <div class="titulo">CARTA DE BIENVENIDA</div>
+
+    <div class="contenido">
+        <p>Estimado(a) Alumno(a): <strong>{{ alumno.nombre }} {{ alumno.ape_paterno }} {{ alumno.ape_materno }}</strong></p>
+
+        <p>Por medio de la presente, le damos la más cordial bienvenida al ciclo escolar vigente. Nos complace informarle que su proceso de inscripción ha sido completado exitosamente en nuestra base de datos institucional.</p>
+
+        <p>A continuación, se le hace entrega de sus credenciales únicas de acceso. Estos datos son confidenciales y necesarios para ingresar al portal de estudiantes, consultar calificaciones y acceder a los servicios digitales de la institución.</p>
+    </div>
+
+    <div class="caja-credenciales">
+        <div class="dato-fila">
+            <span class="etiqueta">Boleta / Matrícula Asignada</span>
+            <span class="valor">{{ alumno.boleta }}</span>
+        </div>
+        
+        <div class="dato-fila">
+            <span class="etiqueta">Correo Institucional</span>
+            <span class="valor">{{ email_generado }}</span>
+        </div>
+
+        <div style="margin-bottom: 0;">
+            <span class="etiqueta">Contraseña Temporal</span>
+            <span class="valor">{{ password_temporal }}</span>
+        </div>
+    </div>
+
+    <div class="contenido">
+        <p>Le solicitamos resguardar este documento. Para activar su cuenta, deberá ingresar al portal web en su primer inicio de sesión utilizando la contraseña temporal proporcionada. El sistema le solicitará cambiarla inmediatamente por motivos de seguridad.</p>
+    </div>
+
+    <div class="firma">
+        <div class="linea-firma">
+            Dirección de Servicios Escolares
+        </div>
+        <div style="font-size: 10pt; margin-top: 5px;">Departamento de Control Académico</div>
+    </div>
+
+    <div class="nota">
+        Este documento es generado automáticamente por el Sistema de Gestión Académica.<br>
+        ID de Transacción: {{ alumno.id_alumno }}-{{ alumno.boleta }}-GEN
+    </div>
+
+</body>
+</html>

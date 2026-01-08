@@ -289,6 +289,7 @@ class Alumno(models.Model):
     nivel = models.ForeignKey(NivelEducativo, on_delete=models.CASCADE, db_column='id_nivel')
     carrera = models.ForeignKey(Carrera, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_carrera')
     tutor = models.ForeignKey(PadreTutor, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_tutor')
+    fecha_eliminacion = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'alumno'
