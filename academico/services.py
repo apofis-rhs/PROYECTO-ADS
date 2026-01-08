@@ -230,11 +230,14 @@ class HorarioGenerator:
 
     def _obtener_regla(self, nivel: NivelEducativo) -> Optional[ReglaHorario]:
         """
-        Obtiene la ReglaHorario activa para el nivel y filtros actuales.
+        Obtiene la ReglaHorario activa para el nivel.
 
-        - En universidad, opcionalmente se filtra por semestre y tipo_alumno.
-        - En Kinder–Prepa normalmente semestre y tipo_alumno son nulos.
+        Regla GLOBAL:
+        - Si el nivel no tiene regla propia, se usa la regla activa de Kínder.
+        - Si tampoco existe, se usa la primera regla activa del sistema.
         """
+
+        # 1) Intento normal: regla del nivel seleccionado
         qs = ReglaHorario.objects.filter(nivel=nivel, activo=True)
 
         if self._es_universidad(nivel):
@@ -245,8 +248,25 @@ class HorarioGenerator:
         else:
             qs = qs.filter(semestre__isnull=True, tipo_alumno__isnull=True)
 
-        # Si hubiera mas de una activa, tomamos la primera por ID
-        return qs.order_by("id_regla").first()
+        regla = qs.order_by("id_regla").first()
+        if regla:
+            return regla
+
+        # 2) Fallback: usar regla de Kínder como GLOBAL
+        regla_kinder = (
+            ReglaHorario.objects
+            .filter(activo=True, nivel__nombre__icontains="kinder")
+            .order_by("id_regla")
+            .first()
+        )
+        if regla_kinder:
+            return regla_kinder
+
+        # 3) Último recurso: cualquier regla activa
+        return ReglaHorario.objects.filter(activo=True).order_by("id_regla").first()
+
+
+
 
     def _obtener_grupos(self, nivel: NivelEducativo) -> List[Grupo]:
         """
