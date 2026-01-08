@@ -20,9 +20,11 @@ from .models import (
     Alumno, PadreTutor, Carrera, NivelEducativo, 
     Docente, Grupo, AreaInteres, 
     HistorialAcademico, Incidente, 
-    Materia, Horario
+    Materia, Horario, AlumnoGrupo
 )
 
+from django.shortcuts import render
+from .models import Materia, NivelEducativo, Carrera
 from django.contrib.sessions.models import Session
 
 
@@ -683,64 +685,100 @@ def generar_documento_tutor(request, id_tutor):
 
 # =========================================================================
 # SECCIÓN: GESTIÓN ACADÉMICA (MATERIAS, GRUPOS, HORARIOS)
-# Agregado desde la rama del colaborador
+    # Agregado desde la rama del colaborador
+
+# -----------------------------------------------------------------------
+# CRUD de MATERIA
+# -------------------------------------------------------------------------
 # =========================================================================
-
-# -------------------------------------------------------------------------
-# CRUD de MATERIA
-# -------------------------------------------------------------------------
-
-
-# -------------------------------------------------------------------------
-# CRUD de MATERIA
-# -------------------------------------------------------------------------
-
 
 def materia_list_view(request):
     """
-    Lista de materias con filtros por nivel educativo y grado (nivel_sugerido).
+    Lista de materias con filtros por:
+      - Nivel educativo (id_nivel)
+      - Nivel sugerido / grado (grado -> Materia.nivel_sugerido)
+      - Carrera (id_carrera) solo para Preparatoria/Universidad
+
+    Importante:
+      - Para que no se vea "sucio", al entrar NO mostramos lista si no hay filtros.
     """
-    # Leer filtros desde la query string (?id_nivel=...&grado=...)
+    # Leer filtros desde la query string
     nivel_id_raw = (request.GET.get("id_nivel") or "").strip()
     grado_raw = (request.GET.get("grado") or "").strip()
+    carrera_id_raw = (request.GET.get("id_carrera") or "").strip()
 
+    niveles = NivelEducativo.objects.all().order_by("nombre")
+    carreras = Carrera.objects.all().order_by("nombre")
+
+    # Base QS (no lo ejecutamos aun)
     materias_qs = (
         Materia.objects
         .select_related("nivel_educativo", "carrera")
         .order_by("nivel_educativo__nombre", "nivel_sugerido", "clave")
     )
 
-    # Filtro por nivel educativo
+    # Parseo seguro
+    nivel_id_int = None
     if nivel_id_raw:
         try:
-            nivel_id_int = int(nivel_id_raw)
-            materias_qs = materias_qs.filter(nivel_educativo_id=nivel_id_int)
+                nivel_id_int = int(nivel_id_raw)
         except ValueError:
             nivel_id_int = None
-    else:
-        nivel_id_int = None
 
-    # Filtro por grado / nivel sugerido
+    grado_int = None
     if grado_raw:
         try:
-            grado_int = int(grado_raw)
-            materias_qs = materias_qs.filter(nivel_sugerido=grado_int)
+                grado_int = int(grado_raw)
         except ValueError:
             grado_int = None
-    else:
-        grado_int = None
 
-    niveles = NivelEducativo.objects.all().order_by("nombre")
+    carrera_id_int = None
+    if carrera_id_raw:
+        try:
+            carrera_id_int = int(carrera_id_raw)
+        except ValueError:
+            carrera_id_int = None
+
+    # Bandera: mostrar resultados solo si hay algun filtro
+    hay_filtros = bool(nivel_id_int or grado_int or carrera_id_int)
+
+    # Si no hay filtros, no mostramos nada (para que se vea limpio)
+    if not hay_filtros:
+        materias_qs = Materia.objects.none()
+    else:
+        # Filtro por nivel educativo
+        if nivel_id_int:
+            materias_qs = materias_qs.filter(nivel_educativo_id=nivel_id_int)
+
+        # Filtro por nivel sugerido / grado
+        if grado_int:
+            materias_qs = materias_qs.filter(nivel_sugerido=grado_int)
+
+        # Filtro por carrera SOLO si el nivel es Preparatoria o Universidad
+        # (si no hay nivel seleccionado, no aplicamos carrera para evitar confusiones)
+        if nivel_id_int and carrera_id_int:
+            nivel_obj = niveles.filter(id_nivel=nivel_id_int).first()
+            nombre_nivel = (nivel_obj.nombre or "").strip().lower() if nivel_obj else ""
+
+            es_prepa = "prepa" in nombre_nivel or "preparatoria" in nombre_nivel
+            es_universidad = "univers" in nombre_nivel or "licencia" in nombre_nivel
+
+            if es_prepa or es_universidad:
+                materias_qs = materias_qs.filter(carrera_id=carrera_id_int)
 
     context = {
         "materias": materias_qs,
         "niveles": niveles,
+        "carreras": carreras,
         "filtros": {
-            "id_nivel": nivel_id_int,
-            "grado": grado_raw,  # lo dejamos como texto para rellenar el input
+            "id_nivel": nivel_id_raw,     # texto para rellenar el select sin trucos en template
+            "grado": grado_raw,           # texto para rellenar input
+            "id_carrera": carrera_id_raw, # texto para rellenar select
         },
+        "hay_filtros": hay_filtros,
     }
     return render(request, "gestion/materia_list.html", context)
+
 
 
 
@@ -1149,22 +1187,25 @@ def generar_horarios_form_view(request):
     return render(request, "gestion/horarios_generar_form.html", context)
 
 
+from collections import defaultdict
+
+from django.contrib import messages
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .models import Grupo, Horario, Alumno, AlumnoGrupo
+
+
 def horario_por_grupo_view(request):
-    """
-    Permite seleccionar un grupo y muestra su horario en formato de cuadricula:
-
-        columnas = dias (Lunes a Viernes)
-        filas    = rangos horarios (07:00-08:30, 08:30-10:00, ...)
-
-    Cada celda contiene el nombre de la materia (o queda vacia si no hay clase).
-    """
     grupos = (
         Grupo.objects
         .select_related("nivel", "materia", "docente")
         .order_by("nivel__nombre", "grado", "clave_grupo")
     )
 
-    grupo_id = request.GET.get("grupo_id")
+    # puede venir por GET o por POST (cuando inscribes/eliminar)
+    grupo_id = request.GET.get("grupo_id") or request.POST.get("grupo_id")
+
     grupo_seleccionado = None
     filas = []
     dias = [
@@ -1175,9 +1216,59 @@ def horario_por_grupo_view(request):
         {"id": 5, "nombre": "Viernes"},
     ]
 
+    alumnos_inscritos = []
+    alumnos_disponibles = []
+    inscritos_count = 0
+    capacidad_maxima = 40
+
     if grupo_id:
         grupo_seleccionado = get_object_or_404(Grupo, pk=grupo_id)
 
+        # ----------------------------
+        # POST: inscribir / eliminar
+        # ----------------------------
+        if request.method == "POST":
+            accion = request.POST.get("accion")
+            alumno_id = request.POST.get("alumno_id")
+
+            if accion in ("inscribir", "eliminar") and alumno_id:
+                with transaction.atomic():
+                    grupo_locked = Grupo.objects.select_for_update().get(pk=grupo_seleccionado.pk)
+
+                    if accion == "inscribir":
+                        ya_existe = AlumnoGrupo.objects.filter(
+                            alumno_id=alumno_id,
+                            grupo_id=grupo_locked.pk
+                        ).exists()
+
+                        if ya_existe:
+                            messages.warning(request, "El alumno ya esta inscrito en este grupo.")
+                        else:
+                            inscritos = AlumnoGrupo.objects.filter(grupo_id=grupo_locked.pk).count()
+                            capacidad = getattr(grupo_locked, "capacidad_maxima", 40) or 40
+
+                            if inscritos >= capacidad:
+                                messages.error(request, f"Este grupo ya alcanzo su capacidad maxima ({capacidad}).")
+                            else:
+                                AlumnoGrupo.objects.create(alumno_id=alumno_id, grupo_id=grupo_locked.pk)
+                                messages.success(request, "Alumno inscrito correctamente.")
+
+                    elif accion == "eliminar":
+                        borrados, _ = AlumnoGrupo.objects.filter(
+                            alumno_id=alumno_id,
+                            grupo_id=grupo_locked.pk
+                        ).delete()
+
+                        if borrados:
+                            messages.success(request, "Alumno eliminado del grupo.")
+                        else:
+                            messages.warning(request, "El alumno no estaba inscrito en este grupo.")
+
+                return redirect(f"{request.path}?grupo_id={grupo_seleccionado.pk}")
+
+        # ----------------------------
+        # Horario del grupo
+        # ----------------------------
         horarios = (
             Horario.objects.filter(grupo=grupo_seleccionado)
             .order_by("dia_semana", "hora_inicio")
@@ -1192,8 +1283,7 @@ def horario_por_grupo_view(request):
             celdas = defaultdict(dict)
             for h in horarios:
                 clave_rango = (h.hora_inicio, h.hora_fin)
-                nombre_materia = h.grupo.materia.nombre
-                celdas[h.dia_semana][clave_rango] = nombre_materia
+                celdas[h.dia_semana][clave_rango] = h.grupo.materia.nombre
 
             for inicio, fin in rangos:
                 rango_str = f"{inicio.strftime('%H:%M')} - {fin.strftime('%H:%M')}"
@@ -1203,13 +1293,32 @@ def horario_por_grupo_view(request):
                     fila["celdas"].append(texto)
                 filas.append(fila)
 
+        # ----------------------------
+        # Cupo y listas de alumnos
+        # ----------------------------
+        inscritos_count = AlumnoGrupo.objects.filter(grupo_id=grupo_seleccionado.pk).count()
+        capacidad_maxima = getattr(grupo_seleccionado, "capacidad_maxima", 40) or 40
+
+        alumnos_inscritos = Alumno.objects.filter(
+            alumnogrupo__grupo_id=grupo_seleccionado.pk
+        ).order_by("ape_paterno", "ape_materno", "nombre")
+
+        alumnos_disponibles = Alumno.objects.exclude(
+            alumnogrupo__grupo_id=grupo_seleccionado.pk
+        ).order_by("ape_paterno", "ape_materno", "nombre")
+
     context = {
         "grupos": grupos,
         "grupo_seleccionado": grupo_seleccionado,
         "dias": dias,
         "filas": filas,
+        "alumnos_inscritos": alumnos_inscritos,
+        "alumnos_disponibles": alumnos_disponibles,
+        "inscritos_count": inscritos_count,
+        "capacidad_maxima": capacidad_maxima,
     }
     return render(request, "gestion/horario_por_grupo.html", context)
+
 
 
 def horario_por_salon_view(request):

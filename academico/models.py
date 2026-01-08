@@ -306,7 +306,7 @@ class Grupo(models.Model):
     clave_grupo = models.CharField(max_length=50)
     grado = models.IntegerField(null=True, blank=True)
     periodo = models.CharField(max_length=20)
-    
+    capacidad_maxima = models.PositiveIntegerField(default=40) # Capacidad máxima del grupo SE AGREGO CAMBIO EDUARDO
     turno = models.ForeignKey(CatTurno, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_turno')
     nivel = models.ForeignKey(NivelEducativo, on_delete=models.CASCADE, db_column='id_nivel')
     materia = models.ForeignKey(Materia, on_delete=models.CASCADE, db_column='id_materia')

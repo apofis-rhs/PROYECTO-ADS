@@ -101,7 +101,10 @@
                         class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow">
                         <option value="">-- Selecciona un nivel --</option>
                         {% for nivel in niveles %}
-                        <option value="{{ nivel.id_nivel }}" {% if valores.id_nivel == nivel.id_nivel %} selected{% endif %}>
+                        <option
+                            value="{{ nivel.id_nivel }}"
+                            data-nombre="{{ nivel.nombre|lower }}"
+                            {% if valores.id_nivel == nivel.id_nivel %} selected{% endif %}>
                             {{ nivel.nombre }}
                         </option>
                         {% endfor %}
@@ -114,38 +117,20 @@
                             (Básica/Media)</label>
                         <input type="number" id="id_grado" name="grado" min="1" value="{{ valores.grado }}"
                             class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow">
-                        <p class="text-xs text-charade-400 mt-1">Opcional para universidad.</p>
+                        <p class="text-xs text-charade-400 mt-1">Se deshabilita en preparatoria.</p>
                     </div>
 
                     <div>
                         <label for="id_semestre" class="block text-sm font-medium text-charade-900 mb-1">Semestre
-                            (Universidad)</label>
+                            (Preparatoria/Universidad)</label>
                         <input type="number" id="id_semestre" name="semestre" min="1" value="{{ valores.semestre }}"
                             class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow">
-                        <p class="text-xs text-charade-400 mt-1">Opcional para básica.</p>
+                        <p class="text-xs text-charade-400 mt-1">En preparatoria se usa para filtrar.</p>
                     </div>
                 </div>
 
-                <div>
-                    <label for="id_tipo_alumno" class="block text-sm font-medium text-charade-900 mb-1">Tipo de
-                        Alumno</label>
-                    <select id="id_tipo_alumno" name="tipo_alumno"
-                        class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow">
-                        <option value="" {% if not valores.tipo_alumno %}selected{% endif %}>Todos</option>
-                        <option value="REGULAR" {% if valores.tipo_alumno == "REGULAR" %}selected{% endif %}>Regular
-                        </option>
-                        <option value="IRREGULAR" {% if valores.tipo_alumno == "IRREGULAR" %}selected{% endif %}>Irregular
-                        </option>
-                    </select>
-                </div>
+                {# ELIMINADOS: Tipo de alumno y Carrera (Opcional) #}
 
-                <div>
-                    <label for="id_carrera" class="block text-sm font-medium text-charade-900 mb-1">Carrera
-                        (Opcional)</label>
-                    <input type="text" id="id_carrera" name="id_carrera" placeholder="ID de carrera"
-                        value="{{ valores.id_carrera }}"
-                        class="block w-full rounded-lg border-charade-300 bg-charade-50 p-2.5 text-sm focus:border-mitec-blue-light focus:ring-mitec-blue-light transition-shadow placeholder-charade-400">
-                </div>
             </div>
         </div>
 
@@ -250,4 +235,73 @@
     </form>
 
 </div>
+
+<script>
+  (function () {
+    const nivelSelect = document.getElementById("id_nivel");
+    const gradoInput = document.getElementById("id_grado");
+    const semestreInput = document.getElementById("id_semestre");
+
+    function aplicarReglasUI() {
+      if (!nivelSelect || !gradoInput || !semestreInput) return;
+
+      const opt = nivelSelect.options[nivelSelect.selectedIndex];
+      const nombre = (opt && opt.dataset && opt.dataset.nombre) ? opt.dataset.nombre : "";
+      const n = (nombre || "").toLowerCase();
+
+      const esBasica =
+        n.includes("kinder") ||
+        n.includes("kínder") ||
+        n.includes("primaria") ||
+        n.includes("secundaria");
+
+      const esSemestral =
+        n.includes("preparatoria") ||
+        n.includes("bachillerato") ||
+        n.includes("universidad") ||
+        n.includes("licenciatura") ||
+        n.includes("universitario");
+
+      if (esBasica) {
+        // Basica: usar grado, deshabilitar semestre
+        semestreInput.value = "";
+        semestreInput.disabled = true;
+        semestreInput.required = false;
+        semestreInput.classList.add("opacity-50", "cursor-not-allowed");
+
+        gradoInput.disabled = false;
+        gradoInput.classList.remove("opacity-50", "cursor-not-allowed");
+        // (Opcional) grado requerido en basica
+        // gradoInput.required = true;
+      } else if (esSemestral) {
+        // Semestral: usar semestre, deshabilitar grado
+        gradoInput.value = "";
+        gradoInput.disabled = true;
+        gradoInput.required = false;
+        gradoInput.classList.add("opacity-50", "cursor-not-allowed");
+
+        semestreInput.disabled = false;
+        semestreInput.classList.remove("opacity-50", "cursor-not-allowed");
+        // (Recomendado) semestre requerido en prepa/uni
+        semestreInput.required = true;
+      } else {
+        // Nivel no contemplado: habilitar ambos (modo neutral)
+        gradoInput.disabled = false;
+        gradoInput.required = false;
+        gradoInput.classList.remove("opacity-50", "cursor-not-allowed");
+
+        semestreInput.disabled = false;
+        semestreInput.required = false;
+        semestreInput.classList.remove("opacity-50", "cursor-not-allowed");
+      }
+    }
+
+    if (nivelSelect) {
+      nivelSelect.addEventListener("change", aplicarReglasUI);
+      aplicarReglasUI(); // ejecutar al cargar
+    }
+  })();
+</script>
+
+
 {% endblock %}

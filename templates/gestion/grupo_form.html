@@ -69,7 +69,8 @@
         Contexto Académico
       </h3>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
         <div>
           <label
             for="{{ form.nivel.id_for_label }}"
@@ -107,26 +108,31 @@
           </p>
           {% endif %}
         </div>
+        <div>
+  <label
+    for="{{ form.docente.id_for_label }}"
+    class="block text-sm font-medium text-charade-900 mb-1"
+  >
+    Docente
+  </label>
+
+  {{ form.docente }}
+
+  {% if form.docente.errors %}
+    <p class="text-xs text-mitec-red-primary mt-1">
+      {{ form.docente.errors|striptags }}
+    </p>
+  {% else %}
+    <p class="text-xs text-charade-400 mt-1">
+      Profesor asignado al grupo (opcional).
+    </p>
+  {% endif %}
+</div>
+
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <label
-            for="{{ form.turno.id_for_label }}"
-            class="block text-sm font-medium text-charade-900 mb-1"
-          >
-            Turno
-          </label>
-          {{ form.turno }} {% if form.turno.errors %}
-          <p class="text-xs text-mitec-red-primary mt-1">
-            {{ form.turno.errors|striptags }}
-          </p>
-          {% else %}
-          <p class="text-xs text-charade-400 mt-1">
-            Matutino, Vespertino, etc.
-          </p>
-          {% endif %}
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
 
         <div>
           <label
@@ -224,7 +230,7 @@
           <p class="text-xs text-blue-800 leading-relaxed">
             La combinación
             <strong class="font-semibold">
-              nivel + grado + clave + periodo
+              nivel + grado + clave + periodos
             </strong>
             se utiliza para generar la cuadrícula de horarios y detectar
             conflictos de aula.
@@ -306,5 +312,25 @@
     background-color: #ffffff;
   }
 </style>
+<script>
+  (function () {
+    const nivel = document.getElementById("{{ form.nivel.auto_id }}");
+    if (!nivel) return;
+
+    nivel.addEventListener("change", function () {
+      const idNivel = nivel.value || "";
+      const url = new URL(window.location.href);
+
+      if (idNivel) {
+        url.searchParams.set("id_nivel", idNivel);
+      } else {
+        url.searchParams.delete("id_nivel");
+      }
+
+      // Conserva "periodo" si ya venía en la URL
+      window.location.href = url.toString();
+    });
+  })();
+</script>
 
 {% endblock %}

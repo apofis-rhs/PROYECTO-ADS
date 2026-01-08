@@ -1,0 +1,64 @@
+cambios a mi pantalla
+
+-ESENCIAL
+	AGREGAR ALUMNOS POR GRUPO MAXIMO 40
+-NOTA: La capacidad va a ir directamente en el apartado de crear grupo, ahí se pueden ingresar alumnos, dar de baja alumnos, el límite son 40.
+
+
+-Secundarios
+	FILTRAR POR CARRERAS
+
+SECCION MATERIAS
+	No mostrar lista hasta que se seleccione el filtro
+	Agregar filtro activo solo cuando se seleccione nivel educativo PREPA O UNIVERSIDAD\
+
+SECCION GRUPOS:
+	-CAMBIOS
+	-Cuando selecciono nivel educativo y grado deberia de mostrarme solo las materias de ese filtro
+	-eliminar la opcion de elegir turno
+	-por defecto cuando se crea un grupo debe tener una capacidad maxima para inscribir a 40 alumnos.
+	-agregar filtros para visualizar las materias por nivel acadmico, grado y Tambien segun sea el caso de preparatoria y universidad filtrar por carrera 
+
+SECCION CREAR GRUPOS:
+	-Eliminar la seccion de "turno"
+	-Al buscar el kinder, solo deben filtra materias de kinder, si filtro primaria solo materias e primaria y asi 
+
+=================================================================
+
+CAMBIOS SECUENCIA:
+
+CAMBIOS EN SERVICES.PY
+	-usar la regla global para horarios.
+	-EN PostgreSQL crear la regla para horarios. (revisar cual es la regla que se creo porque me parece que debe ir en un script)
+
+
+
+EN MODELS -> # 6) GRUPOS Y HORARIOS
+inserte esta linea dentro del modelo para crear la columna en de grupos
+	    capacidad_maxima = models.PositiveIntegerField(default=40)
+
+despues en shell:
+
+	-> python manage.py makemigrations academico
+	-> python manage.py migrate
+
+En VIEWS.PY
+modifique la vista para "horario_por_grupo_view"
+aregre Alumnogrupo en import
+
+En "horario_por_grupo.html"
+MOdifique dentro de la seccion "grupo_seleccionado" agregue un fragmento de codigo para agregar y eliminar alumnos
+
+
+
+=====
+CAMBIOS SECCIONMATERIAS
+
+	-limpiar vista (ya no aparecen las materias al ingresar, hasta que se filtran)
+	-filtra por nivel, grado, y para preparatoria y universiad se habilita el filtro de la carrera
+se modfico la vista materia_list_view
+	se agrego carrera  la vista
+import:
+	from django.shortcuts import render
+	from .models import Materia, NivelEducativo, Carrera
+
