@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputFecha = document.querySelector('input[name="fecha_nacimiento"]');
     const mensajeErrorEdad = document.getElementById('errorEdadNivel');
     const inputCurp = document.querySelector('input[name="curp"]');
-    const mensajeErrorCurp = document.getElementById('errorCurp');
     const camposTelefono = document.querySelectorAll('input[name*="telefono"]');
 
     // Selectores para el Correo dinámico
@@ -22,9 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputCorreo = document.getElementById('inputCorreoAlumno');
 
     // ==========================================
-    // 2. VALIDACIÓN DE BOLETA (AAAA430###)
+    // 2. VALIDACIÓN DE BOLETA (Visual, si está readonly no afecta)
     // ==========================================
-    if (inputBoleta) {
+    if (inputBoleta && !inputBoleta.readOnly) {
         inputBoleta.addEventListener('blur', function() {
             const valor = this.value.trim();
             const añoActual = new Date().getFullYear();
@@ -53,10 +52,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } 
-        });
-
-        inputBoleta.addEventListener('input', function() {
-            this.classList.remove('is-invalid');
         });
     }
 
@@ -195,10 +190,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     case "4": opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre"]; break;
                     case "5": opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre", "7° Semestre", "8° Semestre", "9° Semestre", "10° Semestre"]; break;
                 }
-                opciones.forEach(grado => {
+                
+                // CORRECCIÓN APLICADA AQUÍ:
+                opciones.forEach((gradoTexto, index) => {
                     const opt = document.createElement('option');
-                    opt.value = grado; // Usamos el texto completo como valor
-                    opt.textContent = grado;
+                    opt.value = index + 1; // Envía 1, 2, 3... a la Base de Datos
+                    opt.textContent = gradoTexto; // Muestra "1° Kinder", etc.
                     selectGrado.appendChild(opt);
                 });
             }
@@ -208,53 +205,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 const labelTutor = selectTutor.closest('.row') ? selectTutor.closest('.row').querySelector('label') : null;
                 
                 if (["1", "2", "3"].includes(nivelId)) {
-                    // Básica
+                    // Básica: Tutor obligatorio, Correo oculto
                     selectTutor.required = true;
                     if(labelTutor) labelTutor.innerHTML = "Tutor Asignado * <small class='text-muted'>(Obligatorio)</small>";
                     if(contenedorCorreo) contenedorCorreo.style.display = 'none';
-                    if(inputCorreo) { inputCorreo.required = false; inputCorreo.value = ""; inputCorreo.classList.remove('is-invalid'); }
+                    
                 } else {
-                    // Superior
+                    // Superior: Tutor opcional, Correo visible
                     selectTutor.required = false;
                     if(labelTutor) labelTutor.innerHTML = "Tutor Asignado <small class='text-muted'>(Opcional)</small>";
                     if(contenedorCorreo) contenedorCorreo.style.display = 'block';
-                    if(inputCorreo) inputCorreo.required = true;
+                    
+                    if(inputCorreo) {
+                        inputCorreo.required = false; 
+                        inputCorreo.value = "Se generará automáticamente (Regla: Nombre + Fecha)";
+                    }
                 }
             }
         });
     }
 
     // ==========================================
-    // 7. VALIDACIÓN DE CORREO (REGEX)
+    // 7. VALIDACIÓN DE CORREO (Solo para Modal Tutor, NO para Alumno)
     // ==========================================
     const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    const validarEmail = (input) => {
-        const valor = input.value.trim();
-        input.classList.remove('is-invalid', 'is-valid');
-
-        if (valor === "") {
-            input.classList.add('is-invalid');
-            return false;
-        }
-
-        if (regexCorreo.test(valor)) {
-            input.classList.add('is-valid');
-            return true;
-        } else {
-            input.classList.add('is-invalid');
-            return false;
-        }
-    };
-
-    if (inputCorreo) {
-        inputCorreo.addEventListener('blur', function() {
-            validarEmail(this);
-        });
-        inputCorreo.addEventListener('input', function() {
-            this.classList.remove('is-invalid');
-        });
-    }
+    // (La función existe pero ya no se aplica al inputCorreoAlumno)
 
     // ==========================================
     // 8. BLOQUEO DE ENVÍO (FORMULARIO ALTA/EDICIÓN)
@@ -263,13 +239,6 @@ document.addEventListener('DOMContentLoaded', function() {
         formularioAlumno.addEventListener('submit', function(e) {
             const nivelId = selectNivel ? selectNivel.value : "";
             
-            // Si es Prepa (4) o Universidad (5), validamos el correo
-            if (["4", "5"].includes(nivelId)) {
-                if (inputCorreo && !validarEmail(inputCorreo)) {
-                    // Error en correo
-                }
-            }
-
             // Validamos Tutor obligatorio en básica
             if (["1", "2", "3"].includes(nivelId)) {
                 if (selectTutor && !selectTutor.value) {
@@ -298,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 9. MODAL NUEVO TUTOR (AJAX)
+    // 9. MODAL NUEVO TUTOR (AJAX) - Este sí valida correo del Tutor
     // ==========================================
     const formTutorModal = document.getElementById('formNuevoTutor');
     if (formTutorModal) {
@@ -332,7 +301,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         selectTutor.add(opt);
                         selectTutor.value = data.tutor_id;
                     }
-                    
                     this.reset();
                     alert('✅ Tutor registrado correctamente.');
                 } else {
@@ -347,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 10. GESTIÓN CENTRALIZADA DE DOCUMENTOS
+    // 10. GESTIÓN CENTRALIZADA DE DOCUMENTOS (Ver / Descargar / Ficha)
     // ==========================================
     const btnVisualizar = document.getElementById('btnVisualizarDoc');
     const btnDescargar = document.getElementById('btnDescargarDoc');
@@ -387,10 +355,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // ==========================================
     // 11. PERSISTENCIA DE DATOS (Auto-guardado)
     // ==========================================
-    // 🛑 CORRECCIÓN CRÍTICA: Excluimos radio buttons (:not([type="radio"])) para no corromper sus valores
     const camposAPersistir = document.querySelectorAll('input:not([type="file"]):not([type="radio"]):not([type="checkbox"]):not([readonly]), select:not([disabled])');
 
-    // 1. Restaurar
     camposAPersistir.forEach(campo => {
         const valorGuardado = localStorage.getItem('form_alumno_' + campo.name);
         if (valorGuardado) {
@@ -399,7 +365,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 2. Guardar
     camposAPersistir.forEach(campo => {
         campo.addEventListener('input', () => {
             localStorage.setItem('form_alumno_' + campo.name, campo.value);
@@ -407,15 +372,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // 12. CONFIRMACIÓN DE BAJA (SELECTOR CORREGIDO)
+    // 12. CONFIRMACIÓN DE BAJA
     // ==========================================
     const formBaja = document.getElementById('formBaja');
-    
     if (formBaja) {
         formBaja.addEventListener('submit', function(e) {
             e.preventDefault(); 
-            
-            // Usamos FormData para leer el valor REAL que se enviará
             const formData = new FormData(formBaja);
             const tipo = formData.get('tipoBaja'); 
 
@@ -423,24 +385,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert("⚠️ Por favor, selecciona un tipo de baja.");
                 return;
             }
-
             let mensaje = "";
-
             if (tipo === 'definitiva') {
-                mensaje = "⚠️ ¡ATENCIÓN: ACCIÓN IRREVERSIBLE! ⚠️\n\n" +
-                          "Estás a punto de ELIMINAR PERMANENTEMENTE a este alumno.\n" +
-                          "--------------------------------------------------\n" +
-                          "❌ Se borrará su expediente completo.\n" +
-                          "❌ Se perderá su historial académico.\n" +
-                          "❌ Esta acción NO SE PUEDE DESHACER.\n" +
-                          "--------------------------------------------------\n\n" +
-                          "¿Estás completamente seguro?";
+                mensaje = "⚠️ ¡ATENCIÓN: ACCIÓN IRREVERSIBLE! ⚠️\n\n¿Estás completamente seguro de ELIMINAR a este alumno?";
             } else {
-                mensaje = "CONFIRMACIÓN DE BAJA TEMPORAL\n\n" +
-                          "ℹ️ El alumno pasará a estado 'Inactivo'.\n" +
-                          "✅ Sus datos se conservarán.\n" +
-                          "✅ Podrás reactivarlo después.\n\n" +
-                          "¿Deseas continuar?";
+                mensaje = "CONFIRMACIÓN DE BAJA TEMPORAL\n\n¿Deseas desactivar temporalmente al alumno?";
             }
 
             if (confirm(mensaje)) {
@@ -448,5 +397,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-}); // FIN DEL DOMContentLoaded
+});
