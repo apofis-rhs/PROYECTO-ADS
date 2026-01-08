@@ -39,7 +39,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'academico',
+    'django_recaptcha',
 ]
+
+# Claves de prueba de Google (funcionan en localhost y no nos vamos a complicar haciendo las nuestras)
+RECAPTCHA_PUBLIC_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+RECAPTCHA_PRIVATE_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+
+RECAPTCHA_DOMAIN = 'www.google.com'
+
+# Silenciamos la advertencia de llaves de prueba para poder trabajar en localhost
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

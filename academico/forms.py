@@ -6,6 +6,8 @@ from .models import Materia, Grupo
 from django.core.exceptions import ValidationError
 from .models import Horario  # asegúrate de importar Horario
 
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 def clean_docente(self):
     docente = self.cleaned_data.get("docente")
@@ -181,3 +183,7 @@ class GrupoForm(forms.ModelForm):
         self.fields["docente"].queryset = Docente.objects.all().order_by("ape_paterno", "ape_materno", "nombre")
         self.fields["docente"].required = False  # opcional, por si aún no asignas docente
 
+class LoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField()
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)

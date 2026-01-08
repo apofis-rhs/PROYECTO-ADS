@@ -25,6 +25,7 @@ from django.urls import include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     # ruta raiz (localhost:8000/)
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('alumnos/consultar/', views.consultar_alumno_view, name='consultar_alumno'),
@@ -42,6 +43,7 @@ urlpatterns = [
     path('alumno/documento/<int:id_alumno>/', views.generar_documento_alumno, name='generar_documento_alumno'),
     path('docente/documento/<int:id_docente>/', views.generar_documento_docente, name='generar_documento_docente'),
     path("api/", include("academico.urls")),
+    path('tutor/<int:id_tutor>/documento/', views.generar_documento_tutor, name='generar_documento_tutor'),
 ]
 
 if settings.DEBUG:

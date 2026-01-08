@@ -354,17 +354,6 @@ if (formularioAlumno) {
         });
     }
 
-    // Botones de Documentos
-    const btnVis = document.getElementById('btnVisualizarDoc');
-    const btnDes = document.getElementById('btnDescargarDoc');
-    const selDoc = document.getElementById('selectDocumento');
-    if (btnVis) {
-        btnVis.addEventListener('click', () => {
-            if(!selDoc.value) return alert('Elija un documento');
-            window.open(`${btnVis.dataset.url}?tipo=${selDoc.value}`, '_blank');
-        });
-    }
-
     // ==========================================
 // 9. GRADOS Y SEMESTRES DINÁMICOS
 // ==========================================
@@ -456,10 +445,74 @@ if (selectNivel && selectGrado) {
     document.getElementById("foto").value = "";
   }
 
+    // ==========================================
+    // 7. GESTIÓN CENTRALIZADA DE DOCUMENTOS (Ver, Bajar, Ficha)
+    // ==========================================
+    const btnVisualizar = document.getElementById('btnVisualizarDoc');
+    const btnDescargar = document.getElementById('btnDescargarDoc');
+    const btnFicha = document.getElementById('btnImprimirFicha');
+    const selectDocumento = document.getElementById('selectDocumento');
+
+    // Función genérica para abrir documentos (PDFs y Ficha)
+    function gestionarAperturaDocumento(tipoAccion) {
+        
+        // 1. Caso: Imprimir Ficha Técnica (Botón independiente)
+        if (tipoAccion === 'ficha') {
+            if (btnFicha) {
+                const urlFicha = btnFicha.getAttribute('data-url');
+                window.open(`${urlFicha}?tipo=ficha`, '_blank');
+            }
+            return;
+        }
+
+        // 2. Caso: Documentos del Select (Horario, Historial, Incidencias)
+        if (!selectDocumento.value) {
+            alert('⚠️ Por favor, selecciona un tipo de documento del listado.');
+            selectDocumento.focus();
+            return;
+        }
+
+        // Usamos la URL base que ya tiene el botón de visualizar
+        // (Nota: Ambos botones apuntan a la misma vista en Django)
+        const baseUrl = btnVisualizar.getAttribute('data-url');
+        let urlFinal = `${baseUrl}?tipo=${selectDocumento.value}`;
+
+        // Si es descarga, añadimos el parámetro mágico que configuramos en views.py
+        if (tipoAccion === 'descargar') {
+            urlFinal += '&download=true';
+        }
+
+        // Abrir en nueva pestaña (si es descarga, el navegador lo bajará automáticamente)
+        window.open(urlFinal, '_blank');
+    }
+
+    // --- ASIGNACIÓN DE EVENTOS ---
+
+    // A) Botón "Ver"
+    if (btnVisualizar) {
+        btnVisualizar.addEventListener('click', function() {
+            gestionarAperturaDocumento('ver');
+        });
+    }
+
+    // B) Botón "Bajar"
+    if (btnDescargar) {
+        btnDescargar.addEventListener('click', function() {
+            gestionarAperturaDocumento('descargar');
+        });
+    }
+
+    // C) Botón "Imprimir Ficha"
+    if (btnFicha) {
+        btnFicha.addEventListener('click', function() {
+            gestionarAperturaDocumento('ficha');
+        });
+    }
+
   // ==========================================
 // 10. PERSISTENCIA DE DATOS (Auto-guardado)
 // ==========================================
-const camposAPersistir = document.querySelectorAll('input:not([type="file"]), select');
+const camposAPersistir = document.querySelectorAll('input:not([type="file"]):not([readonly]), select:not([disabled])');
 
 // 1. Restaurar los datos al cargar la página
 camposAPersistir.forEach(campo => {

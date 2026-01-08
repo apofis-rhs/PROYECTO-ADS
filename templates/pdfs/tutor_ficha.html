@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; font-size: 14px; color: #333; }
+        
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #003366; padding-bottom: 10px; }
+        .header h1 { color: #003366; margin: 0; }
+        .header p { margin: 2px 0 0 0; color: #666; font-size: 12px; }
+        
+        /* Layout principal */
+        .layout-table { width: 100%; margin-top: 20px; }
+        .col-foto { width: 30%; vertical-align: top; text-align: center; }
+        .col-datos { width: 70%; vertical-align: top; padding-left: 20px; }
+
+        .foto-marco { 
+            width: 150px; height: 150px; 
+            border: 1px solid #999; padding: 5px; 
+            display: inline-block;
+        }
+        .foto-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .seccion-titulo { 
+            background-color: #f2f2f2; color: #003366; 
+            padding: 5px 10px; font-weight: bold; border-left: 5px solid #003366;
+            margin-bottom: 10px; margin-top: 15px;
+        }
+
+        .dato-row { margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        .label { font-weight: bold; color: #555; width: 140px; display: inline-block; }
+
+        /* Tabla de Hijos */
+        .tabla-hijos { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        .tabla-hijos th { background-color: #003366; color: white; padding: 5px; text-align: left; }
+        .tabla-hijos td { border-bottom: 1px solid #ccc; padding: 5px; }
+
+        .footer { position: fixed; bottom: 0; text-align: center; font-size: 10px; color: #999; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Ficha Técnica del Tutor</h1>
+        <p>Sistema de Gestión Académica - Expediente de Padre/Tutor</p>
+    </div>
+
+    <table class="layout-table">
+        <tr>
+            <td class="col-foto">
+                <div class="foto-marco">
+                    {% if tutor.foto %}
+                        <img src="{{ tutor.foto.path }}" class="foto-img" />
+                    {% else %}
+                        <div style="padding-top: 60px; color: #ccc;">Sin Foto</div>
+                    {% endif %}
+                </div>
+                <br><br>
+                <strong>ID Sistema:</strong> {{ tutor.id_tutor }}
+            </td>
+
+            <td class="col-datos">
+                
+                <div class="seccion-titulo">DATOS PERSONALES</div>
+                <div class="dato-row">
+                    <span class="label">Nombre Completo:</span> 
+                    {{ tutor.nombre }} {{ tutor.ape_paterno }} {{ tutor.ape_materno }}
+                </div>
+                <div class="dato-row">
+                    <span class="label">CURP:</span> 
+                    {{ tutor.curp|default:"No registrada" }}
+                </div>
+                <div class="dato-row">
+                    <span class="label">Teléfono Principal:</span> 
+                    {{ tutor.telefono|default:"--" }}
+                </div>
+                
+                <div class="seccion-titulo">ALUMNOS VINCULADOS (HIJOS)</div>
+                
+                {% if hijos %}
+                <table class="tabla-hijos">
+                    <thead>
+                        <tr>
+                            <th>Boleta</th>
+                            <th>Nombre del Alumno</th>
+                            <th>Nivel</th>
+                            <th>Grado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hijo in hijos %}
+                        <tr>
+                            <td>{{ hijo.boleta }}</td>
+                            <td>{{ hijo.nombre }} {{ hijo.ape_paterno }}</td>
+                            <td>{{ hijo.nivel.nombre }}</td>
+                            <td>{{ hijo.grado|default:"--" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                    <p style="color: #666; font-style: italic;">No tiene alumnos asignados actualmente.</p>
+                {% endif %}
+
+            </td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        Documento generado el {% now "d/m/Y H:i" %}
+    </div>
+
+</body>
+</html>

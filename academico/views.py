@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from collections import defaultdict
 from .services import HorarioGenerator
-from .forms import MateriaForm, GrupoForm
+from .forms import MateriaForm, GrupoForm, LoginForm
 
 from django.template.loader import get_template
 from xhtml2pdf import pisa
@@ -14,7 +14,7 @@ from django.contrib.auth import authenticate, login
 
 from django.template.loader import get_template
 from xhtml2pdf import pisa
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import (
     Alumno, PadreTutor, Carrera, NivelEducativo, 
@@ -25,6 +25,7 @@ from .models import (
 
 from django.shortcuts import render
 from .models import Materia, NivelEducativo, Carrera
+from django.contrib.sessions.models import Session
 
 
 # def dashboard_view(request):
@@ -50,25 +51,68 @@ from .models import Materia, NivelEducativo, Carrera
 # from django.shortcuts import render, redirect
 
 def login_view(request):
+    # Si intentan entrar y ya están logueados, mandar al dashboard
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     if request.method == 'POST':
-        user = authenticate(
-            request,
-            username=request.POST['username'],
-            password=request.POST['password']
-        )
-        if user:
-            login(request, user)
-            return redirect('dashboard')
+        form = LoginForm(request.POST)
+
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                if user.is_active:
+                    # ========================================================
+                    # LÓGICA DE SESIÓN UNICA
+                    # ========================================================
+                    try:
+                        active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+                        
+                        for session in active_sessions:
+                            data = session.get_decoded()
+                            if data.get('_auth_user_id') == str(user.pk):
+                                session.delete()
+                    except Exception as e:
+                        # Si algo falla al limpiar sesiones, imprimimos el error pero dejamos pasar al usuario
+                        print(f"Error limpiando sesiones previas: {e}")
+
+                    # ========================================================
+                    
+                    login(request, user)
+                    return redirect('dashboard')
+                else:
+                    return render(request, 'login.html', {
+                        'form': form,
+                        'error': 'Tu cuenta está inactiva.'
+                    })
+            else:
+                return render(request, 'login.html', {
+                    'form': form,
+                    'error': 'Usuario o contraseña incorrectos.'
+                })
         else:
             return render(request, 'login.html', {
-                'error': 'Credenciales incorrectas'
+                'form': form,
+                'error': 'Por favor completa el Captcha correctamente.'
             })
 
-    return render(request, 'login.html')
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})
 
 @login_required
 def dashboard_view(request):
     return render(request, 'dashboard.html')
+
+def logout_view(request):
+    logout(request)
+    # Redirigir al login despues de salir
+    return redirect('login')
 
 
 # -----------------------------------------------------------------------------
@@ -508,14 +552,18 @@ def api_crear_tutor(request):
 # VISTA PARA RENDERIZAR PDF
 # ------------------------------------------------------------------------------
 
-def render_pdf(template_src, context_dict={}):
-    """Función auxiliar para renderizar HTML a PDF"""
+def render_pdf(template_src, context_dict={}, filename="documento.pdf", download=False):
+    """
+    Renderiza HTML a PDF permitiendo elegir entre visualizar (inline) o descargar (attachment).
+    """
     template = get_template(template_src)
     html  = template.render(context_dict)
     response = HttpResponse(content_type='application/pdf')
-    # Descarga directa: attachment; filename="report.pdf"
-    # Visualizar en navegador: inline; filename="report.pdf"
-    response['Content-Disposition'] = 'inline; filename="documento.pdf"'
+    
+    # LOGICA CORREGIDA:
+    # Si download es True, forzamos 'attachment' (descarga). Si no, 'inline' (ver en pestaña).
+    disposition = 'attachment' if download else 'inline'
+    response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
     
     pisa_status = pisa.CreatePDF(html, dest=response)
     if pisa_status.err:
@@ -527,74 +575,113 @@ def render_pdf(template_src, context_dict={}):
 # ------------------------------------------------------------------------------
 
 def generar_documento_alumno(request, id_alumno):
+    # 1. Recuperamos los parámetros
     tipo_documento = request.GET.get('tipo')
+    
+    descargar_mode = request.GET.get('download') == 'true' 
+    
     alumno = get_object_or_404(Alumno, pk=id_alumno)
 
     context = {'alumno': alumno}
     template_name = ""
+    # Generamos un nombre de archivo personalizado
+    nombre_archivo = f"Alumno_{alumno.boleta}.pdf"
 
     if tipo_documento == 'horario':
-        # Corrección anterior: 'alumnogrupo_set' en lugar de 'alumno_grupo_set'
         grupos = alumno.alumnogrupo_set.all() 
         context['grupos'] = grupos
         template_name = 'pdfs/documento_horario.html'
+        nombre_archivo = f"Horario_{alumno.boleta}.pdf"
 
     elif tipo_documento == 'historial':
-        # --- CORRECCIÓN AQUÍ ---
-        # Cambiamos 'id_alumno=' por 'alumno='
         historial = HistorialAcademico.objects.filter(alumno=alumno)
         context['historial'] = historial
         template_name = 'pdfs/documento_historial.html'
+        nombre_archivo = f"Historial_{alumno.boleta}.pdf"
 
     elif tipo_documento == 'incidencias':
         incidencias = Incidente.objects.filter(alumno=alumno)
         context['incidencias'] = incidencias
         template_name = 'pdfs/documento_incidencias.html'
+        nombre_archivo = f"Incidencias_{alumno.boleta}.pdf"
         
     elif tipo_documento == 'ficha':
-        # Solo necesitamos los datos del alumno, que ya están en el context
         template_name = 'pdfs/documento_ficha.html'
+        nombre_archivo = f"Ficha_{alumno.boleta}.pdf"
 
     else:
         return HttpResponse("Tipo de documento no válido.")
 
-    return render_pdf(template_name, context)
+    # 2. Llamamos a nuestra función render_pdf mejorada
+    return render_pdf(template_name, context, filename=nombre_archivo, download=descargar_mode)
 
 # ------------------------------------------------------------------------------
 # VISTA PARA GENERAR DOCUMENTO PDF DEL DOCENTE
 # ------------------------------------------------------------------------------
 
 def generar_documento_docente(request, id_docente):
-    # 1. Obtenemos parámetros
+    # 1. Obtenemos parametros
     tipo_documento = request.GET.get('tipo')
+    
+    # Verificar si el JS nos pidio descargar
+    descargar_mode = request.GET.get('download') == 'true'
+    
     docente = get_object_or_404(Docente, pk=id_docente)
 
     context = {'docente': docente}
     template_name = ""
+    # Definimos un nombre de archivo bonito segun lo que se baje
+    nombre_archivo = f"Docente_{docente.num_empleado}.pdf"
 
-    # 2. Lógica segun el reporte
+    # 2. Logica segun el reporte
     if tipo_documento == 'horario':
-        # Buscamos los grupos donde este docente da clases
         grupos = Grupo.objects.filter(docente=docente)
         context['grupos'] = grupos
         template_name = 'pdfs/docente_horario.html'
+        nombre_archivo = f"Horario_{docente.num_empleado}.pdf"
 
     elif tipo_documento == 'incidencias':
-        # Buscamos incidentes donde este docente este involucrado
         incidencias = Incidente.objects.filter(docente=docente).order_by('-fecha')
         context['incidencias'] = incidencias
         template_name = 'pdfs/docente_incidencias.html'
+        nombre_archivo = f"Incidencias_{docente.num_empleado}.pdf"
     
     elif tipo_documento == 'ficha':
-        # Placeholder para la ficha tecnica
         template_name = 'pdfs/docente_ficha.html'
+        nombre_archivo = f"Ficha_{docente.num_empleado}.pdf"
 
     else:
         return HttpResponse("Tipo de documento no válido.")
 
-    # 3. Generar PDF
-    return render_pdf(template_name, context)
+    # 3. Generar PDF pasando los nuevos argumentos
+    return render_pdf(template_name, context, filename=nombre_archivo, download=descargar_mode)
 
+# ------------------------------------------------------------------------------
+# VISTA PARA GENERAR DOCUMENTO PDF DEL TUTOR
+# ------------------------------------------------------------------------------
+def generar_documento_tutor(request, id_tutor):
+    # 1. Obtenemos parámetros
+    tipo_documento = request.GET.get('tipo')
+    descargar_mode = request.GET.get('download') == 'true'
+    
+    tutor = get_object_or_404(PadreTutor, pk=id_tutor)
+    
+    # Contexto básico
+    context = {'tutor': tutor}
+    template_name = ""
+    nombre_archivo = f"Tutor_{tutor.id_tutor}.pdf"
+
+    # 2. Selección de Template
+    if tipo_documento == 'ficha':
+        context['hijos'] = tutor.alumno_set.all()
+        
+        template_name = 'pdfs/tutor_ficha.html' 
+        nombre_archivo = f"Ficha_Tutor_{tutor.id_tutor}.pdf"
+    else:
+        return HttpResponse("Tipo de documento no válido.")
+
+    # 3. Generar PDF
+    return render_pdf(template_name, context, filename=nombre_archivo, download=descargar_mode)
 
 # =========================================================================
 # SECCIÓN: GESTIÓN ACADÉMICA (MATERIAS, GRUPOS, HORARIOS)
