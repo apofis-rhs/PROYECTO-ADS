@@ -1,6 +1,64 @@
 # academico/forms.py
 from django import forms
 from .models import Materia, Grupo
+# ----------------------------------
+# ULTIMA MODIFIACION EM CASO QUE ALGO NO FUNCIONE 
+from django.core.exceptions import ValidationError
+from .models import Horario  # asegúrate de importar Horario
+
+
+def clean_docente(self):
+    docente = self.cleaned_data.get("docente")
+
+    # Docente es opcional
+    if not docente:
+        return docente
+
+    # Si es creación, todavía no hay horarios del grupo; la validación dura se hace en el generador.
+    if not getattr(self.instance, "pk", None):
+        return docente
+
+    grupo_id = self.instance.id_grupo
+
+    # Horarios del grupo actual
+    horarios_grupo = list(Horario.objects.filter(grupo_id=grupo_id).only("dia_semana", "hora_inicio", "hora_fin"))
+    if not horarios_grupo:
+        return docente
+
+    # Periodo del grupo (si en el form lo cambias, toma el nuevo; si no, usa el actual)
+    periodo = (self.cleaned_data.get("periodo") or getattr(self.instance, "periodo", None))
+
+    # Horarios de otros grupos del mismo docente en el mismo periodo
+    otros = (
+        Horario.objects
+        .select_related("grupo")
+        .filter(grupo__periodo=periodo, grupo__docente_id=docente.id_docente)
+        .exclude(grupo_id=grupo_id)
+        .only("dia_semana", "hora_inicio", "hora_fin", "grupo__clave_grupo")
+    )
+
+    def traslapa(a_ini, a_fin, b_ini, b_fin):
+        return (a_ini < b_fin) and (a_fin > b_ini)
+
+    choques = []
+    for hg in horarios_grupo:
+        for ho in otros:
+            if hg.dia_semana != ho.dia_semana:
+                continue
+            if traslapa(hg.hora_inicio, hg.hora_fin, ho.hora_inicio, ho.hora_fin):
+                choques.append(
+                    f"Día {hg.dia_semana}: {hg.hora_inicio.strftime('%H:%M')}-{hg.hora_fin.strftime('%H:%M')} "
+                    f"choca con grupo {ho.grupo.clave_grupo} "
+                    f"({ho.hora_inicio.strftime('%H:%M')}-{ho.hora_fin.strftime('%H:%M')})"
+                )
+
+    if choques:
+        raise ValidationError(
+            "No se puede asignar este docente porque tiene choques de horario:\n- " + "\n- ".join(choques)
+        )
+
+    return docente
+# ---------------------------------- FIN DE LA ULTIMA
 
 class MateriaForm(forms.ModelForm):
     class Meta:
@@ -31,7 +89,63 @@ class GrupoForm(forms.ModelForm):
             "periodo",
             "clave_grupo",
         ]
+        
+    from django.core.exceptions import ValidationError
+    from .models import Horario  # asegúrate de importar Horario
 
+
+    def clean_docente(self):
+        docente = self.cleaned_data.get("docente")
+
+        # Docente es opcional
+        if not docente:
+            return docente
+
+        # Si es creación, todavía no hay horarios del grupo; la validación dura se hace en el generador.
+        if not getattr(self.instance, "pk", None):
+            return docente
+
+        grupo_id = self.instance.id_grupo
+
+        # Horarios del grupo actual
+        horarios_grupo = list(Horario.objects.filter(grupo_id=grupo_id).only("dia_semana", "hora_inicio", "hora_fin"))
+        if not horarios_grupo:
+            return docente
+
+        # Periodo del grupo (si en el form lo cambias, toma el nuevo; si no, usa el actual)
+        periodo = (self.cleaned_data.get("periodo") or getattr(self.instance, "periodo", None))
+
+        # Horarios de otros grupos del mismo docente en el mismo periodo
+        otros = (
+            Horario.objects
+            .select_related("grupo")
+            .filter(grupo__periodo=periodo, grupo__docente_id=docente.id_docente)
+            .exclude(grupo_id=grupo_id)
+            .only("dia_semana", "hora_inicio", "hora_fin", "grupo__clave_grupo")
+        )
+
+        def traslapa(a_ini, a_fin, b_ini, b_fin):
+            return (a_ini < b_fin) and (a_fin > b_ini)
+
+        choques = []
+        for hg in horarios_grupo:
+            for ho in otros:
+                if hg.dia_semana != ho.dia_semana:
+                    continue
+                if traslapa(hg.hora_inicio, hg.hora_fin, ho.hora_inicio, ho.hora_fin):
+                    choques.append(
+                        f"Día {hg.dia_semana}: {hg.hora_inicio.strftime('%H:%M')}-{hg.hora_fin.strftime('%H:%M')} "
+                        f"choca con grupo {ho.grupo.clave_grupo} "
+                        f"({ho.hora_inicio.strftime('%H:%M')}-{ho.hora_fin.strftime('%H:%M')})"
+                    )
+
+        if choques:
+            raise ValidationError(
+                "No se puede asignar este docente porque tiene choques de horario:\n- " + "\n- ".join(choques)
+            )
+
+        return docente
+# ---------------------------------- FIN DE LA ULTIMA para validar docente no repetido
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

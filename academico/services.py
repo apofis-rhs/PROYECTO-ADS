@@ -365,6 +365,43 @@ class HorarioGenerator:
         return slots
 
     # ------------------------------------------------------------------
+    # 2.b Validacion de asignaciones de profes
+    # ------------------------------------------------------------------
+    def _precargar_ocupacion_docentes(self, grupos_ids_generando: set[int]) -> dict[int, list[Slot]]:
+        """
+        Precarga la ocupación real de docentes desde la BD para el periodo actual,
+        excluyendo los grupos que se van a regenerar (porque esos se borrarán y recrearán).
+
+        Devuelve:
+            {docente_id: [Slot, Slot, ...]}
+        """
+        horario_docente: dict[int, list[Slot]] = {}
+
+        qs = (
+            Horario.objects
+            .select_related("grupo")
+            .filter(grupo__periodo=self.periodo, grupo__docente__isnull=False)
+            .exclude(grupo_id__in=grupos_ids_generando)
+            .only("dia_semana", "hora_inicio", "hora_fin", "grupo__docente")
+        )
+
+        for h in qs:
+            docente_id = h.grupo.docente_id
+            if not docente_id:
+                continue
+            slot = Slot(
+                dia_semana=h.dia_semana,
+                hora_inicio=h.hora_inicio,
+                hora_fin=h.hora_fin,
+                numero_bloque=0,
+            )
+            horario_docente.setdefault(docente_id, []).append(slot)
+
+        return horario_docente
+
+
+
+    # ------------------------------------------------------------------
     # 3. Asignacion de slots a grupos
     # ------------------------------------------------------------------
     def _asignar_slots(
@@ -416,7 +453,10 @@ class HorarioGenerator:
 
         # 2) Control de ocupacion: grupo, docente, salon, sesiones por dia
         horario_grupo: Dict[int, List[Slot]] = {g.id_grupo: [] for g in grupos}
-        horario_docente: Dict[int, List[Slot]] = {}
+        # Precarga ocupación real desde BD (para evitar choques con horarios ya existentes) CAMBIO --> HOY
+        grupos_ids_generando = {g.id_grupo for g in grupos}
+        horario_docente: Dict[int, List[Slot]] = self._precargar_ocupacion_docentes(grupos_ids_generando)
+
         sesiones_por_grupo_dia: Dict[int, Dict[int, int]] = defaultdict(
             lambda: defaultdict(int)
         )
