@@ -230,11 +230,14 @@ class HorarioGenerator:
 
     def _obtener_regla(self, nivel: NivelEducativo) -> Optional[ReglaHorario]:
         """
-        Obtiene la ReglaHorario activa para el nivel y filtros actuales.
+        Obtiene la ReglaHorario activa para el nivel.
 
-        - En universidad, opcionalmente se filtra por semestre y tipo_alumno.
-        - En Kinder–Prepa normalmente semestre y tipo_alumno son nulos.
+        Regla GLOBAL:
+        - Si el nivel no tiene regla propia, se usa la regla activa de Kínder.
+        - Si tampoco existe, se usa la primera regla activa del sistema.
         """
+
+        # 1) Intento normal: regla del nivel seleccionado
         qs = ReglaHorario.objects.filter(nivel=nivel, activo=True)
 
         if self._es_universidad(nivel):
@@ -245,8 +248,25 @@ class HorarioGenerator:
         else:
             qs = qs.filter(semestre__isnull=True, tipo_alumno__isnull=True)
 
-        # Si hubiera mas de una activa, tomamos la primera por ID
-        return qs.order_by("id_regla").first()
+        regla = qs.order_by("id_regla").first()
+        if regla:
+            return regla
+
+        # 2) Fallback: usar regla de Kínder como GLOBAL
+        regla_kinder = (
+            ReglaHorario.objects
+            .filter(activo=True, nivel__nombre__icontains="kinder")
+            .order_by("id_regla")
+            .first()
+        )
+        if regla_kinder:
+            return regla_kinder
+
+        # 3) Último recurso: cualquier regla activa
+        return ReglaHorario.objects.filter(activo=True).order_by("id_regla").first()
+
+
+
 
     def _obtener_grupos(self, nivel: NivelEducativo) -> List[Grupo]:
         """
@@ -345,6 +365,43 @@ class HorarioGenerator:
         return slots
 
     # ------------------------------------------------------------------
+    # 2.b Validacion de asignaciones de profes
+    # ------------------------------------------------------------------
+    def _precargar_ocupacion_docentes(self, grupos_ids_generando: set[int]) -> dict[int, list[Slot]]:
+        """
+        Precarga la ocupación real de docentes desde la BD para el periodo actual,
+        excluyendo los grupos que se van a regenerar (porque esos se borrarán y recrearán).
+
+        Devuelve:
+            {docente_id: [Slot, Slot, ...]}
+        """
+        horario_docente: dict[int, list[Slot]] = {}
+
+        qs = (
+            Horario.objects
+            .select_related("grupo")
+            .filter(grupo__periodo=self.periodo, grupo__docente__isnull=False)
+            .exclude(grupo_id__in=grupos_ids_generando)
+            .only("dia_semana", "hora_inicio", "hora_fin", "grupo__docente")
+        )
+
+        for h in qs:
+            docente_id = h.grupo.docente_id
+            if not docente_id:
+                continue
+            slot = Slot(
+                dia_semana=h.dia_semana,
+                hora_inicio=h.hora_inicio,
+                hora_fin=h.hora_fin,
+                numero_bloque=0,
+            )
+            horario_docente.setdefault(docente_id, []).append(slot)
+
+        return horario_docente
+
+
+
+    # ------------------------------------------------------------------
     # 3. Asignacion de slots a grupos
     # ------------------------------------------------------------------
     def _asignar_slots(
@@ -396,7 +453,10 @@ class HorarioGenerator:
 
         # 2) Control de ocupacion: grupo, docente, salon, sesiones por dia
         horario_grupo: Dict[int, List[Slot]] = {g.id_grupo: [] for g in grupos}
-        horario_docente: Dict[int, List[Slot]] = {}
+        # Precarga ocupación real desde BD (para evitar choques con horarios ya existentes) CAMBIO --> HOY
+        grupos_ids_generando = {g.id_grupo for g in grupos}
+        horario_docente: Dict[int, List[Slot]] = self._precargar_ocupacion_docentes(grupos_ids_generando)
+
         sesiones_por_grupo_dia: Dict[int, Dict[int, int]] = defaultdict(
             lambda: defaultdict(int)
         )
