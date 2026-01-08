@@ -1,6 +1,7 @@
 import random
 import unicodedata
 import datetime
+from datetime import timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
@@ -326,24 +327,31 @@ def anadir_alumno_view(request):
 #------------------------------------------------------------------------------
 
 def baja_alumno_view(request, id_alumno):
-    # Buscamos al alumno
     alumno = get_object_or_404(Alumno, pk=id_alumno)
 
     if request.method == 'POST':
-        # Leemos qué opción seleccionó el usuario en el radio button
         tipo_baja = request.POST.get('tipoBaja')
 
         if tipo_baja == 'definitiva':
-            # OPCIÓN A: Borrar permanentemente (DELETE)
-            alumno.delete()
-            # Redirigimos a la lista porque el alumno ya no existe
+            # OPCIÓN A: BAJA DEFINITIVA (PROGRAMADA)
+            # En lugar de borrarlo hoy, calculamos la fecha límite (Hoy + 30 días)
+            fecha_limite = timezone.now() + timedelta(days=30)
+            
+            # Marcamos al alumno para ser eliminado
+            alumno.activo = False
+            alumno.fecha_eliminacion = fecha_limite
+            alumno.save()
+            
+            messages.warning(request, f"El alumno ha sido marcado para eliminación definitiva el {fecha_limite.date()}.")
             return redirect('consultar_alumno')
 
         elif tipo_baja == 'temporal':
-            # OPCIÓN B: Solo desactivar (UPDATE)
+            # OPCIÓN B: BAJA TEMPORAL (Solo desactivar)
             alumno.activo = False
+            alumno.fecha_eliminacion = None # Aseguramos que NO se borre
             alumno.save()
-            # Redirigimos a la lista (o podrías dejarlo en visualizar)
+            
+            messages.info(request, "El alumno ha sido dado de baja temporalmente.")
             return redirect('consultar_alumno')
 
     return render(request, 'alumno/baja_alumno.html', {'alumno': alumno})
