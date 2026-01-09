@@ -5,7 +5,6 @@
 
 {% block content %}
 
-
 <div class="container mt-4">
   <h2 class="text-center mb-4">Gestión de Carga Académica</h2>
 
@@ -37,7 +36,7 @@
         <h4 class="mb-3 text-success">Materias Disponibles / Vacantes</h4>
         <div class="table-responsive">
             <table class="table table-striped table-bordered align-middle">
-              <thead class="bg-blue-600">
+              <thead class="bg-blue-600 text-white">
                 <tr>
                   <th>Grupo</th>
                   <th>Materia</th>
@@ -70,14 +69,14 @@
                         {% csrf_token %}
                         <input type="hidden" name="grupo_id" value="{{ grupo.id_grupo }}">
                         <input type="hidden" name="accion" value="asignar">
-                        <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 shadow-sm hover:shadow-md transition-all duration-200" >
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 shadow-sm hover:shadow-md transition-all duration-200" >
                            Asignar
                         </button>
                     </form>
                   </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center text-muted">No hay materias disponibles.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted">No hay materias disponibles en este momento.</td></tr>
                 {% endfor %}
               </tbody>
             </table>
@@ -85,10 +84,28 @@
       </div>
 
       <div class="p-3 shadow rounded bg-light">
-        <h4 class="mb-3 text-primary">Carga Académica Actual</h4>
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-primary m-0">
+                Carga Académica Actual 
+                {% if periodo_actual %} <small class="text-muted">({{ periodo_actual }})</small> {% endif %}
+            </h4>
+            
+            <form method="POST" onsubmit="return confirm('¿Estás seguro? El sistema buscará las materias que este docente impartió el periodo pasado y tratará de asignarlas automáticamente si los grupos están vacantes.');">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="repetir_historial">
+                <button type="submit" class="btn btn-warning text-dark btn-sm fw-bold shadow-sm d-flex align-items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Repetir Horario Anterior
+                </button>
+            </form>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-striped table-bordered align-middle">
-              <thead class="bg-blue-600">
+              <thead class="bg-blue-600 text-white">
                 <tr>
                   <th>Grupo</th>
                   <th>Materia</th>
@@ -113,7 +130,7 @@
                   <td class="text-center">
                     
                     <button type="button" 
-                            class="inline-flex items-center px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-500 shadow-sm hover:shadow-md transition-all duration-200" 
+                            class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-500 shadow-sm hover:shadow-md transition-all duration-200" 
                             data-bs-toggle="modal" 
                             data-bs-target="#modalDesasignar"
                             data-grupo-id="{{ grupo.id_grupo }}"
@@ -124,14 +141,14 @@
                   </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center text-muted">Este docente no tiene carga asignada.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted">Este docente no tiene carga asignada para este periodo.</td></tr>
                 {% endfor %}
               </tbody>
             </table>
         </div>
       </div>
 
-<div class="mt-8 flex justify-center">
+    <div class="mt-8 flex justify-center pb-4">
         <a href="{% url 'consultar_docente' %}"
             class="text-gray-500 hover:text-gray-800 font-medium text-sm flex items-center transition-colors">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,7 +158,7 @@
             Regresar al listado
         </a>
     </div>
-</div>
+
     </div>
 </div>
 
@@ -157,13 +174,13 @@
         <p class="text-muted small">El grupo quedará vacante hasta que sea asignado nuevamente.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="w-full sm:w-auto sm:ml-auto px-6 py-3 border border-charade-300 text-charade-700 font-medium rounded-lg hover:bg-white transition-colors text-center" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         
         <form method="POST">
             {% csrf_token %}
             <input type="hidden" name="grupo_id" id="inputGrupoId">
             <input type="hidden" name="accion" value="desasignar">
-            <button type="submit"  class="w-full sm:w-auto sm:ml-auto px-6 py-3 border border-charade-300 inline-flex items-center px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-500 shadow-sm hover:shadow-md transition-all duration-200" >Sí, Eliminar</button>
+            <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
         </form>
       </div>
     </div>

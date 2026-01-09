@@ -411,46 +411,100 @@ def visualizar_docente_view(request, id_docente):
 # VISTA PARA ASIGNAR MATERIA A DOCENTE
 # ------------------------------------------------------------------------------
 
+def obtener_periodo_anterior(periodo_actual):
+    try:
+        anio, semestre = periodo_actual.split('-')
+        if semestre == '1':
+            return f"{int(anio)-1}-2" # De 2024-1 pasamos a 2023-2
+        else:
+            return f"{anio}-1" # De 2023-2 pasamos a 2023-1
+    except:
+        return None
+
 def asignar_materia_view(request, id_docente):
     docente = get_object_or_404(Docente, pk=id_docente)
+    
+    # 1. Determinar el periodo actual del sistema
+    ultimo_grupo = Grupo.objects.all().order_by('-periodo').first()
+    periodo_actual = ultimo_grupo.periodo if ultimo_grupo else '2024-1'
+
+    # Función auxiliar local
+    def obtener_periodo_anterior(p_actual):
+        try:
+            anio, semestre = p_actual.split('-')
+            if semestre == '1':
+                return f"{int(anio)-1}-2"
+            else:
+                return f"{anio}-1"
+        except:
+            return None
 
     if request.method == 'POST':
         grupo_id = request.POST.get('grupo_id')
         accion = request.POST.get('accion')
 
-        if grupo_id:
-            grupo = get_object_or_404(Grupo, pk=grupo_id)
-            
-            if accion == 'asignar':
-                # VALIDACIÓN EXTRA DE SEGURIDAD:
-                # Verificar que siga vacante antes de asignar (por si otro admin ganó el click)
-                if grupo.docente is None:
-                    grupo.docente = docente
+        # --- CASO 1: ASIGNAR / ELIMINAR INDIVIDUAL ---
+        if accion in ['asignar', 'desasignar']:
+            if grupo_id:
+                grupo = get_object_or_404(Grupo, pk=grupo_id)
+                
+                if accion == 'asignar':
+                    if grupo.docente is None:
+                        grupo.docente = docente
+                        grupo.save()
+                        messages.success(request, f'Materia {grupo.materia.nombre} asignada correctamente.')
+                    else:
+                        messages.error(request, f'Error: El grupo {grupo.clave_grupo} ya tiene un docente asignado.')
+                
+                elif accion == 'desasignar':
+                    grupo.docente = None
                     grupo.save()
-                    messages.success(request, f'Materia {grupo.materia.nombre} asignada correctamente.')
-                else:
-                    messages.error(request, f'Error: El grupo {grupo.clave_grupo} ya tiene un docente asignado.')
+                    messages.warning(request, f'Materia {grupo.materia.nombre} desasignada. Ahora está vacante.')
+
+        # --- CASO 2: REPETIR HORARIO (CORREGIDO) ---
+        elif accion == 'repetir_historial':
+            periodo_anterior = obtener_periodo_anterior(periodo_actual)
             
-            elif accion == 'desasignar':
-                grupo.docente = None
-                grupo.save()
-                messages.warning(request, f'Materia {grupo.materia.nombre} desasignada. Ahora está vacante.')
+            # Buscamos historial del docente
+            historial_grupos = Grupo.objects.filter(docente=docente, periodo=periodo_anterior)
+            
+            if not historial_grupos.exists():
+                messages.error(request, f"No se encontró historial para el periodo {periodo_anterior}.")
+            else:
+                replicadas = 0
+                for grupo_anterior in historial_grupos:
+                    # Buscamos coincidencia en el periodo actual que esté VACANTE
+                    grupo_nuevo = Grupo.objects.filter(
+                        periodo=periodo_actual,
+                        clave_grupo=grupo_anterior.clave_grupo, # Ej. 1CM1
+                        
+                        # --- CORRECCIÓN AQUÍ: Usamos materia_id ---
+                        materia_id=grupo_anterior.materia_id,   
+                        
+                        docente__isnull=True                    # Solo si no tiene profe
+                    ).first()
+                    
+                    if grupo_nuevo:
+                        grupo_nuevo.docente = docente
+                        grupo_nuevo.save()
+                        replicadas += 1
+                
+                if replicadas > 0:
+                    messages.success(request, f"¡Éxito! Se replicaron {replicadas} materias del periodo {periodo_anterior}.")
+                else:
+                    messages.warning(request, f"Se encontró historial en {periodo_anterior}, pero no hubo grupos idénticos vacantes en {periodo_actual}.")
 
-            return redirect('asignar_materia', id_docente=id_docente)
+        return redirect('asignar_materia', id_docente=id_docente)
 
-    # --- FILTROS ---
-    
-    # 1. Asignadas: Las que tiene ESTE docente
-    materias_asignadas = Grupo.objects.filter(docente=docente).order_by('id_grupo')
-    
-    # 2. Disponibles: SOLO LAS VACANTES (Donde docente es NULL)
-    #    Usamos __isnull=True para buscar campos vacíos
-    materias_disponibles = Grupo.objects.filter(docente__isnull=True).order_by('id_grupo')
+    # --- FILTROS DE VISTA (SOLO PERIODO ACTUAL) ---
+    materias_asignadas = Grupo.objects.filter(docente=docente, periodo=periodo_actual).order_by('id_grupo')
+    materias_disponibles = Grupo.objects.filter(docente__isnull=True, periodo=periodo_actual).order_by('id_grupo')
 
     return render(request, 'docente/asignar_materia.html', {
         'docente': docente,
         'materias_asignadas': materias_asignadas,
-        'materias_disponibles': materias_disponibles
+        'materias_disponibles': materias_disponibles,
+        'periodo_actual': periodo_actual
     })
     
 # ------------------------------------------------------------------------------
