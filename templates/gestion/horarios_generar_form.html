@@ -176,14 +176,12 @@
                                 <input type="checkbox" name="grupo_ids" value="{{ g.id_grupo }}"
                                     class="w-4 h-4 text-mitec-blue-primary border-charade-300 rounded focus:ring-mitec-blue-light cursor-pointer">
                             </td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-charade-600">{{ g.nivel.nombre }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-center text-charade-900">{{ g.grado }}
-                            </td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm font-bold text-mitec-blue-primary">{{
-                                g.clave_grupo }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-charade-500 font-mono">{{
-                                g.materia.clave }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-charade-900">{{ g.materia.nombre }}</td>
+                                <td class="px-6 py-3">{{ g.nivel.nombre }}</td>
+                                <td class="px-6 py-3 text-center">{{ g.grado }}</td>
+                                <td class="px-6 py-3 font-bold">{{ g.clave_grupo }}</td>
+                                <td class="px-6 py-3 font-mono">{{ g.materia.clave }}</td>
+                                <td class="px-6 py-3">{{ g.materia.nombre }}</td>
+
                             <td class="px-6 py-3 whitespace-nowrap text-sm text-charade-600">
                                 {% if g.docente %}
                                 {{ g.docente.nombre }} {{ g.docente.ape_paterno }}

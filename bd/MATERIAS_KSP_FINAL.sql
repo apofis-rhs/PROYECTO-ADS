@@ -1,3 +1,52 @@
+-- MATERIAS
+
+-- =============================================
+--           MATERIAS PARA KINDER 1
+-- =============================================
+-- Nota: Buscamos 'Kinder' O 'Preescolar' indistintamente e ignorando mayúsculas (ILIKE)
+
+-- Desarrollo Socioemocional I
+INSERT INTO materia (clave, nombre, creditos, nivel_sugerido, sesiones_por_semana, id_carrera, id_nivel)
+VALUES ('KIN-K1-ES1', 'Desarrollo Socioemocional I', 7, 1, 4, NULL,
+        (SELECT id_nivel FROM nivel_educativo
+         WHERE nombre ILIKE '%Kinder%' OR nombre ILIKE '%Preescolar%'
+         LIMIT 1));
+
+-- Estimulación Cognitiva I
+INSERT INTO materia (clave, nombre, creditos, nivel_sugerido, sesiones_por_semana, id_carrera, id_nivel)
+VALUES ('KIN-K1-ET1', 'Estimulación Cognitiva I', 7, 1, 5, NULL,
+        (SELECT id_nivel FROM nivel_educativo
+         WHERE nombre ILIKE '%Kinder%' OR nombre ILIKE '%Preescolar%'
+         LIMIT 1));
+
+-- Juego y Experimentación I
+INSERT INTO materia (clave, nombre, creditos, nivel_sugerido, sesiones_por_semana, id_carrera, id_nivel)
+VALUES ('KIN-K1-JE1', 'Juego y Experimentación I', 7, 1, 5, NULL,
+        (SELECT id_nivel FROM nivel_educativo
+         WHERE nombre ILIKE '%Kinder%' OR nombre ILIKE '%Preescolar%'
+         LIMIT 1));
+
+-- Comunicación y Lenguaje Oral
+INSERT INTO materia (clave, nombre, creditos, nivel_sugerido, sesiones_por_semana, id_carrera, id_nivel)
+VALUES ('KIN-K1-CL1', 'Comunicación y Lenguaje Oral', 7, 1, 5, NULL,
+        (SELECT id_nivel FROM nivel_educativo
+         WHERE nombre ILIKE '%Kinder%' OR nombre ILIKE '%Preescolar%'
+         LIMIT 1));
+
+-- Arte, Creatividad y Movimiento I
+INSERT INTO materia (clave, nombre, creditos, nivel_sugerido, sesiones_por_semana, id_carrera, id_nivel)
+VALUES ('KIN-K1-AR1', 'Arte, Creatividad y Movimiento I', 7, 1, 5, NULL,
+        (SELECT id_nivel FROM nivel_educativo
+         WHERE nombre ILIKE '%Kinder%' OR nombre ILIKE '%Preescolar%'
+         LIMIT 1));
+
+-- Razonamiento Matemático Inicial I
+INSERT INTO materia (clave, nombre, creditos, nivel_sugerido, sesiones_por_semana, id_carrera, id_nivel)
+VALUES ('KIN-K1-RM1', 'Razonamiento Matemático Inicial I', 7, 1, 5, NULL,
+        (SELECT id_nivel FROM nivel_educativo
+         WHERE nombre ILIKE '%Kinder%' OR nombre ILIKE '%Preescolar%'
+         LIMIT 1));
+
 -- SCRIPT CORREGIDO PARA POBLAR MATERIAS
 -- Solución al error de id_nivel NULL
 
