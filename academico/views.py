@@ -161,103 +161,78 @@ def visualizar_alumno_view(request, id_alumno):
 #------------------------------------------------------------------------------
 
 def anadir_alumno_view(request):
-    # Obtenemos los catálogos para llenar los <select>
+    # 1. Obtenemos los catálogos
     niveles = NivelEducativo.objects.all()
     tutores = PadreTutor.objects.all()
+    # NUEVO: Traemos las carreras activas para el select
+    carreras = Carrera.objects.filter(activo=True)
 
     if request.method == 'POST':
         try:
             with transaction.atomic():
                 # 1. RECUPERAR DATOS DEL FORMULARIO
-                # Nota: Ya no pedimos 'boleta' porque se genera automática
                 nombre = request.POST.get('nombre', '').strip()
                 ape_paterno = request.POST.get('ape_paterno', '').strip()
                 ape_materno = request.POST.get('ape_materno', '').strip()
                 id_nivel = request.POST.get('nivel')
                 id_tutor = request.POST.get('tutor')
                 
+                # --- NUEVO: Recuperar el campo Carrera ---
+                id_carrera = request.POST.get('carrera')
+                
                 # Datos extra
                 curp = request.POST.get('curp')
-                fecha_nacimiento_str = request.POST.get('fecha_nacimiento') # YYYY-MM-DD
+                fecha_nacimiento_str = request.POST.get('fecha_nacimiento')
                 sexo = request.POST.get('sexo')
-                
-                # Resto de campos...
                 nacionalidad = request.POST.get('nacionalidad')
                 lugar_nacimiento = request.POST.get('lugar_nacimiento')
                 direccion = request.POST.get('direccion')
                 grado = request.POST.get('grado')
                 foto = request.FILES.get('foto')
                 
-                # Contacto emergencia...
+                # Contacto emergencia
                 contacto_nombre = request.POST.get('contacto_nombre')
                 contacto_parentesco = request.POST.get('contacto_parentesco')
                 contacto_telefono = request.POST.get('contacto_telefono')
                 contacto_telefono2 = request.POST.get('contacto_telefono2')
 
-                # ==================================================================
-                # REGLA DE NEGOCIO 1: GENERACIÓN DE BOLETA
-                # Formato: Año(4) + Clave(43) + Aleatorios(3) -> Ej: 202543159
-                # ==================================================================
+                # REGLA 1: GENERACIÓN DE BOLETA (Tu código original)
                 anio_ingreso = datetime.datetime.now().year
                 clave_escuela = "43"
                 nueva_boleta = ""
-
-                # Ciclo para garantizar unicidad (por si el random se repite)
                 while True:
-                    aleatorios = random.randint(100, 999) # 3 dígitos exactos
+                    aleatorios = random.randint(100, 999)
                     candidata_boleta = f"{anio_ingreso}{clave_escuela}{aleatorios}"
-                    
                     if not Alumno.objects.filter(boleta=candidata_boleta).exists():
                         nueva_boleta = candidata_boleta
                         break
                 
-                # ==================================================================
-                # REGLA DE NEGOCIO 2: GENERACIÓN DE CORREO INSTITUCIONAL
-                # Formato: 1ra letra (2do nombre o 1ro) + ApePaterno + MM + DD
-                # ==================================================================
-                
-                # Función auxiliar para quitar acentos (Pérez -> perez)
+                # REGLA 2: GENERACIÓN DE CORREO (Tu código original)
                 def limpiar_texto(texto):
                     return ''.join(c for c in unicodedata.normalize('NFD', texto) 
                                    if unicodedata.category(c) != 'Mn').lower()
 
-                # A. Determinar inicial
                 nombres_lista = nombre.split()
                 if len(nombres_lista) > 1:
-                    # Si tiene más de un nombre, usamos el segundo
                     inicial = nombres_lista[1][0]
                 else:
-                    # Si solo tiene uno, usamos el primero
                     inicial = nombres_lista[0][0]
                 
-                # B. Obtener mes y día
                 if fecha_nacimiento_str:
                     fecha_dt = datetime.datetime.strptime(fecha_nacimiento_str, '%Y-%m-%d')
                     mes = f"{fecha_dt.month:02d}"
                     dia = f"{fecha_dt.day:02d}"
                 else:
-                    # Fallback por seguridad
                     hoy = datetime.datetime.now()
                     mes = f"{hoy.month:02d}"
                     dia = f"{hoy.day:02d}"
 
-                # C. Construir usuario base
                 apellido_limpio = limpiar_texto(ape_paterno)
                 usuario_base = f"{limpiar_texto(inicial)}{apellido_limpio}{mes}{dia}"
-                dominio = "@sga.mx" # Placeholder corto
-                
-                # D. Garantizar unicidad del correo
+                dominio = "@sga.mx"
                 email_final = f"{usuario_base}{dominio}"
-                contador_email = 1
-                
-                # Nota: Si aún no tienes campo 'email' en BD, puedes comentar el while
-                # while Alumno.objects.filter(email=email_final).exists():
-                #     email_final = f"{usuario_base}{contador_email}{dominio}"
-                #     contador_email += 1
 
-                # ==================================================================
                 # 3. VALIDACIONES
-                # ==================================================================
                 if not id_nivel:
                     raise ValueError("El Nivel Educativo es obligatorio.")
 
@@ -268,10 +243,15 @@ def anadir_alumno_view(request):
                 # 4. PREPARAR OBJETOS RELACIONADOS
                 nivel_obj = NivelEducativo.objects.get(id_nivel=id_nivel)
                 tutor_obj = PadreTutor.objects.get(id_tutor=id_tutor) if id_tutor else None
+                
+                # --- NUEVO: Validar Carrera (Solo si es Nivel 5/Universidad) ---
+                carrera_obj = None
+                if id_nivel == '5' and id_carrera:
+                     carrera_obj = Carrera.objects.get(id_carrera=id_carrera)
 
-                # 5. CREAR EL ALUMNO (Con la boleta generada)
+                # 5. CREAR EL ALUMNO
                 nuevo_alumno = Alumno.objects.create(
-                    boleta=nueva_boleta,  # <--- Asignación automática
+                    boleta=nueva_boleta,
                     nombre=nombre,
                     ape_paterno=ape_paterno,
                     ape_materno=ape_materno,
@@ -283,28 +263,27 @@ def anadir_alumno_view(request):
                     direccion=direccion,
                     semestre_actual=grado,
                     foto=foto,
-                    
                     contacto_emergencia_nombre=contacto_nombre,
                     contacto_emergencia_parentesco=contacto_parentesco,
                     contacto_emergencia_telefono=contacto_telefono,
                     contacto_emergencia_telefono2=contacto_telefono2,
-
                     nivel=nivel_obj,
                     tutor=tutor_obj,
-                    # email=email_final # Descomenta cuando agregues el campo al modelo
+                    
+                    # --- NUEVO: Asignar la carrera ---
+                    carrera=carrera_obj
                 )
 
-                # 6. GENERAR PDF DE CREDENCIALES (Workaround de correo)
+                # 6. GENERAR PDF
                 context_carta = {
                     'alumno': nuevo_alumno,
                     'email_generado': email_final,
-                    'password_temporal': f"Temp{nueva_boleta[-4:]}", # Contraseña sugerida
+                    'password_temporal': f"Temp{nueva_boleta[-4:]}",
                     'fecha_hoy': datetime.datetime.now()
                 }
                 
-                # Usamos tu función render_pdf existente para descargar
                 return render_pdf(
-                    'pdfs/carta_bienvenida.html',  # Asegúrate de crear este template
+                    'pdfs/carta_bienvenida.html',
                     context_carta, 
                     filename=f"Credenciales_{nueva_boleta}.pdf",
                     download=True
@@ -315,13 +294,15 @@ def anadir_alumno_view(request):
             return render(request, 'alumno/anadir_alumno.html', {
                 'niveles': niveles, 
                 'tutores': tutores,
+                'carreras': carreras, # Importante devolver esto si falla
                 'error': f"No se pudo guardar: {e}"
             })
 
     # GET
     return render(request, 'alumno/anadir_alumno.html', {
         'niveles': niveles, 
-        'tutores': tutores
+        'tutores': tutores,
+        'carreras': carreras # Importante enviar esto al template
     })
 
 #------------------------------------------------------------------------------

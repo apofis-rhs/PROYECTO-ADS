@@ -179,6 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
         selectNivel.addEventListener('change', function() {
             const nivelId = this.value;
             
+            // Referencias a los elementos de Carrera
+            const colCarrera = document.getElementById('colCarrera');
+            const selectCarrera = document.getElementById('selectCarrera');
+            const colNivel = document.getElementById('colNivel');
+            const colGrado = document.getElementById('colGrado');
+
             // A. Grados Dinámicos
             if (selectGrado) {
                 selectGrado.innerHTML = '<option value="">Seleccionar...</option>';
@@ -191,34 +197,66 @@ document.addEventListener('DOMContentLoaded', function() {
                     case "5": opciones = ["1° Semestre", "2° Semestre", "3° Semestre", "4° Semestre", "5° Semestre", "6° Semestre", "7° Semestre", "8° Semestre", "9° Semestre", "10° Semestre"]; break;
                 }
                 
-                // CORRECCIÓN APLICADA AQUÍ:
                 opciones.forEach((gradoTexto, index) => {
                     const opt = document.createElement('option');
-                    opt.value = index + 1; // Envía 1, 2, 3... a la Base de Datos
-                    opt.textContent = gradoTexto; // Muestra "1° Kinder", etc.
+                    opt.value = index + 1; 
+                    opt.textContent = gradoTexto; 
                     selectGrado.appendChild(opt);
                 });
             }
 
-            // B. Tutor y Correo Dinámico
-            if (selectTutor) {
-                const labelTutor = selectTutor.closest('.row') ? selectTutor.closest('.row').querySelector('label') : null;
+            // B. Lógica Universidad vs Básica
+            if (nivelId === "5") {
+                // --- CASO UNIVERSIDAD ---
                 
-                if (["1", "2", "3"].includes(nivelId)) {
-                    // Básica: Tutor obligatorio, Correo oculto
-                    selectTutor.required = true;
-                    if(labelTutor) labelTutor.innerHTML = "Tutor Asignado * <small class='text-muted'>(Obligatorio)</small>";
-                    if(contenedorCorreo) contenedorCorreo.style.display = 'none';
-                    
-                } else {
-                    // Superior: Tutor opcional, Correo visible
+                // 1. Mostrar Carrera y ajustar diseño (3 columnas de 4)
+                if (colCarrera) colCarrera.style.display = 'block';
+                if (selectCarrera) selectCarrera.required = true;
+                if (colNivel) colNivel.className = 'col-4'; // Reducir ancho
+                if (colGrado) colGrado.className = 'col-4'; // Reducir ancho
+
+                // 2. Tutor Opcional
+                if (selectTutor) {
                     selectTutor.required = false;
+                    const labelTutor = selectTutor.closest('.row') ? selectTutor.closest('.row').querySelector('label') : null;
                     if(labelTutor) labelTutor.innerHTML = "Tutor Asignado <small class='text-muted'>(Opcional)</small>";
-                    if(contenedorCorreo) contenedorCorreo.style.display = 'block';
-                    
-                    if(inputCorreo) {
-                        inputCorreo.required = false; 
-                        inputCorreo.value = "Se generará automáticamente (Regla: Nombre + Fecha)";
+                }
+
+                // 3. Mostrar Correo
+                if(contenedorCorreo) contenedorCorreo.style.display = 'block';
+                if(inputCorreo) {
+                    inputCorreo.required = false; 
+                    inputCorreo.value = "Se generará automáticamente (Regla: Nombre + Fecha)";
+                }
+
+            } else {
+                // --- CASO BÁSICA / MEDIA ---
+
+                // 1. Ocultar Carrera y restaurar diseño (2 columnas de 6)
+                if (colCarrera) colCarrera.style.display = 'none';
+                if (selectCarrera) {
+                    selectCarrera.required = false;
+                    selectCarrera.value = ""; // Limpiar selección
+                }
+                if (colNivel) colNivel.className = 'col-6'; // Restaurar ancho
+                if (colGrado) colGrado.className = 'col-6'; // Restaurar ancho
+
+                // 2. Tutor Obligatorio (Solo para 1, 2, 3 - Básica)
+                // Nota: Prepa (4) a veces es opcional, ajusta según tu regla. Aquí asumo que solo 1,2,3 obligan.
+                if (selectTutor) {
+                    if (["1", "2", "3"].includes(nivelId)) {
+                        selectTutor.required = true;
+                        const labelTutor = selectTutor.closest('.row') ? selectTutor.closest('.row').querySelector('label') : null;
+                        if(labelTutor) labelTutor.innerHTML = "Tutor Asignado * <small class='text-muted'>(Obligatorio)</small>";
+                        // Ocultar correo en básica
+                        if(contenedorCorreo) contenedorCorreo.style.display = 'none';
+                    } else {
+                        // Prepa (4)
+                        selectTutor.required = false;
+                        const labelTutor = selectTutor.closest('.row') ? selectTutor.closest('.row').querySelector('label') : null;
+                        if(labelTutor) labelTutor.innerHTML = "Tutor Asignado <small class='text-muted'>(Opcional)</small>";
+                        // Mostrar correo en prepa
+                        if(contenedorCorreo) contenedorCorreo.style.display = 'block';
                     }
                 }
             }
