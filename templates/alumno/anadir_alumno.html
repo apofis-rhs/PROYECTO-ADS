@@ -125,8 +125,9 @@
 
       <div class="caja border rounded p-3 mb-4">
         <h3 class="text-primary">Nivel Educativo y Tutor</h3>
+        
         <div class="row mt-3">
-          <div class="col-6">
+          <div class="col-6" id="colNivel">
             <label class="form-label">Nivel Educativo *</label>
             <select class="form-select" name="nivel" id="selectNivel" required>
               <option value="" selected disabled hidden>Seleccione un nivel...</option>
@@ -137,13 +138,23 @@
             <div id="errorEdadNivel" class="text-danger small fw-bold mt-1" style="display: none"></div>
           </div>
 
-          <div class="col-6">
+          <div class="col-4" id="colCarrera" style="display: none;">
+            <label class="form-label">Carrera / Licenciatura *</label>
+            <select class="form-select" name="carrera" id="selectCarrera">
+                <option value="" selected disabled>Seleccione una carrera...</option>
+                {% for carrera in carreras %}
+                <option value="{{ carrera.id_carrera }}">{{ carrera.nombre }}</option>
+                {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-6" id="colGrado">
               <label class="form-label">Grado / Semestre *</label>
               <select class="form-select" name="grado" id="selectGrado" required>
                 <option value="" selected disabled hidden>Seleccione un nivel primero...</option>
               </select>
-            </div>
           </div>
+        </div>
 
         <div class="row mt-3" id="contenedorCorreoAlumno" style="display: none;">
           <div class="col-12">
